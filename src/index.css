@@ -145,8 +145,9 @@ button {
 }
 
 .nav-item.active {
-  background-color: rgba(201, 162, 39, 0.15);
-  color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .nav-badge {
@@ -495,7 +496,7 @@ button {
 /* Property Cards */
 .properties-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
@@ -1096,6 +1097,126 @@ button {
 .footer-main {
   margin-bottom: 3rem;
 }
+
+/* Search Page Specific */
+.search-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.search-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.search-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.search-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 4px;
+}
+
+.search-results-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.filter-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--color-primary);
+}
+
+.filter-select, .filter-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  outline: none;
+  background-color: var(--color-white);
+}
+
+.filter-select:focus, .filter-input:focus {
+  border-color: var(--color-accent);
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-dark);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.filter-checkbox input[type="checkbox"] {
+  accent-color: var(--color-accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.search-mobile-btn {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .search-page-container {
+    flex-direction: column;
+  }
+  
+  .search-sidebar {
+    display: none;
+    width: 100%;
+    position: static;
+    max-height: none;
+  }
+  
+  .search-sidebar.mobile-open {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-white);
+    z-index: 100;
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+  
+  .search-mobile-btn {
+    display: flex;
+  }
+}
+
 
 .footer-grid {
   display: grid;

@@ -1,7 +1,7 @@
 import { 
   Plus, Crown, Rocket, Home, Eye, Calendar, MessageSquare, 
   BarChart2, MapPin, Bed, Bath, Move, MoreVertical, Heart, FileText,
-  PieChart as PieChartIcon, Bell, Search
+  PieChart as PieChartIcon, Bell, Search, CreditCard
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -18,31 +18,31 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="welcome-banner">
-        <div className="welcome-content">
-          <h1 className="welcome-title">Bonjour {user?.profile?.firstName || currentUser.name.split(' ')[0]} 👋</h1>
-          <h2 className="welcome-subtitle">Votre espace {role?.toLowerCase() || ''} est prêt !</h2>
-          <p className="welcome-desc">
-            {isOwnerOrAgency 
-              ? "Gérez facilement vos annonces, suivez vos visites, boostez votre visibilité et développez votre activité." 
-              : "Retrouvez vos propriétés favorites, suivez vos demandes de visite et configurez vos alertes immobilières."}
-          </p>
-          {isOwnerOrAgency ? (
-            <Link to="/publier" className="btn btn-primary">
-              <Plus size={18} />
-              Publier une annonce
-            </Link>
-          ) : (
-            <Link to="/" className="btn btn-primary">
-              <Search size={18} />
-              Rechercher un bien
-            </Link>
-          )}
-        </div>
-      </div>
-
       <div className="dashboard-grid">
         <div className="main-column">
+          <div className="welcome-banner">
+            <div className="welcome-content">
+              <h1 className="welcome-title">Bonjour {user?.profile?.firstName || currentUser.name.split(' ')[0]} 👋</h1>
+              <h2 className="welcome-subtitle">Votre espace {role?.toLowerCase() || ''} est prêt !</h2>
+              <p className="welcome-desc">
+                {isOwnerOrAgency 
+                  ? "Gérez facilement vos annonces, suivez vos visites, boostez votre visibilité et développez votre activité." 
+                  : "Retrouvez vos propriétés favorites, suivez vos demandes de visite et configurez vos alertes immobilières."}
+              </p>
+              {isOwnerOrAgency ? (
+                <Link to="/publier" className="btn btn-primary">
+                  <Plus size={18} />
+                  Publier une annonce
+                </Link>
+              ) : (
+                <Link to="/" className="btn btn-primary">
+                  <Search size={18} />
+                  Rechercher un bien
+                </Link>
+              )}
+            </div>
+          </div>
+
           <div className="stats-grid">
             {isOwnerOrAgency ? (
               <>
@@ -206,7 +206,7 @@ export default function Dashboard() {
               </Link>
             </div>
             <div className="properties-grid">
-              {properties.slice(0, 2).map(property => (
+              {properties.slice(0, 4).map(property => (
                 <div className="property-card" key={property.id}>
                   <div className="property-img-container">
                     <img src={property.image} alt={property.title} className="property-img" />
@@ -254,6 +254,75 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+          <div className="bottom-widgets">
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Mes demandes de visite</div>
+                <Link to="#" className="card-link">Voir tout</Link>
+              </div>
+              <div className="mini-list">
+                {visitRequests.map(req => (
+                  <div className="mini-item" key={req.id}>
+                    <div className="mini-item-icon">
+                      <Calendar size={16} />
+                    </div>
+                    <div className="mini-item-content">
+                      <div className="mini-item-title">{req.property}</div>
+                      <div className="mini-item-sub">{req.datetime}</div>
+                    </div>
+                    <div className={`mini-badge ${req.status === 'Confirmée' ? 'badge-success' : 'badge-warning'}`}>
+                      {req.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Mes factures</div>
+                <Link to="/paiements" className="card-link">Voir tout</Link>
+              </div>
+              <div className="mini-list">
+                {invoices.map(inv => (
+                  <div className="mini-item" key={inv.id}>
+                    <div className="mini-item-icon">
+                      <FileText size={16} />
+                    </div>
+                    <div className="mini-item-content">
+                      <div className="mini-item-title">{inv.desc}</div>
+                      <div className="mini-item-sub">{inv.date}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{inv.amount}</div>
+                      <div className="mini-badge badge-success" style={{ display: 'inline-block', marginTop: '0.2rem' }}>
+                        {inv.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Mon profil</div>
+                <Link to="#" className="card-link">Voir tout</Link>
+              </div>
+              <div className="profile-summary">
+                <img src={user?.profile?.avatar || currentUser.avatar} alt="Profile" className="profile-summary-avatar" />
+                <div className="profile-details">
+                  <div className="profile-name">{user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName}` : currentUser.name}</div>
+                  <div className="profile-role">{role}</div>
+                  <div className="profile-location">
+                    <MapPin size={12} />
+                    Lomé, Togo
+                  </div>
+                </div>
+              </div>
+              <button className="btn btn-outline btn-block">Modifier mon profil</button>
             </div>
           </div>
         </div>
@@ -308,6 +377,18 @@ export default function Dashboard() {
                     <div>
                       <div className="action-title">Boostez une annonce</div>
                       <div className="action-desc">Plus de visibilité, plus de contacts</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} color="#94a3b8" />
+                </Link>
+                <Link to="/abonnement" className="action-item">
+                  <div className="action-left">
+                    <div className="action-icon">
+                      <CreditCard size={20} />
+                    </div>
+                    <div>
+                      <div className="action-title">Gérer mes abonnements</div>
+                      <div className="action-desc">Profitez de plus d'avantages</div>
                     </div>
                   </div>
                   <ChevronRight size={16} color="#94a3b8" />
@@ -381,76 +462,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="bottom-widgets">
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Mes demandes de visite</div>
-            <Link to="#" className="card-link">Voir tout</Link>
-          </div>
-          <div className="mini-list">
-            {visitRequests.map(req => (
-              <div className="mini-item" key={req.id}>
-                <div className="mini-item-icon">
-                  <Calendar size={16} />
-                </div>
-                <div className="mini-item-content">
-                  <div className="mini-item-title">{req.property}</div>
-                  <div className="mini-item-sub">{req.datetime}</div>
-                </div>
-                <div className={`mini-badge ${req.status === 'Confirmée' ? 'badge-success' : 'badge-warning'}`}>
-                  {req.status}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Mes factures</div>
-            <Link to="/paiements" className="card-link">Voir tout</Link>
-          </div>
-          <div className="mini-list">
-            {invoices.map(inv => (
-              <div className="mini-item" key={inv.id}>
-                <div className="mini-item-icon">
-                  <FileText size={16} />
-                </div>
-                <div className="mini-item-content">
-                  <div className="mini-item-title">{inv.desc}</div>
-                  <div className="mini-item-sub">{inv.date}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{inv.amount}</div>
-                  <div className="mini-badge badge-success" style={{ display: 'inline-block', marginTop: '0.2rem' }}>
-                    {inv.status}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Mon profil</div>
-            <Link to="#" className="card-link">Voir tout</Link>
-          </div>
-          <div className="profile-summary">
-            <img src={user?.profile?.avatar || currentUser.avatar} alt="Profile" className="profile-summary-avatar" />
-            <div className="profile-details">
-              <div className="profile-name">{user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName}` : currentUser.name}</div>
-              <div className="profile-role">{role}</div>
-              <div className="profile-location">
-                <MapPin size={12} />
-                Lomé, Togo
-              </div>
-            </div>
-          </div>
-          <button className="btn btn-outline btn-block">Modifier mon profil</button>
         </div>
       </div>
     </>

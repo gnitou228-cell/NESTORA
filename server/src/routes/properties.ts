@@ -134,6 +134,119 @@ router.get('/my', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/properties/search - Search and filter properties
+router.get('/search', async (req, res) => {
+  try {
+    const {
+      q,
+      countryId,
+      regionId,
+      cityId,
+      neighborhoodId,
+      transactionType,
+      propertyType,
+      minPrice,
+      maxPrice,
+      minBedrooms,
+      minBathrooms,
+      minArea,
+      maxArea,
+      amenities,
+      sort,
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    const where: any = { status: PropertyStatus.PUBLISHED };
+
+    if (q) {
+      where.OR = [
+        { title: { contains: String(q), mode: 'insensitive' } },
+        { description: { contains: String(q), mode: 'insensitive' } },
+        { city: { name: { contains: String(q), mode: 'insensitive' } } },
+        { neighborhood: { name: { contains: String(q), mode: 'insensitive' } } },
+      ];
+    }
+
+    if (countryId) where.countryId = String(countryId);
+    if (regionId) where.regionId = String(regionId);
+    if (cityId) where.cityId = String(cityId);
+    if (neighborhoodId) where.neighborhoodId = String(neighborhoodId);
+    
+    if (transactionType) where.transactionType = String(transactionType);
+    if (propertyType) where.propertyType = String(propertyType);
+
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = parseFloat(String(minPrice));
+      if (maxPrice) where.price.lte = parseFloat(String(maxPrice));
+    }
+
+    if (minBedrooms) where.bedrooms = { gte: parseInt(String(minBedrooms)) };
+    if (minBathrooms) where.bathrooms = { gte: parseInt(String(minBathrooms)) };
+
+    if (minArea || maxArea) {
+      where.surface = {};
+      if (minArea) where.surface.gte = parseFloat(String(minArea));
+      if (maxArea) where.surface.lte = parseFloat(String(maxArea));
+    }
+
+    if (amenities) {
+      const amenityIds = String(amenities).split(',');
+      const andConditions = amenityIds.map(id => ({
+        amenities: { some: { amenityId: id } }
+      }));
+      
+      if (where.AND) {
+        where.AND.push(...andConditions);
+      } else {
+        where.AND = andConditions;
+      }
+    }
+
+    let orderBy: any = { createdAt: 'desc' };
+    
+    if (sort === 'price_asc') orderBy = { price: 'asc' };
+    if (sort === 'price_desc') orderBy = { price: 'desc' };
+    if (sort === 'area_asc') orderBy = { surface: 'asc' };
+    if (sort === 'area_desc') orderBy = { surface: 'desc' };
+    if (sort === 'newest') orderBy = { createdAt: 'desc' };
+
+    const pageNum = parseInt(String(page)) > 0 ? parseInt(String(page)) : 1;
+    const limitNum = parseInt(String(limit)) > 0 ? parseInt(String(limit)) : 20;
+    const skip = (pageNum - 1) * limitNum;
+
+    const [properties, total] = await Promise.all([
+      prisma.property.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limitNum,
+        include: {
+          images: { orderBy: { position: 'asc' }, take: 1 },
+          city: true,
+          neighborhood: true,
+        }
+      }),
+      prisma.property.count({ where })
+    ]);
+
+    res.json({
+      properties,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Error in search:', error);
+    res.status(500).json({ message: 'Erreur lors de la recherche des propriétés', error: error.message });
+  }
+});
+
 // GET /api/properties/:id - Get a specific property
 router.get('/:id', async (req, res) => {
   try {
@@ -155,6 +268,12 @@ router.get('/:id', async (req, res) => {
 
     if (!property) {
       return res.status(404).json({ message: 'Propriété introuvable' });
+    }
+
+    if (property.status !== 'PUBLISHED') {
+      // In a real app we'd check if req.user.id === property.ownerId, 
+      // but this is a public endpoint right now.
+      return res.status(404).json({ message: 'Cette annonce n\'est pas disponible publiquement.' });
     }
 
     res.json(property);

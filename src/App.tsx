@@ -24,6 +24,10 @@ import ReportListing from './pages/ReportListing';
 import TermsOfService from './pages/TermsOfService';
 import SearchPage from './pages/SearchPage';
 import ListingsPage from './pages/ListingsPage';
+import PropertyDetail from './pages/PropertyDetail';
+import FavoritesPage from './pages/FavoritesPage';
+import VisitsPage from './pages/VisitsPage';
+import ReceivedVisitsPage from './pages/ReceivedVisitsPage';
 import AgenciesPage from './pages/AgenciesPage';
 import ValuesPage from './pages/ValuesPage';
 import PartnerPage from './pages/PartnerPage';
@@ -31,12 +35,14 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import CookiePolicy from './pages/CookiePolicy';
 import LegalNotices from './pages/LegalNotices';
 import ProtectedRoute from './components/ProtectedRoute';
+import { FavoritesProvider } from './context/FavoritesContext';
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <FavoritesProvider>
+        <BrowserRouter>
+          <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/a-propos" element={<About />} />
@@ -49,6 +55,7 @@ function App() {
             <Route path="/conditions-generales" element={<TermsOfService />} />
             <Route path="/recherche" element={<SearchPage />} />
             <Route path="/annonces" element={<ListingsPage />} />
+            <Route path="/annonces/:id" element={<PropertyDetail />} />
             <Route path="/agences" element={<AgenciesPage />} />
             <Route path="/valeurs" element={<ValuesPage />} />
             <Route path="/partenaire" element={<PartnerPage />} />
@@ -77,8 +84,14 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['AGENCY']} />}>
                 <Route path="/dashboard/agency" element={<Dashboard />} />
               </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['OWNER', 'AGENCY']} />}>
+                <Route path="demandes-visites" element={<ReceivedVisitsPage />} />
+              </Route>
 
-              {/* Rôles mixtes ou accessibles à plusieurs */}
+              {/* Rôles mixtes ou accessibles à tous les connectés */}
+              <Route path="favoris" element={<FavoritesPage />} />
+              <Route path="visites" element={<VisitsPage />} />
               <Route path="publier" element={<Publish />} />
               <Route path="mes-annonces" element={<MyListings />} />
               <Route path="/tarifs" element={<Pricing />} />
@@ -89,7 +102,8 @@ function App() {
             </Route>
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </FavoritesProvider>
     </AuthProvider>
   );
 }

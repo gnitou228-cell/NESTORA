@@ -271,6 +271,8 @@ model Property {
   @@index([propertyType])
   @@index([cityId])
   @@index([status])
+  @@index([price])
+  @@index([createdAt])
 }
 
 model PropertyImage {

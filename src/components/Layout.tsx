@@ -1,7 +1,7 @@
 import { 
   LayoutDashboard, Home, PlusCircle, Rocket, CreditCard, MessageSquare, 
   BarChart2, Settings, User as UserIcon, Bell, Crown, Headset,
-  FileText, Heart, Search as SearchIcon, FileQuestion, Users, Activity, LogOut
+  FileText, Heart, Search as SearchIcon, FileQuestion, Users, Activity, LogOut, MapPin
 } from 'lucide-react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -16,8 +16,9 @@ export default function Layout() {
   if (role === 'SEEKER') {
     menuItems = [
       { icon: <LayoutDashboard size={20} />, label: 'Tableau de bord', path: '/dashboard/seeker' },
-      { icon: <SearchIcon size={20} />, label: 'Rechercher un logement', path: '#' },
-      { icon: <Heart size={20} />, label: 'Mes favoris', path: '#' },
+      { icon: <SearchIcon size={20} />, label: 'Rechercher un logement', path: '/recherche' },
+      { icon: <Heart size={20} />, label: 'Mes favoris', path: '/favoris' },
+      { icon: <Activity size={20} />, label: 'Mes visites', path: '/visites' },
       { icon: <FileText size={20} />, label: 'Recherches sauvegardées', path: '#' },
       { icon: <FileQuestion size={20} />, label: 'Mes demandes', path: '/mes-annonces' },
       { icon: <PlusCircle size={20} />, label: 'Publier une demande', path: '/publier' },
@@ -31,6 +32,9 @@ export default function Layout() {
       { icon: <LayoutDashboard size={20} />, label: 'Tableau de bord', path: '/dashboard/owner' },
       { icon: <Home size={20} />, label: 'Mes annonces', badge: '7', path: '/mes-annonces' },
       { icon: <PlusCircle size={20} />, label: 'Ajouter une annonce', path: '/publier' },
+      { icon: <Heart size={20} />, label: 'Mes favoris', path: '/favoris' },
+      { icon: <Activity size={20} />, label: 'Mes visites', path: '/visites' },
+      { icon: <FileQuestion size={20} />, label: 'Demandes reçues', path: '/demandes-visites' },
       { icon: <Rocket size={20} />, label: 'Boost & Visibilité', path: '/mes-annonces' },
       { icon: <CreditCard size={20} />, label: 'Tarifs & Abonnement', path: '/tarifs' },
       { icon: <MessageSquare size={20} />, label: 'Messages', badge: '5', path: '#' },
@@ -43,6 +47,9 @@ export default function Layout() {
       { icon: <LayoutDashboard size={20} />, label: 'Vue d\'ensemble', path: '/dashboard/agency' },
       { icon: <Home size={20} />, label: 'Portefeuille immobilier', path: '/mes-annonces' },
       { icon: <PlusCircle size={20} />, label: 'Ajouter un bien', path: '/publier' },
+      { icon: <Heart size={20} />, label: 'Mes favoris', path: '/favoris' },
+      { icon: <Activity size={20} />, label: 'Mes visites', path: '/visites' },
+      { icon: <FileQuestion size={20} />, label: 'Demandes reçues', path: '/demandes-visites' },
       { icon: <Rocket size={20} />, label: 'Boost & Visibilité', path: '/mes-annonces' },
       { icon: <CreditCard size={20} />, label: 'Tarifs & Abonnement', path: '/tarifs' },
       { icon: <Users size={20} />, label: 'Agents', path: '#' },
@@ -100,13 +107,19 @@ export default function Layout() {
 
       <div className="main-content">
         <header className="header">
-          <div className="search-bar">
+          <div className="search-bar" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '0.5rem 1rem', width: '500px' }}>
             <SearchIcon size={18} color="#94a3b8" />
             <input 
               type="text" 
               className="search-input" 
               placeholder="Rechercher un bien, une ville, un quartier..." 
+              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '0 0.5rem' }}
             />
+            <div style={{ height: '24px', width: '1px', backgroundColor: '#cbd5e1', margin: '0 0.5rem' }}></div>
+            <MapPin size={18} color="#94a3b8" />
+            <select style={{ border: 'none', background: 'transparent', outline: 'none', color: '#64748b', fontWeight: 500, cursor: 'pointer', paddingLeft: '0.25rem' }}>
+              <option>Toutes les villes</option>
+            </select>
           </div>
           <div className="header-actions">
             <div className="header-action-icon">
