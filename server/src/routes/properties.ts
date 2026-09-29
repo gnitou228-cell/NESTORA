@@ -124,6 +124,9 @@ router.get('/my', requireAuth, async (req, res) => {
         },
         city: true,
         country: true,
+        boosts: {
+          where: { status: 'ACTIVE', endDate: { gt: new Date() } }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -226,6 +229,9 @@ router.get('/search', async (req, res) => {
           images: { orderBy: { position: 'asc' }, take: 1 },
           city: true,
           neighborhood: true,
+          boosts: {
+            where: { status: 'ACTIVE', endDate: { gt: new Date() } }
+          }
         }
       }),
       prisma.property.count({ where })

@@ -1,40 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Crown, Star } from 'lucide-react';
+import { Check, Star, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import type { Plan } from '../config/monetization';
-import { MONETIZATION_CONFIG, formatPrice } from '../config/monetization';
+import { formatPrice } from '../config/monetization';
+import api from '../lib/api';
 
 export default function Pricing() {
   const { role } = useAuth();
-  const [activeTab, setActiveTab] = useState(role);
+  const [activeTab, setActiveTab] = useState(role || 'SEEKER');
   const navigate = useNavigate();
+  
+  const [plans, setPlans] = useState<any>({ seeker: [], owner: [], agency: [] });
+  const [loading, setLoading] = useState(true);
 
-  const handleSelectPlan = (plan: Plan, type: string) => {
-    // Navigate to checkout with plan details in state
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await api.get('/payments/plans');
+        const subscriptionPlans = response.data.subscriptionPlans || [];
+        
+        setPlans({
+          seeker: subscriptionPlans.filter((p: any) => p.targetRole === 'SEEKER'),
+          owner: subscriptionPlans.filter((p: any) => p.targetRole === 'OWNER'),
+          agency: subscriptionPlans.filter((p: any) => p.targetRole === 'AGENCY'),
+        });
+      } catch (error) {
+        console.error('Erreur chargement des plans', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const handleSelectPlan = (plan: any, type: string) => {
     navigate('/paiement', { state: { plan, type } });
   };
 
-  const renderPlanCard = (plan: Plan, type: string, features: string[]) => {
+  const renderPlanCard = (plan: any, type: string) => {
+    const features = plan.features ? JSON.parse(plan.features) : [];
+    
     return (
       <div 
         key={plan.id} 
-        className={`pricing-card ${plan.isPopular ? 'popular' : ''} ${plan.isBestValue ? 'best-value' : ''}`}
+        className={`pricing-card ${plan.popular ? 'popular' : ''}`}
       >
-        {plan.isPopular && <div className="pricing-badge popular-badge"><Star size={14} fill="currentColor" /> POPULAIRE</div>}
-        {plan.isBestValue && <div className="pricing-badge best-value-badge">💰 MEILLEURE VALEUR</div>}
+        {plan.popular && <div className="pricing-badge popular-badge"><Star size={14} fill="currentColor" /> POPULAIRE</div>}
         
-        <div className="pricing-duration">{plan.label}</div>
-        <div className="pricing-price">{formatPrice(plan.price)}</div>
+        <div className="pricing-duration">{plan.name}</div>
+        <div className="pricing-price">{formatPrice(plan.price, plan.currency)}</div>
         
         <ul className="pricing-features">
-          {features.map((feature, idx) => (
+          {features.map((feature: string, idx: number) => (
             <li key={idx}><Check size={16} className="text-success" /> {feature}</li>
           ))}
         </ul>
         
         <button 
-          className={`btn btn-block ${plan.isPopular || plan.isBestValue ? 'btn-primary' : 'btn-outline'}`}
+          className={`btn btn-block ${plan.popular ? 'btn-primary' : 'btn-outline'}`}
           onClick={() => handleSelectPlan(plan, type)}
         >
           Choisir ce plan
@@ -42,6 +65,14 @@ export default function Pricing() {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+        <Loader className="spin" size={48} color="var(--color-primary)" />
+      </div>
+    );
+  }
 
   return (
     <div className="pricing-page">
@@ -76,16 +107,12 @@ export default function Pricing() {
       {activeTab === 'SEEKER' && (
         <div className="pricing-section">
           <div className="section-header text-center mb-3">
-            <h2>Publier une demande de logement</h2>
-            <p>Trouvez la perle rare en publiant votre recherche (ex: Maison 2 chambres, budget 150k FCFA).</p>
+            <h2>Avantages Premium Chercheur</h2>
+            <p>Accédez en avant-première aux annonces et augmentez vos chances de trouver.</p>
           </div>
           <div className="pricing-grid">
-            {MONETIZATION_CONFIG.chercheurPlans.map(plan => 
-              renderPlanCard(plan, 'Demande de logement', [
-                'Publication immédiate',
-                'Visibilité auprès des propriétaires',
-                'Alertes e-mail'
-              ])
+            {plans.seeker.map((plan: any) => 
+              renderPlanCard(plan, 'Abonnement Chercheur')
             )}
           </div>
         </div>
@@ -94,17 +121,12 @@ export default function Pricing() {
       {activeTab === 'OWNER' && (
         <div className="pricing-section">
           <div className="section-header text-center mb-3">
-            <h2>Publier un bien</h2>
-            <p>Mettez en location ou en vente votre propriété rapidement.</p>
+            <h2>Abonnement Propriétaire</h2>
+            <p>Mettez en location ou en vente votre propriété avec une visibilité maximale.</p>
           </div>
           <div className="pricing-grid">
-            {MONETIZATION_CONFIG.proprietairePlans.map(plan => 
-              renderPlanCard(plan, 'Annonce immobilière', [
-                'Photos haute qualité',
-                'Contact direct locataires/acheteurs',
-                'Statistiques de vues',
-                'Support prioritaire'
-              ])
+            {plans.owner.map((plan: any) => 
+              renderPlanCard(plan, 'Abonnement Propriétaire')
             )}
           </div>
         </div>
@@ -113,40 +135,15 @@ export default function Pricing() {
       {activeTab === 'AGENCY' && (
         <div className="pricing-section">
           <div className="section-header text-center mb-3">
-            <h2>Abonnement Professionnel</h2>
-            <p>La solution complète pour gérer votre portefeuille immobilier.</p>
+            <h2>Abonnement Professionnel Agence</h2>
+            <p>La solution complète pour gérer votre portefeuille immobilier et vos agents.</p>
           </div>
           
           <div className="agency-plans-container">
-            <div className="agency-tier">
-              <h3 className="tier-name">STARTER</h3>
-              <p className="tier-desc">Jusqu'à 10 annonces actives</p>
-              <div className="pricing-grid mini-grid">
-                {MONETIZATION_CONFIG.agencePlans.starter.map(plan => 
-                  renderPlanCard(plan, 'Abonnement Agence - STARTER', ['10 annonces actives', '1 agent', 'Support basique'])
+            <div className="pricing-grid">
+                {plans.agency.map((plan: any) => 
+                  renderPlanCard(plan, 'Abonnement Agence')
                 )}
-              </div>
-            </div>
-            
-            <div className="agency-tier highlight-tier">
-              <div className="tier-badge"><Crown size={16} /> POPULAIRE</div>
-              <h3 className="tier-name">PRO</h3>
-              <p className="tier-desc">Jusqu'à 50 annonces actives</p>
-              <div className="pricing-grid mini-grid">
-                {MONETIZATION_CONFIG.agencePlans.pro.map(plan => 
-                  renderPlanCard(plan, 'Abonnement Agence - PRO', ['50 annonces actives', '5 agents', 'Support prioritaire'])
-                )}
-              </div>
-            </div>
-
-            <div className="agency-tier">
-              <h3 className="tier-name">BUSINESS</h3>
-              <p className="tier-desc">Annonces illimitées</p>
-              <div className="pricing-grid mini-grid">
-                {MONETIZATION_CONFIG.agencePlans.business.map(plan => 
-                  renderPlanCard(plan, 'Abonnement Agence - BUSINESS', ['Annonces illimitées', 'Agents illimités', 'API & Intégrations'])
-                )}
-              </div>
             </div>
           </div>
         </div>

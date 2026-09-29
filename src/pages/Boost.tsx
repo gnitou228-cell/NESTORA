@@ -1,14 +1,31 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Rocket, TrendingUp, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
-import type { Plan } from '../config/monetization';
-import { MONETIZATION_CONFIG, formatPrice } from '../config/monetization';
+import { Rocket, TrendingUp, CheckCircle, Clock, ArrowLeft, Loader } from 'lucide-react';
+import { formatPrice } from '../config/monetization';
+import api from '../lib/api';
 
 export default function Boost() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const propertyId = searchParams.get('propertyId');
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleBoost = (plan: Plan) => {
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await api.get('/payments/plans');
+        setPlans(response.data.boostPlans || []);
+      } catch (error) {
+        console.error('Erreur chargement des plans de boost', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const handleBoost = (plan: any) => {
     if (!propertyId) {
       alert("Veuillez sélectionner une annonce à booster depuis vos annonces.");
       navigate('/mes-annonces');
@@ -16,6 +33,14 @@ export default function Boost() {
     }
     navigate('/paiement', { state: { plan, type: 'Boost Annonce', propertyId } });
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+        <Loader className="spin" size={40} color="#C9A227" />
+      </div>
+    );
+  }
 
   return (
     <div className="boost-page">
@@ -33,22 +58,21 @@ export default function Boost() {
       </div>
 
       <div className="pricing-grid">
-        {MONETIZATION_CONFIG.boostPlans.map(plan => (
-          <div key={plan.id} className={`pricing-card ${plan.isPopular ? 'popular' : ''} ${plan.isBestValue ? 'best-value' : ''}`}>
-            {plan.isPopular && <div className="pricing-badge popular-badge">⭐ POPULAIRE</div>}
-            {plan.isBestValue && <div className="pricing-badge best-value-badge">💰 MEILLEURE VALEUR</div>}
+        {plans.map(plan => (
+          <div key={plan.id} className={`pricing-card ${plan.name.includes('Premium') ? 'popular' : ''}`}>
+            {plan.name.includes('Premium') && <div className="pricing-badge popular-badge">⭐ POPULAIRE</div>}
             
-            <div className="pricing-duration">{plan.label}</div>
-            <div className="pricing-price">{formatPrice(plan.price)}</div>
+            <div className="pricing-duration">{plan.name}</div>
+            <div className="pricing-price">{formatPrice(plan.price, plan.currency)}</div>
             
             <ul className="pricing-features mb-3">
               <li><TrendingUp size={16} className="text-success" /> Jusqu'à 5x plus de vues</li>
               <li><CheckCircle size={16} className="text-success" /> En tête de liste</li>
-              <li><Clock size={16} className="text-success" /> Actif {plan.label}</li>
+              <li><Clock size={16} className="text-success" /> Actif {plan.duration} jours</li>
             </ul>
 
             <button 
-              className={`btn btn-block ${plan.isPopular || plan.isBestValue ? 'btn-primary' : 'btn-outline'}`}
+              className={`btn btn-block ${plan.name.includes('Premium') || plan.name.includes('VIP') ? 'btn-primary' : 'btn-outline'}`}
               onClick={() => handleBoost(plan)}
             >
               Acheter ce boost

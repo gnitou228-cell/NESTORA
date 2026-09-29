@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, CreditCard, Smartphone } from 'lucide-react';
-import type { Plan } from '../config/monetization';
-import { MONETIZATION_CONFIG, formatPrice } from '../config/monetization';
+import { formatPrice } from '../config/monetization';
+import api from '../lib/api';
 
 export default function Checkout() {
   const location = useLocation();
@@ -10,8 +10,10 @@ export default function Checkout() {
   const [provider, setProvider] = useState<string>('Orange Money');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'IDLE' | 'PENDING' | 'SUCCESS' | 'FAILED'>('IDLE');
+  const [paymentResult, setPaymentResult] = useState<any>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const { plan, type } = location.state as { plan: Plan, type: string } || { plan: null, type: '' };
+  const { plan, type, propertyId } = location.state as { plan: any, type: string, propertyId?: string } || { plan: null, type: '' };
 
   if (!plan) {
     return (
@@ -22,19 +24,55 @@ export default function Checkout() {
     );
   }
 
-  const taxAmount = plan.price * MONETIZATION_CONFIG.countries[0].taxRate;
+  // Define payment type internally based on context
+  const paymentType = type.toLowerCase().includes('boost') ? 'BOOST' : 'SUBSCRIPTION';
+
+  const taxAmount = plan.price * 0.18; // 18% tax
   const total = plan.price + taxAmount;
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setLoading(true);
-    setStatus('PENDING');
+    setErrorMessage('');
     
-    // Simulate API call and payment processing
-    setTimeout(() => {
+    try {
+      // 1. Initialiser le paiement côté serveur (sécurisé)
+      const initResponse = await api.post('/payments/checkout', {
+        type: paymentType,
+        planId: plan.id,
+        propertyId,
+        provider
+      });
+      
+      const { paymentId } = initResponse.data;
+      setStatus('PENDING');
+
+      // 2. Simuler le traitement par le fournisseur (car on n'a pas encore la vraie API OrangeMoney)
+      setTimeout(async () => {
+        try {
+          // Simulation du Webhook
+          await api.post(`/payments/webhook/${provider.toLowerCase().replace(' ', '')}`, {
+            paymentId,
+            status: 'SUCCESS',
+            providerTransactionId: 'TXN-' + Math.floor(Math.random() * 100000000)
+          });
+          
+          setStatus('SUCCESS');
+          setPaymentResult({ paymentId, total });
+        } catch (webhookErr) {
+          console.error(webhookErr);
+          setStatus('FAILED');
+          setErrorMessage('Erreur lors de la confirmation du paiement.');
+        } finally {
+          setLoading(false);
+        }
+      }, 3000);
+
+    } catch (error: any) {
+      console.error(error);
       setLoading(false);
-      setStatus('SUCCESS');
-      // In a real app, we would wait for a webhook before showing success
-    }, 2500);
+      setStatus('FAILED');
+      setErrorMessage(error.response?.data?.error || 'Erreur lors de l\'initialisation du paiement');
+    }
   };
 
   if (status === 'SUCCESS') {
@@ -44,16 +82,16 @@ export default function Checkout() {
           <ShieldCheck size={64} color="#10b981" />
         </div>
         <h1 className="mb-1">Paiement Réussi !</h1>
-        <p className="text-light mb-3">Votre achat de <strong>{type} - {plan.label}</strong> a été validé avec succès.</p>
+        <p className="text-light mb-3">Votre achat de <strong>{plan.name}</strong> a été validé avec succès.</p>
         
         <div className="card p-3 mb-3" style={{ maxWidth: '400px', margin: '0 auto' }}>
           <div className="d-flex justify-between mb-1">
             <span className="text-light">Référence:</span>
-            <strong>#NST-{Math.floor(Math.random() * 1000000)}</strong>
+            <strong>{paymentResult?.paymentId?.substring(0, 8).toUpperCase()}</strong>
           </div>
           <div className="d-flex justify-between mb-1">
             <span className="text-light">Montant:</span>
-            <strong>{formatPrice(total)}</strong>
+            <strong>{formatPrice(total, plan.currency)}</strong>
           </div>
           <div className="d-flex justify-between">
             <span className="text-light">Moyen de paiement:</span>
@@ -61,7 +99,7 @@ export default function Checkout() {
           </div>
         </div>
 
-        <Link to="/" className="btn btn-primary">Retour au tableau de bord</Link>
+        <Link to="/dashboard" className="btn btn-primary">Retour au tableau de bord</Link>
       </div>
     );
   }
@@ -80,10 +118,16 @@ export default function Checkout() {
             <div className="card-header">
               <h2>Moyen de paiement</h2>
             </div>
-            <p className="text-light mb-3">Sélectionnez votre méthode de paiement préférée. Les transactions sont sécurisées.</p>
+            <p className="text-light mb-3">Sélectionnez votre méthode de paiement préférée. (Mode simulation actif)</p>
+            
+            {errorMessage && (
+              <div className="alert alert-danger mb-3">
+                {errorMessage}
+              </div>
+            )}
             
             <div className="payment-providers">
-              {MONETIZATION_CONFIG.paymentProviders.map(p => (
+              {['Orange Money', 'Moov Money', 'MTN Mobile Money', 'Wave', 'Carte Bancaire'].map(p => (
                 <div 
                   key={p} 
                   className={`provider-card ${provider === p ? 'active' : ''}`}
@@ -118,36 +162,36 @@ export default function Checkout() {
             
             <div className="summary-item mb-2">
               <div className="summary-title">{type}</div>
-              <div className="summary-desc">Durée : {plan.label}</div>
+              <div className="summary-desc">Plan : {plan.name}</div>
             </div>
 
             <hr className="divider my-2" />
             
             <div className="summary-row">
               <span>Sous-total</span>
-              <span>{formatPrice(plan.price)}</span>
+              <span>{formatPrice(plan.price, plan.currency)}</span>
             </div>
             <div className="summary-row">
               <span>TVA (18%)</span>
-              <span>{formatPrice(taxAmount)}</span>
+              <span>{formatPrice(taxAmount, plan.currency)}</span>
             </div>
             
             <hr className="divider my-2" />
             
             <div className="summary-total">
               <span>Total à payer</span>
-              <span>{formatPrice(total)}</span>
+              <span>{formatPrice(total, plan.currency)}</span>
             </div>
 
             <button 
               className="btn btn-primary btn-block btn-lg mt-4" 
               onClick={handlePayment}
-              disabled={loading}
+              disabled={loading || status === 'PENDING'}
             >
               {loading ? (
                 <span>Traitement en cours...</span>
               ) : (
-                <span><ShieldCheck size={18} /> Payer {formatPrice(total)}</span>
+                <span><ShieldCheck size={18} /> Payer {formatPrice(total, plan.currency)}</span>
               )}
             </button>
             <div className="secure-payment text-center mt-2">

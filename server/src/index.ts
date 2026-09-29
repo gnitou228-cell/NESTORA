@@ -8,6 +8,7 @@ import favoritesRoutes from './routes/favorites';
 import visitsRoutes from './routes/visits';
 import conversationsRoutes from './routes/conversations';
 import dashboardRoutes from './routes/dashboard';
+import paymentsRoutes from './routes/payments';
 import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/favorites', favoritesRoutes);
 app.use('/api/visits', visitsRoutes);
 app.use('/api/conversations', conversationsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/payments', paymentsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
