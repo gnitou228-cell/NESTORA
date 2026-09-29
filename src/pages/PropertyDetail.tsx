@@ -200,6 +200,42 @@ const PropertyDetail = () => {
     }
   };
 
+  const handleContact = async () => {
+    if (!user) {
+      navigate('/connexion');
+      return;
+    }
+    if (property?.ownerId === user.id) {
+      alert('Vous ne pouvez pas vous contacter vous-même.');
+      return;
+    }
+
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+
+      const res = await fetch('http://localhost:5000/api/conversations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ propertyId: property?.id })
+      });
+
+      if (res.ok) {
+        navigate('/messages');
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Erreur lors de la création de la conversation');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur serveur');
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!showGallery) return;
@@ -487,7 +523,11 @@ const PropertyDetail = () => {
               <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Vous êtes intéressé par ce bien ?</h4>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button className="btn btn-primary btn-block" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}>
+                <button 
+                  className="btn btn-primary btn-block" 
+                  onClick={handleContact}
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}
+                >
                   <MessageCircle size={20} />
                   Contacter l'annonceur
                 </button>
@@ -511,9 +551,7 @@ const PropertyDetail = () => {
                 </button>
               </div>
 
-              <div style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--color-text-light)', textAlign: 'center' }}>
-                Bientôt disponible : La messagerie sera intégrée prochainement.
-              </div>
+
 
             </div>
           </div>

@@ -28,6 +28,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import FavoritesPage from './pages/FavoritesPage';
 import VisitsPage from './pages/VisitsPage';
 import ReceivedVisitsPage from './pages/ReceivedVisitsPage';
+import { MessagesPage } from './pages/MessagesPage';
 import AgenciesPage from './pages/AgenciesPage';
 import ValuesPage from './pages/ValuesPage';
 import PartnerPage from './pages/PartnerPage';
@@ -92,6 +93,7 @@ function App() {
               {/* Rôles mixtes ou accessibles à tous les connectés */}
               <Route path="favoris" element={<FavoritesPage />} />
               <Route path="visites" element={<VisitsPage />} />
+              <Route path="messages" element={<MessagesPage />} />
               <Route path="publier" element={<Publish />} />
               <Route path="mes-annonces" element={<MyListings />} />
               <Route path="/tarifs" element={<Pricing />} />

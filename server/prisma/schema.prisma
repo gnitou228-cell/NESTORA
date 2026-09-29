@@ -49,6 +49,7 @@ model User {
   reportsMade   Report[]  @relation("ReportedBy")
   reportsReceived Report[] @relation("ReportedUser")
   verifications Verification[]
+  conversationMembers ConversationMember[]
 
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
@@ -262,6 +263,7 @@ model Property {
   amenities          PropertyAmenity[]
   reports            Report[]
   verifications      Verification[]
+  conversations      Conversation[]
 
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
@@ -336,17 +338,21 @@ model Favorite {
 }
 
 model Conversation {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  propertyId String?
   
-  members   ConversationMember[]
-  messages  Message[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  members    ConversationMember[]
+  messages   Message[]
 }
 
 model ConversationMember {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   conversationId String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   
   @@id([conversationId, userId])
