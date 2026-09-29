@@ -1,143 +1,666 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FileText } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader } from 'lucide-react';
+import NestoraLogo from '../components/brand/NestoraLogo';
 
 export default function Publish() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  
+  // SEEKER check
+  if (role === 'SEEKER') {
+    return (
+      <div className="publish-page" style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
+        <Search size={48} color="#C9A227" style={{ margin: '0 auto 1rem' }} />
+        <h1 className="page-title mb-3">Espace Chercheur</h1>
+        <p className="text-light mb-4 text-lg">
+          En tant que chercheur, vous ne pouvez pas publier de biens immobiliers sur NESTORA.
+          Cet espace est réservé aux Propriétaires et Agences Immobilières.
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <Link to="/" className="btn btn-primary">
+            Retour à l'accueil
+          </Link>
+          <Link to="/recherche" className="btn btn-outline">
+            Voir les annonces
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    setTimeout(() => {
-      setLoading(false);
-      // For agencies with a subscription, we might bypass checkout.
-      // But for demo, redirect to pricing page to select plan.
-      navigate('/tarifs');
-    }, 1000);
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Localisation data
+  const [countries, setCountries] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
+  const [neighborhoods, setNeighborhoods] = useState<any[]>([]);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    transactionType: 'RENT',
+    propertyType: 'HOUSE',
+    countryId: '',
+    regionId: '',
+    cityId: '',
+    neighborhoodId: '',
+    address: '',
+    title: '',
+    description: '',
+    price: '',
+    currency: 'XOF',
+    surface: '',
+    bedrooms: '',
+    bathrooms: '',
+    amenities: [] as string[]
+  });
+
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+
+  const transactionTypes = [
+    { value: 'RENT', label: 'Location' },
+    { value: 'SALE', label: 'Vente' }
+  ];
+
+  const propertyTypes = [
+    { value: 'HOUSE', label: 'Maison' },
+    { value: 'APARTMENT', label: 'Appartement' },
+    { value: 'VILLA', label: 'Villa' },
+    { value: 'STUDIO', label: 'Studio' },
+    { value: 'LAND', label: 'Terrain' },
+    { value: 'OFFICE', label: 'Bureau' },
+    { value: 'SHOP', label: 'Local commercial' },
+    { value: 'OTHER', label: 'Autre' }
+  ];
+
+  const availableAmenities = [
+    'Parking', 'Garage', 'Jardin', 'Piscine', 'Terrasse', 'Balcon',
+    'Climatisation', 'Meublé', 'Cuisine équipée', 'Sécurité', 'Eau',
+    'Électricité', 'Groupe électrogène', 'Internet', 'Ascenseur', 'Gardien', 'Accès véhicule'
+  ];
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/locations/countries')
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+        if (data.length > 0) setFormData(prev => ({ ...prev, countryId: data[0].id }));
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (formData.countryId) {
+      fetch(`http://localhost:5000/api/locations/regions?countryId=${formData.countryId}`)
+        .then(res => res.json())
+        .then(data => {
+          setRegions(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, regionId: data[0].id }));
+          else setFormData(prev => ({ ...prev, regionId: '' }));
+        });
+    }
+  }, [formData.countryId]);
+
+  useEffect(() => {
+    if (formData.regionId) {
+      fetch(`http://localhost:5000/api/locations/cities?regionId=${formData.regionId}`)
+        .then(res => res.json())
+        .then(data => {
+          setCities(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, cityId: data[0].id }));
+          else setFormData(prev => ({ ...prev, cityId: '' }));
+        });
+    }
+  }, [formData.regionId]);
+
+  useEffect(() => {
+    if (formData.cityId) {
+      fetch(`http://localhost:5000/api/locations/neighborhoods?cityId=${formData.cityId}`)
+        .then(res => res.json())
+        .then(data => {
+          setNeighborhoods(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, neighborhoodId: data[0].id }));
+          else setFormData(prev => ({ ...prev, neighborhoodId: '' }));
+        });
+    }
+  }, [formData.cityId]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const renderChercheurForm = () => (
-    <form onSubmit={handleSubmit} className="publish-form">
-      <div className="card p-3 mb-3">
-        <h3 className="mb-2">Votre recherche</h3>
-        <div className="form-group mb-2">
-          <label>Type de logement souhaité</label>
-          <select className="form-control" required>
-            <option>Maison</option>
-            <option>Appartement</option>
-            <option>Terrain</option>
-          </select>
-        </div>
-        <div className="form-group mb-2">
-          <label>Budget maximum (FCFA)</label>
-          <input type="number" className="form-control" required placeholder="Ex: 150000" />
-        </div>
-        <div className="form-group mb-2">
-          <label>Quartiers ciblés</label>
-          <input type="text" className="form-control" required placeholder="Ex: Ouaga 2000, ZAD" />
-        </div>
-        <div className="form-group mb-2">
-          <label>Description de votre besoin</label>
-          <textarea className="form-control" rows={4} required placeholder="Détaillez votre recherche..."></textarea>
-        </div>
-      </div>
-      <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
-        {loading ? 'Traitement...' : 'Valider ma recherche et choisir un forfait'}
-      </button>
-    </form>
-  );
+  const handleAmenityToggle = (amenity: string) => {
+    setFormData(prev => {
+      const exists = prev.amenities.includes(amenity);
+      if (exists) {
+        return { ...prev, amenities: prev.amenities.filter(a => a !== amenity) };
+      } else {
+        return { ...prev, amenities: [...prev.amenities, amenity] };
+      }
+    });
+  };
 
-  const renderProprietaireForm = () => (
-    <form onSubmit={handleSubmit} className="publish-form">
-      <div className="card p-3 mb-3">
-        <h3 className="mb-2">Informations sur le bien</h3>
-        <div className="form-group mb-2">
-          <label>Titre de l'annonce</label>
-          <input type="text" className="form-control" required placeholder="Ex: Belle villa 4 pièces" />
-        </div>
-        <div className="d-flex" style={{ gap: '1rem' }}>
-          <div className="form-group mb-2" style={{ flex: 1 }}>
-            <label>Transaction</label>
-            <select className="form-control" required>
-              <option>À louer</option>
-              <option>À vendre</option>
-            </select>
-          </div>
-          <div className="form-group mb-2" style={{ flex: 1 }}>
-            <label>Type de bien</label>
-            <select className="form-control" required>
-              <option>Villa</option>
-              <option>Appartement</option>
-              <option>Studio</option>
-              <option>Terrain</option>
-              <option>Bureau</option>
-            </select>
-          </div>
-        </div>
-        <div className="d-flex" style={{ gap: '1rem' }}>
-          <div className="form-group mb-2" style={{ flex: 1 }}>
-            <label>Prix (FCFA)</label>
-            <input type="number" className="form-control" required />
-          </div>
-          <div className="form-group mb-2" style={{ flex: 1 }}>
-            <label>Surface (m²)</label>
-            <input type="number" className="form-control" required />
-          </div>
-        </div>
-        <div className="form-group mb-2">
-          <label>Description complète</label>
-          <textarea className="form-control" rows={5} required placeholder="Décrivez votre bien en détail..."></textarea>
-        </div>
-        <div className="form-group mb-2">
-          <label>Photos (jusqu'à 10)</label>
-          <input type="file" className="form-control" multiple accept="image/*" />
-        </div>
-      </div>
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      const totalImages = images.length + newFiles.length;
       
-      <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
-        {loading ? 'Traitement...' : 'Continuer vers le paiement'}
-      </button>
-    </form>
-  );
+      if (totalImages > 10) {
+        setError('Vous ne pouvez télécharger que 10 images maximum.');
+        return;
+      }
+      
+      setError('');
+      setImages(prev => [...prev, ...newFiles]);
+      
+      const newUrls = newFiles.map(file => URL.createObjectURL(file));
+      setImagePreviewUrls(prev => [...prev, ...newUrls]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => {
+      const newUrls = [...prev];
+      URL.revokeObjectURL(newUrls[index]); // Free memory
+      newUrls.splice(index, 1);
+      return newUrls;
+    });
+  };
+
+  const validateStep = (currentStep: number) => {
+    if (currentStep === 2) {
+      if (!formData.countryId || !formData.regionId || !formData.cityId) {
+        setError("Veuillez sélectionner au moins le pays, la région et la ville.");
+        return false;
+      }
+    }
+    if (currentStep === 3) {
+      if (!formData.title || !formData.description || !formData.price) {
+        setError("Le titre, la description et le prix sont obligatoires.");
+        return false;
+      }
+      if (Number(formData.price) < 0) {
+        setError("Le prix ne peut pas être négatif.");
+        return false;
+      }
+    }
+    if (currentStep === 4) {
+      if (images.length === 0) {
+        setError("Veuillez ajouter au moins une photo.");
+        return false;
+      }
+    }
+    setError('');
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep(prev => prev + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handlePrev = () => {
+    setStep(prev => prev - 1);
+    window.scrollTo(0, 0);
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // 1. Upload images to Supabase Storage
+      const uploadedUrls: string[] = [];
+      
+      for (const file of images) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${user?.id}/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('property-images')
+          .upload(filePath, file);
+          
+        if (uploadError) {
+          throw new Error(`Erreur lors du téléchargement de l'image: ${uploadError.message}`);
+        }
+        
+        const { data: publicUrlData } = supabase.storage
+          .from('property-images')
+          .getPublicUrl(filePath);
+          
+        uploadedUrls.push(publicUrlData.publicUrl);
+      }
+
+      // 2. Submit data to backend
+      const token = localStorage.getItem('nestora_token') || sessionStorage.getItem('nestora_token'); // Or however you store the JWT if it's custom. 
+      // Wait, with Supabase, we get the token dynamically.
+      const { data: { session } } = await supabase.auth.getSession();
+      const jwt = session?.access_token;
+      
+      if (!jwt) throw new Error("Non autorisé. Veuillez vous reconnecter.");
+
+      const response = await fetch('http://localhost:5000/api/properties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          images: uploadedUrls
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Erreur lors de la création de l\'annonce');
+      }
+
+      navigate('/mes-annonces?success=true');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Une erreur est survenue lors de la publication.');
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="publish-page" style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div className="text-center mb-4">
-        <FileText size={48} color="#0B1F3A" style={{ margin: '0 auto 1rem' }} />
-        <h1 className="page-title">
-          {role === 'SEEKER' ? 'Publier une demande' : 'Publier une annonce'}
-        </h1>
-        <p className="page-subtitle text-light">
-          Remplissez les informations ci-dessous pour publier sur NESTORA.
-        </p>
+    <div className="publish-page" style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1rem' }}>
+      <div className="publish-header text-center mb-4">
+        <h1 className="page-title">Publier une annonce</h1>
+        <p className="text-light">Complétez les informations pour mettre votre bien en ligne.</p>
       </div>
 
-      {role === 'SEEKER' ? renderChercheurForm() : renderProprietaireForm()}
-      
+      <div className="publish-progress">
+        <div className={`progress-step ${step >= 1 ? 'active' : ''}`}>
+          <div className="step-circle">1</div>
+          <div className="step-label d-none d-md-block">Type de bien</div>
+        </div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>
+          <div className="step-circle">2</div>
+          <div className="step-label d-none d-md-block">Localisation</div>
+        </div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${step >= 3 ? 'active' : ''}`}>
+          <div className="step-circle">3</div>
+          <div className="step-label d-none d-md-block">Informations</div>
+        </div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${step >= 4 ? 'active' : ''}`}>
+          <div className="step-circle">4</div>
+          <div className="step-label d-none d-md-block">Photos</div>
+        </div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${step >= 5 ? 'active' : ''}`}>
+          <div className="step-circle">5</div>
+          <div className="step-label d-none d-md-block">Aperçu</div>
+        </div>
+      </div>
+
+      {error && <div className="badge-warning mb-4" style={{ padding: '1rem', borderRadius: '8px' }}>{error}</div>}
+
+      <div className="publish-content card p-4">
+        {step === 1 && (
+          <div className="step-container">
+            <h2 className="mb-4 d-flex align-center gap-2"><FileText size={24} color="var(--color-primary)" /> Type de transaction et de bien</h2>
+            
+            <div className="form-group mb-4">
+              <label>Type de transaction *</label>
+              <div className="radio-group row mt-2" style={{ gap: '1rem' }}>
+                {transactionTypes.map(t => (
+                  <div 
+                    key={t.value} 
+                    className={`radio-card col ${formData.transactionType === t.value ? 'selected' : ''}`}
+                    onClick={() => setFormData({ ...formData, transactionType: t.value })}
+                  >
+                    {t.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group mb-4">
+              <label>Type de bien *</label>
+              <div className="radio-group-grid mt-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                {propertyTypes.map(p => (
+                  <div 
+                    key={p.value} 
+                    className={`radio-card ${formData.propertyType === p.value ? 'selected' : ''}`}
+                    onClick={() => setFormData({ ...formData, propertyType: p.value })}
+                  >
+                    {p.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="step-container">
+            <h2 className="mb-4 d-flex align-center gap-2"><MapPin size={24} color="var(--color-primary)" /> Localisation</h2>
+            
+            <div className="row mb-3" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className="form-group col" style={{ flex: '1 1 200px' }}>
+                <label>Pays *</label>
+                <select name="countryId" className="form-control" value={formData.countryId} onChange={handleChange}>
+                  {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group col" style={{ flex: '1 1 200px' }}>
+                <label>Région *</label>
+                <select name="regionId" className="form-control" value={formData.regionId} onChange={handleChange}>
+                  <option value="">Sélectionner</option>
+                  {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="row mb-3" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className="form-group col" style={{ flex: '1 1 200px' }}>
+                <label>Ville *</label>
+                <select name="cityId" className="form-control" value={formData.cityId} onChange={handleChange}>
+                  <option value="">Sélectionner</option>
+                  {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group col" style={{ flex: '1 1 200px' }}>
+                <label>Quartier</label>
+                <select name="neighborhoodId" className="form-control" value={formData.neighborhoodId} onChange={handleChange}>
+                  <option value="">Sélectionner</option>
+                  {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Adresse complète (Facultatif)</label>
+              <input type="text" name="address" className="form-control" value={formData.address} onChange={handleChange} placeholder="Ex: Rue 123, Porte 45" />
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="step-container">
+            <h2 className="mb-4 d-flex align-center gap-2"><Info size={24} color="var(--color-primary)" /> Informations générales</h2>
+            
+            <div className="form-group mb-3">
+              <label>Titre de l'annonce *</label>
+              <input type="text" name="title" className="form-control" value={formData.title} onChange={handleChange} placeholder="Ex: Magnifique Villa avec piscine" required />
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Description détaillée *</label>
+              <textarea name="description" className="form-control" rows={6} value={formData.description} onChange={handleChange} placeholder="Décrivez votre bien en mettant en valeur ses atouts..." required />
+            </div>
+
+            <div className="row mb-3" style={{ display: 'flex', gap: '1rem' }}>
+              <div className="form-group col" style={{ flex: 2 }}>
+                <label>Prix *</label>
+                <input type="number" name="price" className="form-control" value={formData.price} onChange={handleChange} placeholder="Ex: 150000" min="0" required />
+              </div>
+              <div className="form-group col" style={{ flex: 1 }}>
+                <label>Devise</label>
+                <select name="currency" className="form-control" value={formData.currency} onChange={handleChange}>
+                  <option value="XOF">XOF (FCFA)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="USD">USD ($)</option>
+                </select>
+              </div>
+            </div>
+
+            {formData.propertyType !== 'LAND' && (
+              <div className="row mb-3" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <div className="form-group col" style={{ flex: '1 1 120px' }}>
+                  <label>Surface (m²)</label>
+                  <input type="number" name="surface" className="form-control" value={formData.surface} onChange={handleChange} min="0" />
+                </div>
+                <div className="form-group col" style={{ flex: '1 1 120px' }}>
+                  <label>Chambres</label>
+                  <input type="number" name="bedrooms" className="form-control" value={formData.bedrooms} onChange={handleChange} min="0" />
+                </div>
+                <div className="form-group col" style={{ flex: '1 1 120px' }}>
+                  <label>Salles de bain</label>
+                  <input type="number" name="bathrooms" className="form-control" value={formData.bathrooms} onChange={handleChange} min="0" />
+                </div>
+              </div>
+            )}
+
+            <div className="form-group mb-3 mt-4">
+              <label className="mb-2 d-block">Caractéristiques & Équipements</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
+                {availableAmenities.map(amenity => (
+                  <div key={amenity} className="d-flex align-center" style={{ gap: '0.5rem', cursor: 'pointer' }} onClick={() => handleAmenityToggle(amenity)}>
+                    <input type="checkbox" checked={formData.amenities.includes(amenity)} readOnly />
+                    <span style={{ fontSize: '0.9rem' }}>{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="step-container">
+            <h2 className="mb-4 d-flex align-center gap-2"><ImageIcon size={24} color="var(--color-primary)" /> Photos du bien</h2>
+            <p className="text-light mb-4">Ajoutez au moins une photo. Les annonces avec plusieurs belles photos génèrent 3x plus de contacts. (Max 10 images)</p>
+            
+            <div className="photo-upload-container mb-4" style={{ border: '2px dashed var(--color-border)', borderRadius: '12px', padding: '3rem 1rem', textAlign: 'center', backgroundColor: '#fafafa' }}>
+              <input type="file" id="photo-upload" multiple accept="image/jpeg, image/png, image/webp" onChange={handleImageChange} style={{ display: 'none' }} />
+              <label htmlFor="photo-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ backgroundColor: '#eef2f6', padding: '1rem', borderRadius: '50%', color: 'var(--color-primary)' }}>
+                  <Plus size={32} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Cliquez pour ajouter des photos</div>
+                  <div className="text-light text-sm mt-1">JPG, PNG, WEBP (Max 5MB)</div>
+                </div>
+              </label>
+            </div>
+
+            {imagePreviewUrls.length > 0 && (
+              <div className="photos-preview-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem' }}>
+                {imagePreviewUrls.map((url, index) => (
+                  <div key={index} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', aspectRatio: '1', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <img src={url} alt={`Preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button 
+                      type="button" 
+                      onClick={() => removeImage(index)}
+                      style={{ position: 'absolute', top: '5px', right: '5px', backgroundColor: 'rgba(255,0,0,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                    {index === 0 && (
+                      <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', backgroundColor: 'rgba(11,31,58,0.8)', color: '#fff', fontSize: '0.7rem', padding: '0.2rem', textAlign: 'center' }}>
+                        Image Principale
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="step-container">
+            <h2 className="mb-4 d-flex align-center gap-2"><CheckCircle size={24} color="#10b981" /> Aperçu avant publication</h2>
+            
+            <div className="preview-card" style={{ border: '1px solid var(--color-border)', borderRadius: '12px', overflow: 'hidden' }}>
+              {imagePreviewUrls.length > 0 ? (
+                <div style={{ height: '300px', width: '100%', overflow: 'hidden' }}>
+                  <img src={imagePreviewUrls[0]} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ) : (
+                <div style={{ height: '300px', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                  Aucune image
+                </div>
+              )}
+              
+              <div className="p-4">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                  <div>
+                    <div style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>
+                      {formData.transactionType === 'RENT' ? 'À LOUER' : 'À VENDRE'} • {propertyTypes.find(p => p.value === formData.propertyType)?.label?.toUpperCase()}
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--color-text-dark)' }}>{formData.title}</h3>
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {formData.price} {formData.currency}
+                  </div>
+                </div>
+
+                <div className="text-light mb-4 d-flex align-center gap-2">
+                  <MapPin size={16} /> 
+                  {cities.find(c => c.id === formData.cityId)?.name}, {countries.find(c => c.id === formData.countryId)?.name}
+                </div>
+
+                <div className="mb-4 text-dark" style={{ lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  {formData.description}
+                </div>
+                
+                <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1.5rem 0' }} />
+                
+                <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                  {formData.surface && <div><strong style={{ color: 'var(--color-text-dark)' }}>Surface:</strong> <span className="text-light">{formData.surface} m²</span></div>}
+                  {formData.bedrooms && <div><strong style={{ color: 'var(--color-text-dark)' }}>Chambres:</strong> <span className="text-light">{formData.bedrooms}</span></div>}
+                  {formData.bathrooms && <div><strong style={{ color: 'var(--color-text-dark)' }}>Salles de bain:</strong> <span className="text-light">{formData.bathrooms}</span></div>}
+                </div>
+              </div>
+            </div>
+            
+            <div className="alert alert-info mt-4" style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: '1rem', borderRadius: '8px', color: '#0369a1' }}>
+              <strong>Note:</strong> En cliquant sur "Publier maintenant", votre annonce sera enregistrée en base de données et visible selon nos conditions de modération.
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      <div className="publish-footer mt-4" style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0' }}>
+        {step > 1 ? (
+          <button className="btn btn-outline" onClick={handlePrev} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ArrowLeft size={18} /> Précédent
+          </button>
+        ) : (
+          <div></div>
+        )}
+
+        {step < 5 ? (
+          <button className="btn btn-primary" onClick={handleNext} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            Suivant <ArrowRight size={18} />
+          </button>
+        ) : (
+          <button className="btn btn-primary btn-lg" onClick={handleSubmit} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {loading ? <><Loader size={18} className="spin" /> Publication en cours...</> : <><CheckCircle size={18} /> Publier maintenant</>}
+          </button>
+        )}
+      </div>
+
       <style>{`
+        .publish-progress {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 2rem;
+          background: #fff;
+          padding: 1.5rem 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .progress-step {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          opacity: 0.5;
+          transition: all 0.3s;
+        }
+        .progress-step.active {
+          opacity: 1;
+        }
+        .step-circle {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: var(--color-border);
+          color: var(--color-text-light);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          transition: all 0.3s;
+        }
+        .progress-step.active .step-circle {
+          background: var(--color-primary);
+          color: #fff;
+        }
+        .progress-line {
+          flex: 1;
+          height: 2px;
+          background: var(--color-border);
+          margin: 0 1rem;
+          margin-bottom: 1.5rem;
+        }
+        @media (max-width: 768px) {
+          .progress-label { display: none; }
+          .progress-line { margin-bottom: 0; }
+        }
+        
+        .radio-card {
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
+          padding: 1rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 500;
+          color: var(--color-text-dark);
+        }
+        .radio-card:hover {
+          border-color: var(--color-primary);
+        }
+        .radio-card.selected {
+          border-color: var(--color-primary);
+          background-color: rgba(11, 31, 58, 0.05);
+          color: var(--color-primary);
+        }
+        
         .form-control {
           width: 100%;
-          padding: 0.75rem;
+          padding: 0.75rem 1rem;
           border: 1px solid var(--color-border);
-          border-radius: var(--border-radius-sm);
+          border-radius: 8px;
           font-family: inherit;
           font-size: 0.95rem;
-          margin-top: 0.25rem;
+          transition: all 0.2s;
         }
         .form-control:focus {
           outline: none;
           border-color: var(--color-primary);
-          box-shadow: 0 0 0 2px rgba(11, 31, 58, 0.1);
+          box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.1);
         }
-        .form-group label {
-          font-weight: 500;
+        label {
+          font-weight: 600;
           font-size: 0.9rem;
           color: var(--color-text-dark);
+          margin-bottom: 0.5rem;
+          display: inline-block;
         }
+        .spin {
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
     </div>
   );

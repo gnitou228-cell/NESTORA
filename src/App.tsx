@@ -72,17 +72,15 @@ function App() {
               
               <Route element={<ProtectedRoute allowedRoles={['OWNER']} />}>
                 <Route path="/dashboard/owner" element={<Dashboard />} />
-                <Route path="publier" element={<Publish />} />
-                <Route path="mes-annonces" element={<MyListings />} />
               </Route>
               
               <Route element={<ProtectedRoute allowedRoles={['AGENCY']} />}>
                 <Route path="/dashboard/agency" element={<Dashboard />} />
-                <Route path="publier" element={<Publish />} />
-                <Route path="mes-annonces" element={<MyListings />} />
               </Route>
 
               {/* Rôles mixtes ou accessibles à plusieurs */}
+              <Route path="publier" element={<Publish />} />
+              <Route path="mes-annonces" element={<MyListings />} />
               <Route path="/tarifs" element={<Pricing />} />
               <Route path="boost" element={<Boost />} />
               <Route path="paiement" element={<Checkout />} />

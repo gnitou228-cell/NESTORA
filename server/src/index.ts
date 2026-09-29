@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import locationsRoutes from './routes/locations';
+import propertiesRoutes from './routes/properties';
 import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/locations', locationsRoutes);
+app.use('/api/properties', propertiesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
