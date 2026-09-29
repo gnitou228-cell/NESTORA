@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Edit, Trash2, Globe } from 'lucide-react';
+import { Search, Edit, Trash2, Globe, Rocket } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -166,6 +166,10 @@ export default function MyListings() {
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title="Voir l'annonce">
                           <Globe size={16} />
                         </button>
+                        <Link to={`/boost?propertyId=${property.id}`} className="btn btn-primary d-flex align-items-center" style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                          <Rocket size={14} />
+                          Booster
+                        </Link>
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
                           <Edit size={16} />
                         </button>

@@ -1,17 +1,28 @@
-import { useNavigate } from 'react-router-dom';
-import { Rocket, TrendingUp, CheckCircle, Clock } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Rocket, TrendingUp, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 import type { Plan } from '../config/monetization';
 import { MONETIZATION_CONFIG, formatPrice } from '../config/monetization';
 
 export default function Boost() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
 
   const handleBoost = (plan: Plan) => {
-    navigate('/paiement', { state: { plan, type: 'Boost Annonce' } });
+    if (!propertyId) {
+      alert("Veuillez sélectionner une annonce à booster depuis vos annonces.");
+      navigate('/mes-annonces');
+      return;
+    }
+    navigate('/paiement', { state: { plan, type: 'Boost Annonce', propertyId } });
   };
 
   return (
     <div className="boost-page">
+      <Link to="/mes-annonces" className="btn btn-outline mb-4 d-inline-flex" style={{ gap: '0.5rem', alignItems: 'center' }}>
+        <ArrowLeft size={16} /> Retour à mes annonces
+      </Link>
+      
       <div className="text-center mb-4">
         <Rocket size={48} color="#C9A227" style={{ margin: '0 auto 1rem' }} />
         <h1 className="page-title">Boostez vos annonces</h1>
