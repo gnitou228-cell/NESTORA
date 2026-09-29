@@ -356,13 +356,13 @@ export default function Dashboard() {
             <Link to="#" className="card-link">Voir tout</Link>
           </div>
           <div className="profile-summary">
-            <img src={currentUser.avatar} alt="Profile" className="profile-summary-avatar" />
+            <img src={user?.profile?.avatar || currentUser.avatar} alt="Profile" className="profile-summary-avatar" />
             <div className="profile-details">
               <div className="profile-name">{user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName}` : currentUser.name}</div>
               <div className="profile-role">{role}</div>
               <div className="profile-location">
                 <MapPin size={12} />
-                {currentUser.location}
+                Lomé, Togo
               </div>
             </div>
           </div>
