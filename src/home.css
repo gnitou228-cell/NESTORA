@@ -81,10 +81,9 @@
   color: var(--color-primary);
 }
 
-/* Hero Section */
 .hero-section {
-  min-height: 90vh;
-  padding-top: 80px;
+  padding-top: 90px;
+  padding-bottom: 25px;
   background-image: linear-gradient(rgba(11, 31, 58, 0.7), rgba(11, 31, 58, 0.7)), url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80');
   background-size: cover;
   background-position: center;
@@ -99,9 +98,9 @@
 }
 
 .hero-title {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 800;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   line-height: 1.1;
   animation: fadeUp 0.8s ease-out forwards;
 }
@@ -110,14 +109,14 @@
   font-size: 1.25rem;
   font-weight: 400;
   max-width: 600px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 1.5rem;
   opacity: 0.9;
   animation: fadeUp 1s ease-out forwards;
 }
 
 .search-box {
   background: white;
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.2);
   width: 100%;
@@ -207,7 +206,7 @@
 .trust-badges {
   display: flex;
   gap: 2rem;
-  margin-top: 3rem;
+  margin-top: 1rem;
   flex-wrap: wrap;
   justify-content: center;
   animation: fadeUp 1.4s ease-out forwards;
@@ -224,7 +223,7 @@
 
 /* Sections Base */
 .section {
-  padding: 6rem 5%;
+  padding: 3rem 5%;
 }
 
 .section-title {

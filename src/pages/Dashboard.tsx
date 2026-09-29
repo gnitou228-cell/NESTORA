@@ -12,13 +12,13 @@ import { useAuth } from '../context/AuthContext';
 import { currentUser, properties, activities, visitRequests, invoices, chartData, pieData } from '../data/mockData';
 
 export default function Dashboard() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
 
   return (
     <>
       <div className="welcome-banner">
         <div className="welcome-content">
-          <h1 className="welcome-title">Bonjour {currentUser.name.split(' ')[0]} 👋</h1>
+          <h1 className="welcome-title">Bonjour {user?.profile?.firstName || currentUser.name.split(' ')[0]} 👋</h1>
           <h2 className="welcome-subtitle">Votre espace {role?.toLowerCase() || ''} est prêt !</h2>
           <p className="welcome-desc">
             Gérez facilement vos annonces, suivez vos visites, boostez votre visibilité et développez votre activité.
@@ -358,7 +358,7 @@ export default function Dashboard() {
           <div className="profile-summary">
             <img src={currentUser.avatar} alt="Profile" className="profile-summary-avatar" />
             <div className="profile-details">
-              <div className="profile-name">{currentUser.name}</div>
+              <div className="profile-name">{user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName}` : currentUser.name}</div>
               <div className="profile-role">{role}</div>
               <div className="profile-location">
                 <MapPin size={12} />
