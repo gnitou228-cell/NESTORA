@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader } from 'lucide-react';
-import NestoraLogo from '../components/brand/NestoraLogo';
+
 
 export default function Publish() {
   const { role, user } = useAuth();
@@ -241,7 +241,7 @@ export default function Publish() {
       }
 
       // 2. Submit data to backend
-      const token = localStorage.getItem('nestora_token') || sessionStorage.getItem('nestora_token'); // Or however you store the JWT if it's custom. 
+
       // Wait, with Supabase, we get the token dynamically.
       const { data: { session } } = await supabase.auth.getSession();
       const jwt = session?.access_token;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Eye, Calendar, MoreVertical, Rocket, Search, Edit, Trash2, Globe, Archive } from 'lucide-react';
+import { Search, Edit, Trash2, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
