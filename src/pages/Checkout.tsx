@@ -13,6 +13,12 @@ export default function Checkout() {
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
+  const [step, setStep] = useState<'BILLING' | 'PAYMENT'>('BILLING');
+  const [country, setCountry] = useState('BF');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+
   const [searchParams] = useSearchParams();
   const urlStatus = searchParams.get('status');
   const urlPaymentId = searchParams.get('payment_id');
@@ -41,7 +47,10 @@ export default function Checkout() {
   // Define payment type internally based on context
   const paymentType = type?.toLowerCase().includes('boost') ? 'BOOST' : 'SUBSCRIPTION';
 
-  const taxAmount = (plan?.price || 0) * 0.18; // 18% tax
+  let taxRate = 0.18;
+  if (country === 'FR') taxRate = 0.20;
+  
+  const taxAmount = (plan?.price || 0) * taxRate;
   const total = (plan?.price || 0) + taxAmount;
 
   const handlePayment = async () => {
@@ -55,7 +64,8 @@ export default function Checkout() {
         type: paymentType,
         planId: plan.id,
         propertyId,
-        provider: selectedProvider
+        provider: selectedProvider,
+        customerDetails: { firstName, lastName, email, country }
       });
       
       const { paymentId, url } = initResponse.data;
@@ -72,7 +82,7 @@ export default function Checkout() {
       setTimeout(async () => {
         try {
           // Simulation du Webhook
-          await api.post(`/payments/webhook/${selectedProvider.toLowerCase().replace(' ', '')}`, {
+          await api.post(`/payments/webhook/${selectedProvider.toLowerCase().replace(/ /g, '')}`, {
             paymentId,
             status: 'SUCCESS',
             providerTransactionId: 'TXN-' + Math.floor(Math.random() * 100000000)
@@ -97,6 +107,26 @@ export default function Checkout() {
     }
   };
 
+  const getPaymentProviders = () => {
+    switch (country) {
+      case 'BF': return ['Orange Money', 'Moov Money', 'Carte Bancaire'];
+      case 'CI': return ['Orange Money', 'MTN Mobile Money', 'Wave', 'Carte Bancaire'];
+      case 'SN': return ['Orange Money', 'Wave', 'Carte Bancaire'];
+      case 'ML': return ['Orange Money', 'Moov Money', 'Sama Money', 'Carte Bancaire'];
+      case 'FR': return ['Carte Bancaire'];
+      default: return ['Carte Bancaire'];
+    }
+  };
+
+  const availableProviders = getPaymentProviders();
+  // Ensure selected provider is valid for country
+  useEffect(() => {
+    if (!availableProviders.includes(provider)) {
+      setProvider(availableProviders[0]);
+    }
+  }, [country, availableProviders, provider]);
+
+
   if (status === 'SUCCESS') {
     return (
       <div className="checkout-success text-center">
@@ -106,7 +136,7 @@ export default function Checkout() {
         <h1 className="mb-1">Paiement Réussi !</h1>
         <p className="text-light mb-3">Votre achat de <strong>{plan.name}</strong> a été validé avec succès.</p>
         
-        <div className="card p-3 mb-3" style={{ maxWidth: '400px', margin: '0 auto' }}>
+        <div className="card p-3 mb-3" style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'left' }}>
           <div className="d-flex justify-between mb-1">
             <span className="text-light">Référence:</span>
             <strong>{paymentResult?.paymentId?.substring(0, 8).toUpperCase()}</strong>
@@ -129,83 +159,87 @@ export default function Checkout() {
   return (
     <div className="checkout-page">
       <div className="mb-3">
-        <button className="btn btn-outline" onClick={() => navigate(-1)}>
+        <button className="btn btn-outline" onClick={() => step === 'PAYMENT' ? setStep('BILLING') : navigate(-1)}>
           <ArrowLeft size={16} /> Retour
         </button>
       </div>
 
       <div className="checkout-grid">
         <div className="checkout-form">
-          <div className="card mb-3">
-            <div className="card-header">
-              <h2>Informations de facturation</h2>
-            </div>
-            <p className="text-light mb-3">Ces informations seront utilisées pour générer votre facture.</p>
-            
-            <div className="form-group mb-2">
-              <label>Pays de facturation</label>
-              <select className="form-control" defaultValue="BF">
-                <option value="BF">Burkina Faso (TVA 18%)</option>
-                <option value="CI">Côte d'Ivoire (TVA 18%)</option>
-                <option value="SN">Sénégal (TVA 18%)</option>
-                <option value="ML">Mali (TVA 18%)</option>
-                <option value="FR">France (TVA 20%)</option>
-              </select>
-            </div>
-            <div className="d-flex" style={{ gap: '1rem' }}>
-              <div className="form-group flex-1">
-                <label>Prénom</label>
-                <input type="text" className="form-control" placeholder="Votre prénom" />
+          {step === 'BILLING' && (
+            <div className="card mb-3">
+              <div className="card-header">
+                <h2>Informations de facturation</h2>
               </div>
-              <div className="form-group flex-1">
-                <label>Nom</label>
-                <input type="text" className="form-control" placeholder="Votre nom" />
+              <p className="text-light mb-3">Ces informations seront utilisées pour générer votre facture.</p>
+              
+              <div className="form-group mb-3">
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Pays de facturation</label>
+                <select className="form-control" value={country} onChange={e => setCountry(e.target.value)}>
+                  <option value="BF">Burkina Faso (TVA 18%)</option>
+                  <option value="CI">Côte d'Ivoire (TVA 18%)</option>
+                  <option value="SN">Sénégal (TVA 18%)</option>
+                  <option value="ML">Mali (TVA 18%)</option>
+                  <option value="FR">France (TVA 20%)</option>
+                </select>
               </div>
-            </div>
-            <div className="form-group mt-2">
-              <label>Adresse Email</label>
-              <input type="email" className="form-control" placeholder="Email pour la facture" />
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header">
-              <h2>Moyen de paiement</h2>
-            </div>
-            <p className="text-light mb-3">Sélectionnez votre méthode de paiement préférée.</p>
-            
-            {errorMessage && (
-              <div className="alert alert-danger mb-3">
-                {errorMessage}
-              </div>
-            )}
-            
-            <div className="payment-providers">
-              {['Orange Money', 'Moov Money', 'MTN Mobile Money', 'Wave', 'Carte Bancaire'].map(p => (
-                <div 
-                  key={p} 
-                  className={`provider-card ${provider === p ? 'active' : ''}`}
-                  onClick={() => setProvider(p)}
-                >
-                  <div className="provider-icon">
-                    {p === 'Carte Bancaire' ? <CreditCard size={24} /> : <Smartphone size={24} />}
-                  </div>
-                  <div className="provider-name">{p}</div>
-                  <div className="provider-radio">
-                    <div className={`radio-inner ${provider === p ? 'checked' : ''}`}></div>
-                  </div>
+              <div className="d-flex mb-3" style={{ gap: '1rem' }}>
+                <div className="form-group flex-1">
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Prénom</label>
+                  <input type="text" className="form-control" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} required />
                 </div>
-              ))}
+                <div className="form-group flex-1">
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Nom</label>
+                  <input type="text" className="form-control" placeholder="Votre nom" value={lastName} onChange={e => setLastName(e.target.value)} required />
+                </div>
+              </div>
+              <div className="form-group mt-2">
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Adresse Email</label>
+                <input type="email" className="form-control" placeholder="Email pour la facture" value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
             </div>
+          )}
 
-            <div className="mt-4">
-              <label className="checkbox-container">
-                <input type="checkbox" defaultChecked />
-                <span className="checkmark"></span>
-                <span className="text-sm">J'accepte les conditions générales de vente et certifie être autorisé à effectuer cet achat.</span>
-              </label>
+          {step === 'PAYMENT' && (
+            <div className="card">
+              <div className="card-header">
+                <h2>Moyen de paiement</h2>
+              </div>
+              <p className="text-light mb-3">Sélectionnez votre méthode de paiement pour <strong>{country === 'BF' ? 'le Burkina Faso' : country === 'CI' ? 'la Côte d\'Ivoire' : country === 'SN' ? 'le Sénégal' : country === 'ML' ? 'le Mali' : 'la France'}</strong>.</p>
+              
+              {errorMessage && (
+                <div className="alert alert-danger mb-3">
+                  {errorMessage}
+                </div>
+              )}
+              
+              <div className="payment-providers">
+                {availableProviders.map(p => (
+                  <div 
+                    key={p} 
+                    className={`provider-card ${provider === p ? 'active' : ''}`}
+                    onClick={() => setProvider(p)}
+                  >
+                    <div className="provider-icon">
+                      {p === 'Carte Bancaire' ? <CreditCard size={24} /> : <Smartphone size={24} />}
+                    </div>
+                    <div className="provider-name">{p}</div>
+                    <div className="provider-radio">
+                      <div className={`radio-inner ${provider === p ? 'checked' : ''}`}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                <label className="checkbox-container">
+                  <input type="checkbox" defaultChecked />
+                  <span className="checkmark"></span>
+                  <span className="text-sm">J'accepte les conditions générales de vente et certifie être autorisé à effectuer cet achat.</span>
+                </label>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="checkout-summary">
@@ -226,7 +260,7 @@ export default function Checkout() {
               <span>{formatPrice(plan.price, plan.currency)}</span>
             </div>
             <div className="summary-row">
-              <span>TVA (18%)</span>
+              <span>TVA ({taxRate * 100}%)</span>
               <span>{formatPrice(taxAmount, plan.currency)}</span>
             </div>
             
@@ -237,17 +271,28 @@ export default function Checkout() {
               <span>{formatPrice(total, plan.currency)}</span>
             </div>
 
-            <button 
-              className="btn btn-primary btn-block btn-lg mt-4" 
-              onClick={handlePayment}
-              disabled={loading || status === 'PENDING'}
-            >
-              {loading ? (
-                <span>Traitement en cours...</span>
-              ) : (
-                <span><ShieldCheck size={18} /> Payer {formatPrice(total, plan.currency)}</span>
-              )}
-            </button>
+            {step === 'BILLING' ? (
+              <button 
+                className="btn btn-primary btn-block btn-lg mt-4" 
+                onClick={() => setStep('PAYMENT')}
+                disabled={!firstName || !lastName || !email}
+              >
+                Continuer vers le paiement
+              </button>
+            ) : (
+              <button 
+                className="btn btn-primary btn-block btn-lg mt-4" 
+                onClick={handlePayment}
+                disabled={loading || status === 'PENDING'}
+              >
+                {loading ? (
+                  <span>Traitement en cours...</span>
+                ) : (
+                  <span><ShieldCheck size={18} /> Payer {formatPrice(total, plan.currency)}</span>
+                )}
+              </button>
+            )}
+            
             <div className="secure-payment text-center mt-2">
               <ShieldCheck size={14} className="text-success" /> Paiement 100% sécurisé
             </div>
