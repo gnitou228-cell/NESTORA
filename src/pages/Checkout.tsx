@@ -1,8 +1,65 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { ShieldCheck, ArrowLeft, CreditCard, Smartphone } from 'lucide-react';
+import { CreditCard, ShieldCheck, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { formatPrice } from '../config/monetization';
 import api from '../lib/api';
+
+const AFRICAN_COUNTRIES = [
+  { code: 'BF', name: '🇧🇫 Burkina Faso', currency: 'XOF' },
+  { code: 'CI', name: '🇨🇮 Côte d\'Ivoire', currency: 'XOF' },
+  { code: 'SN', name: '🇸🇳 Sénégal', currency: 'XOF' },
+  { code: 'ML', name: '🇲🇱 Mali', currency: 'XOF' },
+  { code: 'TG', name: '🇹🇬 Togo', currency: 'XOF' },
+  { code: 'BJ', name: '🇧🇯 Bénin', currency: 'XOF' },
+  { code: 'NE', name: '🇳🇪 Niger', currency: 'XOF' },
+  { code: 'GN', name: '🇬🇳 Guinée', currency: 'GNF' },
+  { code: 'CM', name: '🇨🇲 Cameroun', currency: 'XAF' },
+  { code: 'GA', name: '🇬🇦 Gabon', currency: 'XAF' },
+  { code: 'CD', name: '🇨🇩 RDC', currency: 'CDF' },
+  { code: 'CG', name: '🇨🇬 Congo', currency: 'XAF' },
+  { code: 'FR', name: '🇫🇷 France', currency: 'EUR' },
+];
+
+const ProviderLogo = ({ provider }: { provider: string }) => {
+  let bg = '#f0f0f0';
+  let color = '#333';
+  let text = '';
+  let src = '';
+
+  if (provider === 'Orange Money') {
+    src = 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Orange_logo.svg';
+  } else if (provider === 'MTN Mobile Money') {
+    src = 'https://upload.wikimedia.org/wikipedia/commons/a/a3/MTN_Logo.svg';
+  } else if (provider === 'Moov Money') {
+    bg = '#005C9A'; color = '#FFF'; text = 'moov';
+  } else if (provider === 'Wave') {
+    src = 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Wave_logo.svg';
+  } else if (provider === 'Sama Money') {
+    bg = '#00A651'; color = '#FFF'; text = 'sama';
+  } else if (provider === 'Free Money') {
+    bg = '#E3000F'; color = '#FFF'; text = 'Free';
+  } else if (provider === 'Tmoney') {
+    bg = '#FFD700'; color = '#000'; text = 'T';
+  }
+
+  if (src) {
+    return <img src={src} alt={provider} style={{ width: 40, height: 40, objectFit: 'contain' }} />;
+  }
+
+  if (text) {
+    return (
+      <div style={{ width: 40, height: 40, backgroundColor: bg, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: color, fontWeight: 'bold', fontSize: '11px' }}>
+        {text}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: 40, height: 40, backgroundColor: '#f0f0f0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>
+      <CreditCard size={24} />
+    </div>
+  );
+};
 
 export default function Checkout() {
   const location = useLocation();
@@ -12,7 +69,9 @@ export default function Checkout() {
   const [status, setStatus] = useState<'IDLE' | 'PENDING' | 'SUCCESS' | 'FAILED'>('IDLE');
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
+  const [modalStep, setModalStep] = useState<'HIDDEN' | 'BILLING' | 'PAYMENT'>('HIDDEN');
+  
   const [country, setCountry] = useState('BF');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -43,22 +102,15 @@ export default function Checkout() {
     );
   }
 
-  // Define payment type internally based on context
   const paymentType = type?.toLowerCase().includes('boost') ? 'BOOST' : 'SUBSCRIPTION';
-
   const total = plan?.price || 0;
 
   const handlePayment = async () => {
-    if (!firstName || !lastName || !email) {
-      setErrorMessage('Veuillez remplir vos informations.');
-      return;
-    }
     setLoading(true);
     setErrorMessage('');
     
     try {
       const selectedProvider = provider === 'Carte Bancaire' ? 'Stripe' : provider;
-      // 1. Initialiser le paiement côté serveur (sécurisé)
       const initResponse = await api.post('/payments/checkout', {
         type: paymentType,
         planId: plan.id,
@@ -70,17 +122,14 @@ export default function Checkout() {
       const { paymentId, url } = initResponse.data;
       
       if (url) {
-        // Redirection vers Stripe
         window.location.href = url;
         return;
       }
 
       setStatus('PENDING');
 
-      // 2. Simuler le traitement par le fournisseur (car on n'a pas encore la vraie API OrangeMoney)
       setTimeout(async () => {
         try {
-          // Simulation du Webhook
           await api.post(`/payments/webhook/${selectedProvider.toLowerCase().replace(/ /g, '')}`, {
             paymentId,
             status: 'SUCCESS',
@@ -89,7 +138,7 @@ export default function Checkout() {
           
           setStatus('SUCCESS');
           setPaymentResult({ paymentId, total });
-          setShowPaymentModal(false);
+          setModalStep('HIDDEN');
         } catch (webhookErr) {
           console.error(webhookErr);
           setStatus('FAILED');
@@ -110,22 +159,32 @@ export default function Checkout() {
   const getPaymentProviders = () => {
     switch (country) {
       case 'BF': return ['Orange Money', 'Moov Money', 'Carte Bancaire'];
-      case 'CI': return ['Orange Money', 'MTN Mobile Money', 'Wave', 'Carte Bancaire'];
-      case 'SN': return ['Orange Money', 'Wave', 'Carte Bancaire'];
+      case 'CI': return ['Orange Money', 'MTN Mobile Money', 'Wave', 'Moov Money', 'Carte Bancaire'];
+      case 'SN': return ['Orange Money', 'Wave', 'Free Money', 'Carte Bancaire'];
       case 'ML': return ['Orange Money', 'Moov Money', 'Sama Money', 'Carte Bancaire'];
+      case 'TG': return ['Tmoney', 'Moov Money', 'Carte Bancaire'];
+      case 'BJ': return ['MTN Mobile Money', 'Moov Money', 'Carte Bancaire'];
+      case 'CM': return ['Orange Money', 'MTN Mobile Money', 'Carte Bancaire'];
       case 'FR': return ['Carte Bancaire'];
       default: return ['Carte Bancaire'];
     }
   };
 
   const availableProviders = getPaymentProviders();
-  // Ensure selected provider is valid for country
   useEffect(() => {
     if (!availableProviders.includes(provider)) {
       setProvider(availableProviders[0]);
     }
   }, [country, availableProviders, provider]);
 
+  const validateBilling = () => {
+    if (!firstName || !lastName || !email) {
+      setErrorMessage('Veuillez remplir tous les champs.');
+      return;
+    }
+    setErrorMessage('');
+    setModalStep('PAYMENT');
+  };
 
   if (status === 'SUCCESS') {
     return (
@@ -195,7 +254,7 @@ export default function Checkout() {
 
             <button 
               className="btn btn-primary btn-block mt-4" 
-              onClick={() => setShowPaymentModal(true)}
+              onClick={() => setModalStep('BILLING')}
               style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}
             >
               <span>Payer maintenant</span>
@@ -209,101 +268,124 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* PAYMENT MODAL */}
-      {showPaymentModal && (
+      {/* MULTI-STEP PAYMENT MODAL */}
+      {modalStep !== 'HIDDEN' && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
           backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', 
           justifyContent: 'center', zIndex: 9999, padding: '1rem',
           backdropFilter: 'blur(4px)'
         }}>
-          <div className="card" style={{ maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', borderRadius: '12px', padding: '2rem' }}>
+          <div className="card" style={{ maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', borderRadius: '12px', padding: '2rem' }}>
             <button 
-              onClick={() => setShowPaymentModal(false)}
+              onClick={() => setModalStep('HIDDEN')}
               style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: '#333' }}
             >
               &times;
             </button>
             
-            <div className="text-center mb-4">
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Validez votre paiement</h2>
-              <p className="text-light text-sm">Veuillez remplir vos informations et choisir votre méthode de paiement.</p>
-            </div>
+            {modalStep === 'BILLING' && (
+              <>
+                <div className="text-center mb-4">
+                  <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Informations de facturation</h2>
+                  <p className="text-light text-sm">Veuillez sélectionner votre pays et remplir vos informations.</p>
+                </div>
 
-            {errorMessage && (
-              <div className="alert alert-danger mb-3" style={{ borderRadius: '8px' }}>
-                {errorMessage}
-              </div>
+                {errorMessage && (
+                  <div className="alert alert-danger mb-3" style={{ borderRadius: '8px' }}>
+                    {errorMessage}
+                  </div>
+                )}
+
+                <div className="form-group mb-3">
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Pays de facturation</label>
+                  <select className="form-control" value={country} onChange={e => setCountry(e.target.value)} style={{ padding: '0.8rem', borderRadius: '8px', fontSize: '1rem' }}>
+                    {AFRICAN_COUNTRIES.map(c => (
+                      <option key={c.code} value={c.code}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="d-flex mb-3" style={{ gap: '1rem' }}>
+                  <div className="form-group flex-1">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Prénom</label>
+                    <input type="text" className="form-control" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
+                  </div>
+                  <div className="form-group flex-1">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Nom</label>
+                    <input type="text" className="form-control" placeholder="Votre nom" value={lastName} onChange={e => setLastName(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
+                  </div>
+                </div>
+                <div className="form-group mb-4">
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Adresse Email</label>
+                  <input type="email" className="form-control" placeholder="Email pour le reçu" value={email} onChange={e => setEmail(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
+                </div>
+
+                <button 
+                  className="btn btn-primary btn-block btn-lg" 
+                  onClick={validateBilling}
+                  style={{ padding: '1rem', borderRadius: '8px', fontSize: '1.1rem' }}
+                >
+                  Valider
+                </button>
+              </>
             )}
 
-            <div className="form-group mb-3">
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Pays de facturation</label>
-              <select className="form-control" value={country} onChange={e => setCountry(e.target.value)} style={{ padding: '0.8rem', borderRadius: '8px' }}>
-                <option value="BF">Burkina Faso</option>
-                <option value="CI">Côte d'Ivoire</option>
-                <option value="SN">Sénégal</option>
-                <option value="ML">Mali</option>
-                <option value="FR">France</option>
-              </select>
-            </div>
-            
-            <div className="d-flex mb-3" style={{ gap: '1rem' }}>
-              <div className="form-group flex-1">
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Prénom</label>
-                <input type="text" className="form-control" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
-              </div>
-              <div className="form-group flex-1">
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Nom</label>
-                <input type="text" className="form-control" placeholder="Votre nom" value={lastName} onChange={e => setLastName(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
-              </div>
-            </div>
-            <div className="form-group mb-4">
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Adresse Email</label>
-              <input type="email" className="form-control" placeholder="Email pour le reçu" value={email} onChange={e => setEmail(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
-            </div>
-
-            <hr className="divider mb-4" style={{ borderColor: 'rgba(0,0,0,0.05)' }} />
-            
-            <h3 className="mb-3" style={{ fontSize: '1.2rem' }}>Choisissez votre moyen de paiement</h3>
-            <div className="payment-providers mb-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
-              {availableProviders.map(p => (
-                <div 
-                  key={p} 
-                  className={`provider-card ${provider === p ? 'active' : ''}`}
-                  onClick={() => setProvider(p)}
-                  style={{ 
-                    border: provider === p ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s',
-                    backgroundColor: provider === p ? 'rgba(201, 162, 39, 0.05)' : 'white'
-                  }}
-                >
-                  <div className="provider-icon mb-2" style={{ color: provider === p ? 'var(--color-accent)' : '#666' }}>
-                    {p === 'Carte Bancaire' ? <CreditCard size={32} /> : <Smartphone size={32} />}
-                  </div>
-                  <div className="provider-name" style={{ fontWeight: provider === p ? '600' : '400', fontSize: '0.9rem', textAlign: 'center' }}>{p}</div>
+            {modalStep === 'PAYMENT' && (
+              <>
+                <div className="text-center mb-4">
+                  <button className="btn btn-outline mb-3" onClick={() => setModalStep('BILLING')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>
+                    <ArrowLeft size={14} style={{ marginRight: '4px' }} /> Modifier les infos
+                  </button>
+                  <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Moyens de paiement</h2>
+                  <p className="text-light text-sm">Sélectionnez comment vous souhaitez payer depuis {AFRICAN_COUNTRIES.find(c => c.code === country)?.name.split(' ').slice(1).join(' ')}.</p>
                 </div>
-              ))}
-            </div>
 
-            <button 
-              className="btn btn-primary btn-block btn-lg" 
-              onClick={handlePayment}
-              disabled={loading || status === 'PENDING' || !firstName || !lastName || !email}
-              style={{ padding: '1rem', borderRadius: '8px', fontSize: '1.1rem' }}
-            >
-              {loading ? (
-                <span>Traitement en cours...</span>
-              ) : (
-                <span><ShieldCheck size={18} /> Confirmer et payer {formatPrice(total, plan.currency)}</span>
-              )}
-            </button>
+                {errorMessage && (
+                  <div className="alert alert-danger mb-3" style={{ borderRadius: '8px' }}>
+                    {errorMessage}
+                  </div>
+                )}
+
+                <div className="payment-providers mb-4" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+                  {availableProviders.map(p => (
+                    <div 
+                      key={p} 
+                      className={`provider-card ${provider === p ? 'active' : ''}`}
+                      onClick={() => setProvider(p)}
+                      style={{ 
+                        border: provider === p ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        transition: 'all 0.2s',
+                        backgroundColor: provider === p ? 'rgba(201, 162, 39, 0.05)' : 'white'
+                      }}
+                    >
+                      <ProviderLogo provider={p} />
+                      <div className="provider-name" style={{ fontWeight: provider === p ? '600' : '500', fontSize: '1rem', flex: 1 }}>{p}</div>
+                      {provider === p && <CheckCircle2 size={24} color="var(--color-accent)" />}
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  className="btn btn-primary btn-block btn-lg" 
+                  onClick={handlePayment}
+                  disabled={loading || status === 'PENDING'}
+                  style={{ padding: '1rem', borderRadius: '8px', fontSize: '1.1rem' }}
+                >
+                  {loading ? (
+                    <span>Traitement en cours...</span>
+                  ) : (
+                    <span><ShieldCheck size={18} /> Payer {formatPrice(total, plan.currency)}</span>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
