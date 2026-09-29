@@ -25,7 +25,7 @@ const FavoritesPage = () => {
         const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
         if (!token) return;
-        const res = await fetch('http://localhost:5000/api/favorites', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/favorites`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

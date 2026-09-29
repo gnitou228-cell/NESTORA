@@ -89,7 +89,7 @@ export default function Publish() {
   ];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/locations/countries')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/countries`)
       .then(res => res.json())
       .then(data => {
         setCountries(data);
@@ -100,7 +100,7 @@ export default function Publish() {
 
   useEffect(() => {
     if (formData.countryId) {
-      fetch(`http://localhost:5000/api/locations/regions?countryId=${formData.countryId}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/regions?countryId=${formData.countryId}`)
         .then(res => res.json())
         .then(data => {
           setRegions(data);
@@ -112,7 +112,7 @@ export default function Publish() {
 
   useEffect(() => {
     if (formData.regionId) {
-      fetch(`http://localhost:5000/api/locations/cities?regionId=${formData.regionId}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/cities?regionId=${formData.regionId}`)
         .then(res => res.json())
         .then(data => {
           setCities(data);
@@ -124,7 +124,7 @@ export default function Publish() {
 
   useEffect(() => {
     if (formData.cityId) {
-      fetch(`http://localhost:5000/api/locations/neighborhoods?cityId=${formData.cityId}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/neighborhoods?cityId=${formData.cityId}`)
         .then(res => res.json())
         .then(data => {
           setNeighborhoods(data);
@@ -251,7 +251,7 @@ export default function Publish() {
       
       if (!jwt) throw new Error("Non autorisé. Veuillez vous reconnecter.");
 
-      const response = await fetch('http://localhost:5000/api/properties', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

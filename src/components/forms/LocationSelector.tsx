@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:5000/api/locations';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations`;
 
 // Fallback data if DB is unreachable
 const FALLBACK_COUNTRIES = [

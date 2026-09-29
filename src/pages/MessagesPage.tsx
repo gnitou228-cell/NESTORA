@@ -74,7 +74,7 @@ export const MessagesPage = () => {
       const token = data.session?.access_token;
       if (!token) return;
 
-      const res = await fetch('http://localhost:5000/api/conversations', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -95,7 +95,7 @@ export const MessagesPage = () => {
       const token = data.session?.access_token;
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/conversations/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -115,7 +115,7 @@ export const MessagesPage = () => {
       const token = data.session?.access_token;
       if (!token) return;
 
-      await fetch(`http://localhost:5000/api/conversations/${id}/read`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations/${id}/read`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -141,7 +141,7 @@ export const MessagesPage = () => {
       const token = data.session?.access_token;
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/conversations/${activeConversation.id}/messages`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations/${activeConversation.id}/messages`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

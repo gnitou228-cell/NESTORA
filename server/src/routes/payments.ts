@@ -86,7 +86,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
     });
 
     if (provider === 'Stripe') {
-      const origin = req.headers.origin || 'http://localhost:5173';
+      const origin = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
       
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],

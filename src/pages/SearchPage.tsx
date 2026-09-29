@@ -52,7 +52,7 @@ export default function SearchPage() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [mapLoading, setMapLoading] = useState(false);
+  const [, setMapLoading] = useState(false);
   const [error, setError] = useState('');
 
   const [countries, setCountries] = useState<any[]>([]);
@@ -62,13 +62,13 @@ export default function SearchPage() {
   
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [, setUserLocation] = useState<[number, number] | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([12.368, -1.527]);
   const [mapZoom, setMapZoom] = useState(6);
 
   // Initial fetches
   useEffect(() => {
-    fetch('http://localhost:5000/api/locations/countries')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/countries`)
       .then(res => res.json())
       .then(setCountries)
       .catch(console.error);
@@ -76,7 +76,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (filters.countryId) {
-      fetch(`http://localhost:5000/api/locations/regions?countryId=${filters.countryId}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/regions?countryId=${filters.countryId}`)
         .then(res => res.json())
         .then(setRegions)
         .catch(console.error);
@@ -87,7 +87,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (filters.regionId) {
-      fetch(`http://localhost:5000/api/locations/cities?regionId=${filters.regionId}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/cities?regionId=${filters.regionId}`)
         .then(res => res.json())
         .then(setCities)
         .catch(console.error);
@@ -98,7 +98,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (filters.cityId) {
-      fetch(`http://localhost:5000/api/locations/neighborhoods?cityId=${filters.cityId}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/neighborhoods?cityId=${filters.cityId}`)
         .then(res => res.json())
         .then(setNeighborhoods)
         .catch(console.error);
@@ -129,7 +129,7 @@ export default function SearchPage() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://localhost:5000/api/properties/search?${params.toString()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/search?${params.toString()}`);
       if (!response.ok) throw new Error('Erreur lors de la recherche');
       const data = await response.json();
       setResults(data.properties || []);
@@ -145,7 +145,7 @@ export default function SearchPage() {
   const fetchMapProperties = async (params: URLSearchParams) => {
     setMapLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/properties/map?${params.toString()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/map?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
         setMapProperties(data || []);
@@ -228,7 +228,7 @@ export default function SearchPage() {
           setMapCenter([lat, lng]);
           setMapZoom(12);
         },
-        (error) => {
+        () => {
           alert("La localisation n'est pas disponible. Vous pouvez rechercher manuellement une ville ou un quartier.");
         }
       );

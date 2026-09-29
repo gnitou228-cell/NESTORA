@@ -25,7 +25,7 @@ const ReceivedVisitsPage = () => {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
       if (!token) return;
-      const res = await fetch('http://localhost:5000/api/visits/received', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/visits/received`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -44,7 +44,7 @@ const ReceivedVisitsPage = () => {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
       if (!token) return;
-      const res = await fetch(`http://localhost:5000/api/visits/${visitId}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/visits/${visitId}/status`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',

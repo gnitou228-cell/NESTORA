@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Move, Calendar, User, Building, 
   Heart, MessageCircle, Share2, X, ChevronLeft, 
-  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag, Navigation
+  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag
 } from 'lucide-react';
 import { NestoraMap } from '../components/Map';
 import { formatDistanceToNow } from 'date-fns';
@@ -94,7 +94,7 @@ const PropertyDetail = () => {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       
-      const res = await fetch(`http://localhost:5000/api/visits/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/visits/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ const PropertyDetail = () => {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       
-      const res = await fetch(`http://localhost:5000/api/reports`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/reports`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ const PropertyDetail = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/properties/${id}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/${id}`);
       if (res.status === 404) {
         setError('Propriété introuvable ou indisponible.');
         setLoading(false);
@@ -207,7 +207,7 @@ const PropertyDetail = () => {
         limit: '4', // fetch 4 in case one is current
         page: '1'
       });
-      const res = await fetch(`http://localhost:5000/api/properties/search?${params.toString()}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/search?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         const filtered = (data.properties || []).filter((p: any) => p.id !== currentProperty.id).slice(0, 3);
@@ -267,7 +267,7 @@ const PropertyDetail = () => {
       const token = data.session?.access_token;
       if (!token) return;
 
-      const res = await fetch('http://localhost:5000/api/conversations', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

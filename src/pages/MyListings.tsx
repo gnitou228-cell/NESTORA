@@ -30,7 +30,7 @@ export default function MyListings() {
       
       if (!token) throw new Error("Veuillez vous connecter.");
 
-      const response = await fetch('http://localhost:5000/api/properties/my', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/my`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -60,7 +60,7 @@ export default function MyListings() {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       
-      const response = await fetch(`http://localhost:5000/api/properties/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
