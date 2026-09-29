@@ -35,13 +35,33 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Récupérer l'utilisateur dans la BDD pour avoir son rôle (OWNER, SEEKER, etc.)
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { id: user.id },
       include: { agency: true }
     });
 
     if (!dbUser) {
-      return res.status(404).json({ message: 'Utilisateur introuvable dans la base' });
+      // Sync user from Supabase to Prisma if it doesn't exist
+      const role = user.user_metadata?.role || 'SEEKER';
+      const email = user.email || '';
+      const firstName = user.user_metadata?.first_name || '';
+      const lastName = user.user_metadata?.last_name || '';
+
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email,
+          role,
+          status: 'ACTIVE',
+          profile: {
+            create: {
+              firstName,
+              lastName
+            }
+          }
+        },
+        include: { agency: true }
+      });
     }
 
     req.user = dbUser;
