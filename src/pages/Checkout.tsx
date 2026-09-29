@@ -12,8 +12,7 @@ export default function Checkout() {
   const [status, setStatus] = useState<'IDLE' | 'PENDING' | 'SUCCESS' | 'FAILED'>('IDLE');
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
-
-  const [step, setStep] = useState<'BILLING' | 'PAYMENT'>('BILLING');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [country, setCountry] = useState('BF');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -54,6 +53,10 @@ export default function Checkout() {
   const total = (plan?.price || 0) + taxAmount;
 
   const handlePayment = async () => {
+    if (!firstName || !lastName || !email) {
+      setErrorMessage('Veuillez remplir vos informations.');
+      return;
+    }
     setLoading(true);
     setErrorMessage('');
     
@@ -90,6 +93,7 @@ export default function Checkout() {
           
           setStatus('SUCCESS');
           setPaymentResult({ paymentId, total });
+          setShowPaymentModal(false);
         } catch (webhookErr) {
           console.error(webhookErr);
           setStatus('FAILED');
@@ -159,146 +163,168 @@ export default function Checkout() {
   return (
     <div className="checkout-page">
       <div className="mb-3">
-        <button className="btn btn-outline" onClick={() => step === 'PAYMENT' ? setStep('BILLING') : navigate(-1)}>
+        <button className="btn btn-outline" onClick={() => navigate(-1)}>
           <ArrowLeft size={16} /> Retour
         </button>
       </div>
 
-      <div className="checkout-grid">
-        <div className="checkout-form">
-          {step === 'BILLING' && (
-            <div className="card mb-3">
-              <div className="card-header">
-                <h2>Informations de facturation</h2>
-              </div>
-              <p className="text-light mb-3">Ces informations seront utilisées pour générer votre facture.</p>
-              
-              <div className="form-group mb-3">
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Pays de facturation</label>
-                <select className="form-control" value={country} onChange={e => setCountry(e.target.value)}>
-                  <option value="BF">Burkina Faso (TVA 18%)</option>
-                  <option value="CI">Côte d'Ivoire (TVA 18%)</option>
-                  <option value="SN">Sénégal (TVA 18%)</option>
-                  <option value="ML">Mali (TVA 18%)</option>
-                  <option value="FR">France (TVA 20%)</option>
-                </select>
-              </div>
-              <div className="d-flex mb-3" style={{ gap: '1rem' }}>
-                <div className="form-group flex-1">
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Prénom</label>
-                  <input type="text" className="form-control" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} required />
-                </div>
-                <div className="form-group flex-1">
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Nom</label>
-                  <input type="text" className="form-control" placeholder="Votre nom" value={lastName} onChange={e => setLastName(e.target.value)} required />
-                </div>
-              </div>
-              <div className="form-group mt-2">
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Adresse Email</label>
-                <input type="email" className="form-control" placeholder="Email pour la facture" value={email} onChange={e => setEmail(e.target.value)} required />
-              </div>
-            </div>
-          )}
-
-          {step === 'PAYMENT' && (
-            <div className="card">
-              <div className="card-header">
-                <h2>Moyen de paiement</h2>
-              </div>
-              <p className="text-light mb-3">Sélectionnez votre méthode de paiement pour <strong>{country === 'BF' ? 'le Burkina Faso' : country === 'CI' ? 'la Côte d\'Ivoire' : country === 'SN' ? 'le Sénégal' : country === 'ML' ? 'le Mali' : 'la France'}</strong>.</p>
-              
-              {errorMessage && (
-                <div className="alert alert-danger mb-3">
-                  {errorMessage}
-                </div>
-              )}
-              
-              <div className="payment-providers">
-                {availableProviders.map(p => (
-                  <div 
-                    key={p} 
-                    className={`provider-card ${provider === p ? 'active' : ''}`}
-                    onClick={() => setProvider(p)}
-                  >
-                    <div className="provider-icon">
-                      {p === 'Carte Bancaire' ? <CreditCard size={24} /> : <Smartphone size={24} />}
-                    </div>
-                    <div className="provider-name">{p}</div>
-                    <div className="provider-radio">
-                      <div className={`radio-inner ${provider === p ? 'checked' : ''}`}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4">
-                <label className="checkbox-container">
-                  <input type="checkbox" defaultChecked />
-                  <span className="checkmark"></span>
-                  <span className="text-sm">J'accepte les conditions générales de vente et certifie être autorisé à effectuer cet achat.</span>
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="checkout-summary">
+      <div className="checkout-grid" style={{ display: 'flex', justifyContent: 'center' }}>
+        <div className="checkout-summary" style={{ maxWidth: '500px', width: '100%' }}>
           <div className="card">
-            <div className="card-header">
-              <h2>Récapitulatif</h2>
+            <div className="card-header text-center border-bottom pb-3 mb-3">
+              <h2>Récapitulatif de votre commande</h2>
+              <p className="text-light mt-1">Veuillez vérifier les détails avant de payer.</p>
             </div>
             
-            <div className="summary-item mb-2">
-              <div className="summary-title">{type}</div>
-              <div className="summary-desc">Plan : {plan.name}</div>
+            <div className="summary-item mb-3 p-3" style={{ backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '8px' }}>
+              <div className="summary-title" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{type === 'BOOST' ? 'Boost Annonce' : 'Abonnement'}</div>
+              <div className="summary-desc" style={{ color: 'var(--color-primary)' }}>Plan : {plan.name}</div>
             </div>
 
             <hr className="divider my-2" />
             
-            <div className="summary-row">
-              <span>Sous-total</span>
+            <div className="summary-row" style={{ fontSize: '1.1rem' }}>
+              <span>Sous-total HT</span>
               <span>{formatPrice(plan.price, plan.currency)}</span>
             </div>
-            <div className="summary-row">
-              <span>TVA ({taxRate * 100}%)</span>
-              <span>{formatPrice(taxAmount, plan.currency)}</span>
+            <div className="summary-row text-light">
+              <span>TVA estimée</span>
+              <span>Calculée à l'étape suivante</span>
             </div>
             
             <hr className="divider my-2" />
             
-            <div className="summary-total">
+            <div className="summary-total" style={{ fontSize: '1.4rem' }}>
               <span>Total à payer</span>
-              <span>{formatPrice(total, plan.currency)}</span>
+              <span>{formatPrice(plan.price, plan.currency)} <small className="text-sm text-light">HT</small></span>
             </div>
 
-            {step === 'BILLING' ? (
-              <button 
-                className="btn btn-primary btn-block btn-lg mt-4" 
-                onClick={() => setStep('PAYMENT')}
-                disabled={!firstName || !lastName || !email}
-              >
-                Continuer vers le paiement
-              </button>
-            ) : (
-              <button 
-                className="btn btn-primary btn-block btn-lg mt-4" 
-                onClick={handlePayment}
-                disabled={loading || status === 'PENDING'}
-              >
-                {loading ? (
-                  <span>Traitement en cours...</span>
-                ) : (
-                  <span><ShieldCheck size={18} /> Payer {formatPrice(total, plan.currency)}</span>
-                )}
-              </button>
-            )}
+            <button 
+              className="btn btn-primary btn-block btn-lg mt-4" 
+              onClick={() => setShowPaymentModal(true)}
+              style={{ padding: '1rem', fontSize: '1.1rem' }}
+            >
+              <span>Continuer vers le paiement</span>
+            </button>
             
-            <div className="secure-payment text-center mt-2">
-              <ShieldCheck size={14} className="text-success" /> Paiement 100% sécurisé
+            <div className="secure-payment text-center mt-3 text-sm">
+              <ShieldCheck size={16} className="text-success" style={{ verticalAlign: 'middle', marginRight: '4px' }} /> 
+              Paiement 100% sécurisé et chiffré
             </div>
           </div>
         </div>
       </div>
+
+      {/* PAYMENT MODAL */}
+      {showPaymentModal && (
+        <div className="modal-backdrop" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', 
+          justifyContent: 'center', zIndex: 9999, padding: '1rem'
+        }}>
+          <div className="card" style={{ maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button 
+              onClick={() => setShowPaymentModal(false)}
+              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: '#666' }}
+            >
+              &times;
+            </button>
+            
+            <div className="text-center mb-4">
+              <h2>Finalisez votre paiement</h2>
+              <p className="text-light">Sélectionnez votre pays pour voir les modes de paiement disponibles.</p>
+            </div>
+
+            {errorMessage && (
+              <div className="alert alert-danger mb-3">
+                {errorMessage}
+              </div>
+            )}
+
+            <div className="form-group mb-3">
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Pays de facturation</label>
+              <select className="form-control" value={country} onChange={e => setCountry(e.target.value)}>
+                <option value="BF">Burkina Faso (TVA 18%)</option>
+                <option value="CI">Côte d'Ivoire (TVA 18%)</option>
+                <option value="SN">Sénégal (TVA 18%)</option>
+                <option value="ML">Mali (TVA 18%)</option>
+                <option value="FR">France (TVA 20%)</option>
+              </select>
+            </div>
+            
+            <div className="d-flex mb-3" style={{ gap: '1rem' }}>
+              <div className="form-group flex-1">
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Prénom</label>
+                <input type="text" className="form-control" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+              </div>
+              <div className="form-group flex-1">
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Nom</label>
+                <input type="text" className="form-control" placeholder="Votre nom" value={lastName} onChange={e => setLastName(e.target.value)} required />
+              </div>
+            </div>
+            <div className="form-group mb-4">
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Adresse Email</label>
+              <input type="email" className="form-control" placeholder="Email pour la facture" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+
+            <hr className="divider mb-4" />
+            
+            <h3 className="mb-3">Moyens de paiement disponibles</h3>
+            <div className="payment-providers mb-4">
+              {availableProviders.map(p => (
+                <div 
+                  key={p} 
+                  className={`provider-card ${provider === p ? 'active' : ''}`}
+                  onClick={() => setProvider(p)}
+                >
+                  <div className="provider-icon">
+                    {p === 'Carte Bancaire' ? <CreditCard size={24} /> : <Smartphone size={24} />}
+                  </div>
+                  <div className="provider-name">{p}</div>
+                  <div className="provider-radio">
+                    <div className={`radio-inner ${provider === p ? 'checked' : ''}`}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="summary-total mb-4 p-3" style={{ backgroundColor: 'var(--color-secondary)', borderRadius: '8px' }}>
+              <span>Total TTC ({taxRate * 100}% TVA)</span>
+              <span>{formatPrice(total, plan.currency)}</span>
+            </div>
+
+            <button 
+              className="btn btn-primary btn-block btn-lg" 
+              onClick={handlePayment}
+              disabled={loading || status === 'PENDING' || !firstName || !lastName || !email}
+            >
+              {loading ? (
+                <span>Traitement en cours...</span>
+              ) : (
+                <span><ShieldCheck size={18} /> Confirmer et Payer {formatPrice(total, plan.currency)}</span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .form-control { 
+          width: 100%; 
+          padding: 0.75rem; 
+          border: 1px solid var(--color-border); 
+          border-radius: var(--border-radius-sm); 
+          font-family: inherit; 
+          font-size: 0.95rem; 
+          margin-top: 0.25rem; 
+          background-color: white;
+        }
+        .form-control:focus { 
+          outline: none; 
+          border-color: var(--color-primary); 
+          box-shadow: 0 0 0 2px rgba(11, 31, 58, 0.1); 
+        }
+      `}</style>
     </div>
   );
 }
