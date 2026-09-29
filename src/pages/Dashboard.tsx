@@ -1,6 +1,6 @@
 import { 
   Plus, Crown, Rocket, Home, Eye, Calendar, MessageSquare, 
-  BarChart2, MapPin, Bed, Bath, Move, MoreVertical, Heart, FileText,
+  BarChart2, MapPin, Bed, Bath, Move, Heart, FileText,
   PieChart as PieChartIcon, Bell, Search, CreditCard
 } from 'lucide-react';
 import { 
@@ -9,12 +9,47 @@ import {
 } from 'recharts';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { currentUser, properties, activities, visitRequests, invoices, chartData, pieData } from '../data/mockData';
+import { supabase } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { Loader } from 'lucide-react';
+import { chartData, pieData } from '../data/mockData';
 
 export default function Dashboard() {
   const { role, user } = useAuth();
   
   const isOwnerOrAgency = role === 'OWNER' || role === 'AGENCY';
+
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const res = await fetch('http://localhost:5000/api/dashboard/stats', {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [role]);
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader className="spin" size={40} color="var(--color-primary)" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -22,7 +57,7 @@ export default function Dashboard() {
         <div className="main-column">
           <div className="welcome-banner">
             <div className="welcome-content">
-              <h1 className="welcome-title">Bonjour {user?.profile?.firstName || currentUser.name.split(' ')[0]} 👋</h1>
+              <h1 className="welcome-title">Bonjour {user?.profile?.firstName || 'Utilisateur'} 👋</h1>
               <h2 className="welcome-subtitle">Votre espace {role?.toLowerCase() || ''} est prêt !</h2>
               <p className="welcome-desc">
                 {isOwnerOrAgency 
@@ -52,22 +87,33 @@ export default function Dashboard() {
                     Mes annonces
                   </div>
                   <div className="stat-value-container">
-                    <div className="stat-value">7</div>
-                    <div className="stat-trend positive">+2</div>
+                    <div className="stat-value">{stats?.totalProperties || 0}</div>
                   </div>
-                  <div className="stat-sub">3 actives | 2 en attente | 2 expirées</div>
+                  <div className="stat-sub">{stats?.publishedProperties || 0} actives | {stats?.pendingProperties || 0} en attente {stats?.expiredProperties !== undefined ? `| ${stats.expiredProperties} expirées` : ''}</div>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-header">
-                    <Eye size={16} />
-                    Vues totales
+                {role === 'AGENCY' ? (
+                  <div className="stat-card">
+                    <div className="stat-header">
+                      <PieChartIcon size={16} />
+                      Agents
+                    </div>
+                    <div className="stat-value-container">
+                      <div className="stat-value">{stats?.agents || 0}</div>
+                    </div>
+                    <div className="stat-sub">Membres de l'agence</div>
                   </div>
-                  <div className="stat-value-container">
-                    <div className="stat-value">2 843</div>
-                    <div className="stat-trend positive">+18%</div>
+                ) : (
+                  <div className="stat-card">
+                    <div className="stat-header">
+                      <Eye size={16} />
+                      Vues totales
+                    </div>
+                    <div className="stat-value-container">
+                      <div className="stat-value">-</div>
+                    </div>
+                    <div className="stat-sub">Bientôt disponible</div>
                   </div>
-                  <div className="stat-sub">ce mois</div>
-                </div>
+                )}
               </>
             ) : (
               <>
@@ -77,8 +123,7 @@ export default function Dashboard() {
                     Favoris
                   </div>
                   <div className="stat-value-container">
-                    <div className="stat-value">14</div>
-                    <div className="stat-trend positive">+3</div>
+                    <div className="stat-value">{stats?.favorites || 0}</div>
                   </div>
                   <div className="stat-sub">Biens sauvegardés</div>
                 </div>
@@ -88,9 +133,9 @@ export default function Dashboard() {
                     Alertes actives
                   </div>
                   <div className="stat-value-container">
-                    <div className="stat-value">2</div>
+                    <div className="stat-value">-</div>
                   </div>
-                  <div className="stat-sub">Recherches automatiques</div>
+                  <div className="stat-sub">Bientôt disponible</div>
                 </div>
               </>
             )}
@@ -101,21 +146,17 @@ export default function Dashboard() {
                 Demandes de visite
               </div>
               <div className="stat-value-container">
-                <div className="stat-value">12</div>
-                <div className="stat-trend positive">+33%</div>
+                <div className="stat-value">{stats?.visits || 0}</div>
               </div>
-              <div className="stat-sub">3 en attente</div>
             </div>
             <div className="stat-card">
               <div className="stat-header">
                 <MessageSquare size={16} />
-                Messages
+                Conversations
               </div>
               <div className="stat-value-container">
-                <div className="stat-value">28</div>
-                <div className="stat-trend positive">+42%</div>
+                <div className="stat-value">{stats?.conversations || 0}</div>
               </div>
-              <div className="stat-sub">non lus : 5</div>
             </div>
           </div>
 
@@ -206,12 +247,12 @@ export default function Dashboard() {
               </Link>
             </div>
             <div className="properties-grid">
-              {properties.slice(0, 4).map(property => (
+              {(stats?.recentProperties || []).map((property: any) => (
                 <div className="property-card" key={property.id}>
                   <div className="property-img-container">
-                    <img src={property.image} alt={property.title} className="property-img" />
+                    <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} alt={property.title} className="property-img" />
                     {isOwnerOrAgency && (
-                      <div className={`property-status ${property.status === 'En ligne' ? 'status-online' : property.status === 'En attente' ? 'status-pending' : 'status-expired'}`}>
+                      <div className={`property-status ${property.status === 'PUBLISHED' ? 'status-online' : property.status === 'PENDING' ? 'status-pending' : 'status-expired'}`}>
                         {property.status}
                       </div>
                     )}
@@ -223,33 +264,35 @@ export default function Dashboard() {
                     <div className="property-title">{property.title}</div>
                     <div className="property-location">
                       <MapPin size={12} />
-                      {property.location}
+                      {property.city?.name}
                     </div>
                     <div className="property-features">
-                      {property.beds > 0 && (
+                      {property.bedrooms > 0 && (
                         <div className="feature">
-                          <Bed size={14} /> {property.beds} ch
+                          <Bed size={14} /> {property.bedrooms} ch
                         </div>
                       )}
-                      {property.baths > 0 && (
+                      {property.bathrooms > 0 && (
                         <div className="feature">
-                          <Bath size={14} /> {property.baths} sdb
+                          <Bath size={14} /> {property.bathrooms} sdb
                         </div>
                       )}
-                      <div className="feature">
-                        <Move size={14} /> {property.area}
-                      </div>
+                      {property.surface > 0 && (
+                        <div className="feature">
+                          <Move size={14} /> {property.surface} m²
+                        </div>
+                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
                       <div>
-                        <div className="property-price">{property.price}</div>
-                        <div className={`property-type ${property.type === 'À vendre' ? 'property-type-sell' : ''}`}>
-                          {property.type}
+                        <div className="property-price">{property.price?.toLocaleString()} {property.currency}</div>
+                        <div className={`property-type ${property.transactionType === 'SALE' ? 'property-type-sell' : ''}`}>
+                          {property.transactionType === 'SALE' ? 'À vendre' : 'À louer'}
                         </div>
                       </div>
-                      <button className="btn btn-outline" style={{ padding: '0.25rem' }}>
-                        <MoreVertical size={16} />
-                      </button>
+                      <Link to={`/annonces/${property.id}`} className="btn btn-outline" style={{ padding: '0.25rem' }}>
+                        <Eye size={16} />
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -259,24 +302,28 @@ export default function Dashboard() {
           <div className="bottom-widgets">
             <div className="card">
               <div className="card-header">
-                <div className="card-title">Mes demandes de visite</div>
+                <div className="card-title">Activités récentes</div>
                 <Link to="#" className="card-link">Voir tout</Link>
               </div>
               <div className="mini-list">
-                {visitRequests.map(req => (
-                  <div className="mini-item" key={req.id}>
-                    <div className="mini-item-icon">
-                      <Calendar size={16} />
+                {stats?.recentActivities?.length === 0 ? (
+                  <div style={{ textAlign: 'center', color: 'var(--color-text-light)', padding: '1rem' }}>Aucune activité récente</div>
+                ) : (
+                  (stats?.recentActivities || []).map((req: any, i: number) => (
+                    <div className="mini-item" key={i}>
+                      <div className="mini-item-icon">
+                        <Calendar size={16} />
+                      </div>
+                      <div className="mini-item-content">
+                        <div className="mini-item-title">{req.title}</div>
+                        <div className="mini-item-sub">{req.desc}</div>
+                      </div>
+                      <div className="mini-item-sub">
+                        {new Date(req.date).toLocaleDateString()}
+                      </div>
                     </div>
-                    <div className="mini-item-content">
-                      <div className="mini-item-title">{req.property}</div>
-                      <div className="mini-item-sub">{req.datetime}</div>
-                    </div>
-                    <div className={`mini-badge ${req.status === 'Confirmée' ? 'badge-success' : 'badge-warning'}`}>
-                      {req.status}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
@@ -285,24 +332,8 @@ export default function Dashboard() {
                 <div className="card-title">Mes factures</div>
                 <Link to="/paiements" className="card-link">Voir tout</Link>
               </div>
-              <div className="mini-list">
-                {invoices.map(inv => (
-                  <div className="mini-item" key={inv.id}>
-                    <div className="mini-item-icon">
-                      <FileText size={16} />
-                    </div>
-                    <div className="mini-item-content">
-                      <div className="mini-item-title">{inv.desc}</div>
-                      <div className="mini-item-sub">{inv.date}</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{inv.amount}</div>
-                      <div className="mini-badge badge-success" style={{ display: 'inline-block', marginTop: '0.2rem' }}>
-                        {inv.status}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="mini-list" style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--color-text-light)' }}>
+                Bientôt disponible
               </div>
             </div>
 
@@ -312,9 +343,9 @@ export default function Dashboard() {
                 <Link to="#" className="card-link">Voir tout</Link>
               </div>
               <div className="profile-summary">
-                <img src={user?.profile?.avatar || currentUser.avatar} alt="Profile" className="profile-summary-avatar" />
+                <img src={user?.profile?.avatar || "https://ui-avatars.com/api/?name=" + (user?.profile?.firstName || 'User')} alt="Profile" className="profile-summary-avatar" />
                 <div className="profile-details">
-                  <div className="profile-name">{user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName}` : currentUser.name}</div>
+                  <div className="profile-name">{user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName}` : 'Utilisateur'}</div>
                   <div className="profile-role">{role}</div>
                   <div className="profile-location">
                     <MapPin size={12} />
@@ -426,25 +457,26 @@ export default function Dashboard() {
 
           <div className="card">
             <div className="card-header">
-              <div className="card-title">Activités récentes</div>
+              <div className="card-title">Activités récentes (Toutes)</div>
               <Link to="#" className="card-link">Voir tout</Link>
             </div>
             <div className="activity-list">
-              {activities.map(activity => (
-                <div className="activity-item" key={activity.id}>
-                  <div className={`activity-icon ${activity.type === 'visit' ? 'blue' : activity.type === 'boost' ? 'gold' : 'green'}`}>
-                    {activity.type === 'visit' && <Calendar size={16} />}
-                    {activity.type === 'message' && <MessageSquare size={16} />}
-                    {activity.type === 'listing' && <Home size={16} />}
-                    {activity.type === 'boost' && <Crown size={16} />}
+              {stats?.recentActivities?.length === 0 ? (
+                <div style={{ padding: '1rem', color: 'var(--color-text-light)', textAlign: 'center' }}>Aucune activité récente</div>
+              ) : (
+                (stats?.recentActivities || []).map((activity: any, i: number) => (
+                  <div className="activity-item" key={i}>
+                    <div className="activity-icon blue">
+                      <Calendar size={16} />
+                    </div>
+                    <div className="activity-content">
+                      <div className="activity-title">{activity.title}</div>
+                      <div className="activity-desc">{activity.desc}</div>
+                      <div className="activity-time">{new Date(activity.date).toLocaleDateString()}</div>
+                    </div>
                   </div>
-                  <div className="activity-content">
-                    <div className="activity-title">{activity.title}</div>
-                    <div className="activity-desc">{activity.desc}</div>
-                    <div className="activity-time">{activity.time}</div>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
           
