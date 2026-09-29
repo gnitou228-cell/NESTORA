@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Send, MapPin, Building, ArrowLeft, Loader, User, MessageSquare } from 'lucide-react';
+import { Search, Send, Building, ArrowLeft, Loader, User, MessageSquare } from 'lucide-react';
 import { format, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
