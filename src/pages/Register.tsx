@@ -22,6 +22,8 @@ export default function Register() {
     whatsapp: '',
     whatsappCode: '+228',
     password: '',
+    confirmPassword: '',
+    countryId: '',
     regionId: '',
     cityId: '',
     neighborhoodId: '',
