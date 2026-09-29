@@ -204,7 +204,7 @@ export default function Checkout() {
               onClick={() => setShowPaymentModal(true)}
               style={{ padding: '1rem', fontSize: '1.1rem' }}
             >
-              <span>Continuer vers le paiement</span>
+              <span>Payer</span>
             </button>
             
             <div className="secure-payment text-center mt-3 text-sm">
