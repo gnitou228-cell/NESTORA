@@ -36,6 +36,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import CookiePolicy from './pages/CookiePolicy';
 import LegalNotices from './pages/LegalNotices';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import { FavoritesProvider } from './context/FavoritesContext';
 
 function App() {
@@ -84,6 +85,10 @@ function App() {
               
               <Route element={<ProtectedRoute allowedRoles={['AGENCY']} />}>
                 <Route path="/dashboard/agency" element={<Dashboard />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+                <Route path="/admin" element={<AdminDashboard />} />
               </Route>
               
               <Route element={<ProtectedRoute allowedRoles={['OWNER', 'AGENCY']} />}>

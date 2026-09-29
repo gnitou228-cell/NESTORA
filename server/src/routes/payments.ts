@@ -103,6 +103,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
           },
         ],
         mode: 'payment',
+        billing_address_collection: 'required',
         success_url: `${origin}/checkout?status=success&session_id={CHECKOUT_SESSION_ID}&payment_id=${payment.id}`,
         cancel_url: `${origin}/checkout?status=canceled`,
         client_reference_id: payment.id,

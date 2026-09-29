@@ -136,11 +136,43 @@ export default function Checkout() {
 
       <div className="checkout-grid">
         <div className="checkout-form">
+          <div className="card mb-3">
+            <div className="card-header">
+              <h2>Informations de facturation</h2>
+            </div>
+            <p className="text-light mb-3">Ces informations seront utilisées pour générer votre facture.</p>
+            
+            <div className="form-group mb-2">
+              <label>Pays de facturation</label>
+              <select className="form-control" defaultValue="BF">
+                <option value="BF">Burkina Faso (TVA 18%)</option>
+                <option value="CI">Côte d'Ivoire (TVA 18%)</option>
+                <option value="SN">Sénégal (TVA 18%)</option>
+                <option value="ML">Mali (TVA 18%)</option>
+                <option value="FR">France (TVA 20%)</option>
+              </select>
+            </div>
+            <div className="d-flex" style={{ gap: '1rem' }}>
+              <div className="form-group flex-1">
+                <label>Prénom</label>
+                <input type="text" className="form-control" placeholder="Votre prénom" />
+              </div>
+              <div className="form-group flex-1">
+                <label>Nom</label>
+                <input type="text" className="form-control" placeholder="Votre nom" />
+              </div>
+            </div>
+            <div className="form-group mt-2">
+              <label>Adresse Email</label>
+              <input type="email" className="form-control" placeholder="Email pour la facture" />
+            </div>
+          </div>
+
           <div className="card">
             <div className="card-header">
               <h2>Moyen de paiement</h2>
             </div>
-            <p className="text-light mb-3">Sélectionnez votre méthode de paiement préférée. (Mode simulation actif)</p>
+            <p className="text-light mb-3">Sélectionnez votre méthode de paiement préférée.</p>
             
             {errorMessage && (
               <div className="alert alert-danger mb-3">

@@ -9,6 +9,7 @@ import visitsRoutes from './routes/visits';
 import conversationsRoutes from './routes/conversations';
 import dashboardRoutes from './routes/dashboard';
 import paymentsRoutes from './routes/payments';
+import adminRoutes from './routes/admin';
 import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use('/api/visits', visitsRoutes);
 app.use('/api/conversations', conversationsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

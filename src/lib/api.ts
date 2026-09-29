@@ -38,6 +38,10 @@ export default {
     method: 'PUT',
     body: JSON.stringify(data)
   }),
+  patch: (endpoint: string, data: any) => fetchWithAuth(endpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  }),
   delete: (endpoint: string) => fetchWithAuth(endpoint, {
     method: 'DELETE'
   }),
