@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Move, Calendar, User, Building, 
   Heart, MessageCircle, Share2, X, ChevronLeft, 
-  ChevronRight, CheckCircle2, AlertCircle, Loader
+  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -60,6 +60,14 @@ const PropertyDetail = () => {
   const [visitSuccess, setVisitSuccess] = useState(false);
   const [visitError, setVisitError] = useState('');
 
+  // Report Modal
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportCategory, setReportCategory] = useState('SPAM');
+  const [reportDescription, setReportDescription] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportError, setReportError] = useState('');
+
   const favorite = id ? isFavorite(id) : false;
 
   const toggleFavorite = async () => {
@@ -114,6 +122,49 @@ const PropertyDetail = () => {
       setVisitError('Erreur réseau');
     } finally {
       setSubmittingVisit(false);
+    }
+  };
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      navigate('/connexion');
+      return;
+    }
+    setSubmittingReport(true);
+    setReportError('');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      const res = await fetch(`http://localhost:5000/api/reports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          propertyId: id,
+          category: reportCategory,
+          description: reportDescription
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReportSuccess(true);
+        setTimeout(() => {
+          setShowReportModal(false);
+          setReportSuccess(false);
+          setReportCategory('SPAM');
+          setReportDescription('');
+        }, 3000);
+      } else {
+        setReportError(data.error || 'Erreur lors du signalement');
+      }
+    } catch (err) {
+      setReportError('Erreur réseau');
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
@@ -382,6 +433,19 @@ const PropertyDetail = () => {
                     }}
                   >
                     <Heart size={18} fill={favorite ? 'currentColor' : 'none'} /> {favorite ? 'Retirer' : 'Favori'}
+                  </button>
+                  <button 
+                    className="btn btn-outline" 
+                    onClick={() => {
+                      if (!user) navigate('/connexion');
+                      else setShowReportModal(true);
+                    }}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem',
+                      color: 'var(--color-danger)', borderColor: 'var(--color-danger)'
+                    }}
+                  >
+                    <Flag size={18} /> Signaler
                   </button>
                 </div>
               </div>
@@ -708,6 +772,80 @@ const PropertyDetail = () => {
                   </button>
                   <button type="submit" className="btn btn-primary" disabled={submittingVisit}>
                     {submittingVisit ? <Loader className="spin" size={20} /> : 'Envoyer la demande'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SIGNALEMENT */}
+      {showReportModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9998,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1rem'
+        }}>
+          <div className="card" style={{ maxWidth: '500px', width: '100%', padding: '2rem', backgroundColor: 'white', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.5rem', color: 'var(--color-danger)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertCircle size={24} /> Signaler l'annonce
+              </h3>
+              <button onClick={() => setShowReportModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={24} color="var(--color-text-light)" />
+              </button>
+            </div>
+            
+            {reportSuccess ? (
+              <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                <CheckCircle2 size={48} color="#10b981" style={{ margin: '0 auto 1rem' }} />
+                <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Signalement envoyé</h4>
+                <p style={{ color: 'var(--color-text-light)' }}>Notre équipe de modération va examiner cette annonce dans les plus brefs délais.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleReportSubmit}>
+                {reportError && (
+                  <div style={{ padding: '0.75rem', backgroundColor: 'var(--color-danger-bg)', color: 'var(--color-danger)', borderRadius: '8px', marginBottom: '1rem' }}>
+                    {reportError}
+                  </div>
+                )}
+                
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Raison du signalement <span style={{ color: 'red' }}>*</span></label>
+                  <select 
+                    required 
+                    value={reportCategory}
+                    onChange={(e) => setReportCategory(e.target.value)}
+                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                  >
+                    <option value="FRAUD">Fraude / Arnaque</option>
+                    <option value="INACCURATE">Prix trompeur / Fausse annonce</option>
+                    <option value="SPAM">Annonce déjà vendue/louée ou Spam</option>
+                    <option value="INAPPROPRIATE">Contenu inapproprié ou interdit</option>
+                    <option value="OTHER">Autre</option>
+                  </select>
+                </div>
+                
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Description détaillée <span style={{ color: 'red' }}>*</span></label>
+                  <textarea 
+                    rows={4}
+                    required
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    placeholder="Veuillez fournir plus de détails pour aider nos modérateurs..."
+                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', resize: 'vertical' }} 
+                  ></textarea>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowReportModal(false)}>
+                    Annuler
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ backgroundColor: 'var(--color-danger)', borderColor: 'var(--color-danger)' }} disabled={submittingReport}>
+                    {submittingReport ? <Loader className="spin" size={20} /> : 'Envoyer le signalement'}
                   </button>
                 </div>
               </form>

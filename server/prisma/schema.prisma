@@ -50,6 +50,7 @@ model User {
   reportsReceived Report[] @relation("ReportedUser")
   verifications Verification[]
   conversationMembers ConversationMember[]
+  adminLogs     AdminAuditLog[] @relation("AdminAuditLogs")
 
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
@@ -576,9 +577,9 @@ enum ReportCategory {
 
 enum ReportStatus {
   PENDING
-  REVIEWING
+  UNDER_REVIEW
   RESOLVED
-  REJECTED
+  DISMISSED
 }
 
 model Report {
@@ -632,3 +633,19 @@ model Verification {
   @@index([agencyId])
   @@index([propertyId])
 }
+
+model AdminAuditLog {
+  id             String   @id @default(uuid())
+  adminId        String
+  admin          User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+  action         String
+  entityType     String
+  entityId       String
+  oldValue       String?
+  newValue       String?
+  createdAt      DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entityType, entityId])
+}
+
