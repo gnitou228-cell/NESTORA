@@ -1,81 +1,36 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { CreditCard, ShieldCheck, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { useLocation, Link, useSearchParams } from 'react-router-dom';
+import { ShieldCheck, Rocket, Star, Gift } from 'lucide-react';
 import { formatPrice } from '../config/monetization';
 import api from '../lib/api';
 
 const AFRICAN_COUNTRIES = [
-  { code: 'BF', name: '🇧🇫 Burkina Faso', currency: 'XOF' },
-  { code: 'CI', name: '🇨🇮 Côte d\'Ivoire', currency: 'XOF' },
-  { code: 'SN', name: '🇸🇳 Sénégal', currency: 'XOF' },
-  { code: 'ML', name: '🇲🇱 Mali', currency: 'XOF' },
-  { code: 'TG', name: '🇹🇬 Togo', currency: 'XOF' },
-  { code: 'BJ', name: '🇧🇯 Bénin', currency: 'XOF' },
-  { code: 'NE', name: '🇳🇪 Niger', currency: 'XOF' },
-  { code: 'GN', name: '🇬🇳 Guinée', currency: 'GNF' },
-  { code: 'CM', name: '🇨🇲 Cameroun', currency: 'XAF' },
-  { code: 'GA', name: '🇬🇦 Gabon', currency: 'XAF' },
-  { code: 'CD', name: '🇨🇩 RDC', currency: 'CDF' },
-  { code: 'CG', name: '🇨🇬 Congo', currency: 'XAF' },
-  { code: 'FR', name: '🇫🇷 France', currency: 'EUR' },
+  { code: 'BF', name: '🇧🇫', dialCode: '+226' },
+  { code: 'CI', name: '🇨🇮', dialCode: '+225' },
+  { code: 'SN', name: '🇸🇳', dialCode: '+221' },
+  { code: 'ML', name: '🇲🇱', dialCode: '+223' },
+  { code: 'TG', name: '🇹🇬', dialCode: '+228' },
+  { code: 'BJ', name: '🇧🇯', dialCode: '+229' },
+  { code: 'CM', name: '🇨🇲', dialCode: '+237' },
+  { code: 'FR', name: '🇫🇷', dialCode: '+33' },
 ];
-
-const ProviderLogo = ({ provider }: { provider: string }) => {
-  let bg = '#f0f0f0';
-  let color = '#333';
-  let text = '';
-  let src = '';
-
-  if (provider === 'Orange Money') {
-    src = 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Orange_logo.svg';
-  } else if (provider === 'MTN Mobile Money') {
-    src = 'https://upload.wikimedia.org/wikipedia/commons/a/a3/MTN_Logo.svg';
-  } else if (provider === 'Moov Money') {
-    bg = '#005C9A'; color = '#FFF'; text = 'moov';
-  } else if (provider === 'Wave') {
-    src = 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Wave_logo.svg';
-  } else if (provider === 'Sama Money') {
-    bg = '#00A651'; color = '#FFF'; text = 'sama';
-  } else if (provider === 'Free Money') {
-    bg = '#E3000F'; color = '#FFF'; text = 'Free';
-  } else if (provider === 'Tmoney') {
-    bg = '#FFD700'; color = '#000'; text = 'T';
-  }
-
-  if (src) {
-    return <img src={src} alt={provider} style={{ width: 40, height: 40, objectFit: 'contain' }} />;
-  }
-
-  if (text) {
-    return (
-      <div style={{ width: 40, height: 40, backgroundColor: bg, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: color, fontWeight: 'bold', fontSize: '11px' }}>
-        {text}
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ width: 40, height: 40, backgroundColor: '#f0f0f0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>
-      <CreditCard size={24} />
-    </div>
-  );
-};
 
 export default function Checkout() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [provider, setProvider] = useState<string>('Orange Money');
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<'IDLE' | 'PENDING' | 'SUCCESS' | 'FAILED'>('IDLE');
-  const [paymentResult, setPaymentResult] = useState<any>(null);
-  const [errorMessage, setErrorMessage] = useState<string>('');
   
-  const [modalStep, setModalStep] = useState<'HIDDEN' | 'BILLING' | 'PAYMENT'>('HIDDEN');
-  
-  const [country, setCountry] = useState('BF');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [country, setCountry] = useState('BF');
+  const [discountCode, setDiscountCode] = useState('');
+
+  // We keep the payment modal logic for the next step (until user gives screenshot)
+  const [modalStep, setModalStep] = useState<'HIDDEN' | 'PAYMENT'>('HIDDEN');
+  const [provider, setProvider] = useState<string>('Orange Money');
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'IDLE' | 'PENDING' | 'SUCCESS' | 'FAILED'>('IDLE');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const [searchParams] = useSearchParams();
   const urlStatus = searchParams.get('status');
@@ -86,7 +41,6 @@ export default function Checkout() {
   useEffect(() => {
     if (urlStatus === 'success' && urlPaymentId) {
       setStatus('SUCCESS');
-      setPaymentResult({ paymentId: urlPaymentId });
     } else if (urlStatus === 'canceled') {
       setStatus('FAILED');
       setErrorMessage('Le paiement a été annulé.');
@@ -105,6 +59,15 @@ export default function Checkout() {
   const paymentType = type?.toLowerCase().includes('boost') ? 'BOOST' : 'SUBSCRIPTION';
   const total = plan?.price || 0;
 
+  const validateAndProceed = () => {
+    if (!firstName || !lastName || !email || !phone) {
+      setErrorMessage('Veuillez remplir tous les champs obligatoires (*).');
+      return;
+    }
+    setErrorMessage('');
+    setModalStep('PAYMENT');
+  };
+
   const handlePayment = async () => {
     setLoading(true);
     setErrorMessage('');
@@ -116,7 +79,7 @@ export default function Checkout() {
         planId: plan.id,
         propertyId,
         provider: selectedProvider,
-        customerDetails: { firstName, lastName, email, country }
+        customerDetails: { firstName, lastName, email, country, phone }
       });
       
       const { paymentId, url } = initResponse.data;
@@ -137,7 +100,6 @@ export default function Checkout() {
           });
           
           setStatus('SUCCESS');
-          setPaymentResult({ paymentId, total });
           setModalStep('HIDDEN');
         } catch (webhookErr) {
           console.error(webhookErr);
@@ -156,255 +118,447 @@ export default function Checkout() {
     }
   };
 
-  const getPaymentProviders = () => {
-    switch (country) {
-      case 'BF': return ['Orange Money', 'Moov Money', 'Carte Bancaire'];
-      case 'CI': return ['Orange Money', 'MTN Mobile Money', 'Wave', 'Moov Money', 'Carte Bancaire'];
-      case 'SN': return ['Orange Money', 'Wave', 'Free Money', 'Carte Bancaire'];
-      case 'ML': return ['Orange Money', 'Moov Money', 'Sama Money', 'Carte Bancaire'];
-      case 'TG': return ['Tmoney', 'Moov Money', 'Carte Bancaire'];
-      case 'BJ': return ['MTN Mobile Money', 'Moov Money', 'Carte Bancaire'];
-      case 'CM': return ['Orange Money', 'MTN Mobile Money', 'Carte Bancaire'];
-      case 'FR': return ['Carte Bancaire'];
-      default: return ['Carte Bancaire'];
-    }
-  };
-
-  const availableProviders = getPaymentProviders();
-  useEffect(() => {
-    if (!availableProviders.includes(provider)) {
-      setProvider(availableProviders[0]);
-    }
-  }, [country, availableProviders, provider]);
-
-  const validateBilling = () => {
-    if (!firstName || !lastName || !email) {
-      setErrorMessage('Veuillez remplir tous les champs.');
-      return;
-    }
-    setErrorMessage('');
-    setModalStep('PAYMENT');
-  };
-
   if (status === 'SUCCESS') {
     return (
-      <div className="checkout-success text-center">
+      <div className="checkout-success text-center mt-5">
         <div className="success-icon mb-2">
           <ShieldCheck size={64} color="#10b981" />
         </div>
         <h1 className="mb-1">Paiement Réussi !</h1>
         <p className="text-light mb-3">Votre achat de <strong>{plan.name}</strong> a été validé avec succès.</p>
-        
-        <div className="card p-3 mb-3" style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'left', border: '1px solid var(--color-border)' }}>
-          <div className="d-flex justify-between mb-1">
-            <span className="text-light">Référence:</span>
-            <strong>{paymentResult?.paymentId?.substring(0, 8).toUpperCase()}</strong>
-          </div>
-          <div className="d-flex justify-between mb-1">
-            <span className="text-light">Montant:</span>
-            <strong>{formatPrice(total, plan.currency)}</strong>
-          </div>
-          <div className="d-flex justify-between">
-            <span className="text-light">Moyen de paiement:</span>
-            <strong>{provider}</strong>
-          </div>
-        </div>
-
         <Link to="/dashboard" className="btn btn-primary">Retour au tableau de bord</Link>
       </div>
     );
   }
 
   return (
-    <div className="checkout-page" style={{ padding: '2rem 1rem' }}>
-      <div className="mb-3">
-        <button className="btn btn-outline" onClick={() => navigate(-1)}>
-          <ArrowLeft size={16} /> Retour
-        </button>
+    <div className="checkout-page-modern">
+      <div className="checkout-header text-center">
+        <h1>Finaliser votre achat</h1>
       </div>
 
-      <div className="checkout-grid" style={{ display: 'flex', justifyContent: 'center' }}>
-        <div className="checkout-summary" style={{ maxWidth: '450px', width: '100%' }}>
-          <div className="card" style={{ padding: '2rem', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: 'none', borderRadius: '12px' }}>
-            <div className="text-center mb-4">
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '60px', height: '60px', backgroundColor: 'rgba(201, 162, 39, 0.1)', color: 'var(--color-accent)', borderRadius: '50%', marginBottom: '1rem' }}>
-                <CreditCard size={32} />
-              </div>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Récapitulatif de commande</h2>
-              <p className="text-light text-sm">Veuillez vérifier les détails avant de valider votre paiement.</p>
+      <div className="checkout-container">
+        
+        {/* LEFT COLUMN: FORM */}
+        <div className="checkout-form-section">
+          <h3 className="section-title">Informations personnelles</h3>
+          
+          {errorMessage && (
+            <div className="alert alert-danger mb-3" style={{ borderRadius: '8px' }}>
+              {errorMessage}
             </div>
+          )}
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Prénom <span className="text-danger">*</span></label>
+              <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Prénom" required />
+            </div>
+            <div className="form-group">
+              <label>Nom <span className="text-danger">*</span></label>
+              <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Nom" required />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Adresse email <span className="text-danger">*</span></label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@exemple.com" required />
+          </div>
+
+          <div className="form-group">
+            <label>Numéro de téléphone (WhatsApp de préférence) <span className="text-danger">*</span></label>
+            <div className="phone-input-container">
+              <select className="country-select" value={country} onChange={e => setCountry(e.target.value)}>
+                {AFRICAN_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+              <span className="dial-code">{AFRICAN_COUNTRIES.find(c => c.code === country)?.dialCode}</span>
+              <input 
+                type="tel" 
+                className="phone-input" 
+                placeholder="Numéro"
+                value={phone} 
+                onChange={e => setPhone(e.target.value)} 
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="gift-option">
+            <Gift size={18} color="#666" />
+            <span>Offrir ce produit</span>
+          </div>
+
+          <button className="btn-pay-now" onClick={validateAndProceed}>
+            Payer maintenant
+          </button>
+          
+          <p className="terms-text">
+            En cliquant sur le bouton « Payer maintenant », vous acceptez nos <a href="#">termes et conditions</a> et la <a href="#">politique de confidentialité</a>.
+          </p>
+        </div>
+
+        {/* RIGHT COLUMN: SUMMARY */}
+        <div className="checkout-summary-section">
+          <div className="summary-card">
+            <h3 className="summary-title">Résumé</h3>
             
-            <div className="summary-item mb-4 p-3" style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '8px' }}>
-              <div className="d-flex justify-between align-center mb-1">
-                <span className="text-light text-sm">{type === 'BOOST' ? 'Type' : 'Abonnement'}</span>
-                <span style={{ fontWeight: '600', color: 'var(--color-primary)' }}>{type === 'BOOST' ? 'Boost Annonce' : 'Forfait Pro'}</span>
+            <div className="product-details">
+              <div className="product-icon">
+                {type === 'BOOST' ? <Rocket size={24} color="#FFF" /> : <Star size={24} color="#FFF" />}
               </div>
-              <div className="d-flex justify-between align-center">
-                <span className="text-light text-sm">Plan choisi</span>
-                <span style={{ fontWeight: '600' }}>{plan.name}</span>
+              <div className="product-info">
+                <h4>{type === 'BOOST' ? 'Boost d\'Annonce Immo' : 'Abonnement Pro'}</h4>
+                <p>Plan : {plan.name}</p>
               </div>
             </div>
 
-            <hr className="divider my-3" />
-            
-            <div className="summary-total d-flex justify-between align-center" style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>
-              <span>Total à payer</span>
-              <span>{formatPrice(plan.price, plan.currency)}</span>
+            <div className="discount-row">
+              <input 
+                type="text" 
+                placeholder="Code de réduction" 
+                value={discountCode}
+                onChange={e => setDiscountCode(e.target.value)}
+              />
+              <button className="btn-apply">Appliquer</button>
             </div>
 
-            <button 
-              className="btn btn-primary btn-block mt-4" 
-              onClick={() => setModalStep('BILLING')}
-              style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}
-            >
-              <span>Payer maintenant</span>
-            </button>
-            
-            <div className="secure-payment text-center mt-3 text-sm text-light">
-              <ShieldCheck size={16} className="text-success" style={{ verticalAlign: 'middle', marginRight: '4px' }} /> 
-              Paiement 100% sécurisé et chiffré
+            <hr className="divider" />
+
+            <div className="price-row">
+              <span className="label">Sous-total</span>
+              <span className="value" style={{ fontWeight: 600, color: '#111' }}>{formatPrice(total, plan.currency)}</span>
+            </div>
+
+            <hr className="divider" />
+
+            <div className="price-row total-row">
+              <span className="label">Total</span>
+              <span className="value">{formatPrice(total, plan.currency)}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* MULTI-STEP PAYMENT MODAL */}
-      {modalStep !== 'HIDDEN' && (
-        <div className="modal-backdrop" style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', 
-          justifyContent: 'center', zIndex: 9999, padding: '1rem',
-          backdropFilter: 'blur(4px)'
-        }}>
-          <div className="card" style={{ maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', borderRadius: '12px', padding: '2rem' }}>
-            <button 
-              onClick={() => setModalStep('HIDDEN')}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: '#333' }}
-            >
-              &times;
+      {/* TEMPORARY MODAL FOR STEP 2 UNTIL USER PROVIDES SCREENSHOT */}
+      {modalStep === 'PAYMENT' && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <button className="close-btn" onClick={() => setModalStep('HIDDEN')}>&times;</button>
+            <h2>Moyens de paiement</h2>
+            <p>En attente de ta maquette pour cette page ! En attendant, choisis un moyen de paiement :</p>
+            <div className="providers-list mt-3">
+              {['Orange Money', 'Moov Money', 'MTN Mobile Money', 'Wave', 'Carte Bancaire'].map(p => (
+                <label key={p} className="provider-option" style={{ display: 'block', margin: '10px 0' }}>
+                  <input type="radio" name="provider" checked={provider === p} onChange={() => setProvider(p)} /> {p}
+                </label>
+              ))}
+            </div>
+            <button className="btn btn-primary btn-block mt-3" onClick={handlePayment} disabled={loading}>
+              {loading ? 'Traitement...' : `Payer ${formatPrice(total, plan.currency)}`}
             </button>
-            
-            {modalStep === 'BILLING' && (
-              <>
-                <div className="text-center mb-4">
-                  <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Informations de facturation</h2>
-                  <p className="text-light text-sm">Veuillez sélectionner votre pays et remplir vos informations.</p>
-                </div>
-
-                {errorMessage && (
-                  <div className="alert alert-danger mb-3" style={{ borderRadius: '8px' }}>
-                    {errorMessage}
-                  </div>
-                )}
-
-                <div className="form-group mb-3">
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Pays de facturation</label>
-                  <select className="form-control" value={country} onChange={e => setCountry(e.target.value)} style={{ padding: '0.8rem', borderRadius: '8px', fontSize: '1rem' }}>
-                    {AFRICAN_COUNTRIES.map(c => (
-                      <option key={c.code} value={c.code}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="d-flex mb-3" style={{ gap: '1rem' }}>
-                  <div className="form-group flex-1">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Prénom</label>
-                    <input type="text" className="form-control" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
-                  </div>
-                  <div className="form-group flex-1">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Nom</label>
-                    <input type="text" className="form-control" placeholder="Votre nom" value={lastName} onChange={e => setLastName(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
-                  </div>
-                </div>
-                <div className="form-group mb-4">
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Adresse Email</label>
-                  <input type="email" className="form-control" placeholder="Email pour le reçu" value={email} onChange={e => setEmail(e.target.value)} required style={{ padding: '0.8rem', borderRadius: '8px' }} />
-                </div>
-
-                <button 
-                  className="btn btn-primary btn-block btn-lg" 
-                  onClick={validateBilling}
-                  style={{ padding: '1rem', borderRadius: '8px', fontSize: '1.1rem' }}
-                >
-                  Valider
-                </button>
-              </>
-            )}
-
-            {modalStep === 'PAYMENT' && (
-              <>
-                <div className="text-center mb-4">
-                  <button className="btn btn-outline mb-3" onClick={() => setModalStep('BILLING')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>
-                    <ArrowLeft size={14} style={{ marginRight: '4px' }} /> Modifier les infos
-                  </button>
-                  <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Moyens de paiement</h2>
-                  <p className="text-light text-sm">Sélectionnez comment vous souhaitez payer depuis {AFRICAN_COUNTRIES.find(c => c.code === country)?.name.split(' ').slice(1).join(' ')}.</p>
-                </div>
-
-                {errorMessage && (
-                  <div className="alert alert-danger mb-3" style={{ borderRadius: '8px' }}>
-                    {errorMessage}
-                  </div>
-                )}
-
-                <div className="payment-providers mb-4" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
-                  {availableProviders.map(p => (
-                    <div 
-                      key={p} 
-                      className={`provider-card ${provider === p ? 'active' : ''}`}
-                      onClick={() => setProvider(p)}
-                      style={{ 
-                        border: provider === p ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
-                        borderRadius: '8px',
-                        padding: '1rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        transition: 'all 0.2s',
-                        backgroundColor: provider === p ? 'rgba(201, 162, 39, 0.05)' : 'white'
-                      }}
-                    >
-                      <ProviderLogo provider={p} />
-                      <div className="provider-name" style={{ fontWeight: provider === p ? '600' : '500', fontSize: '1rem', flex: 1 }}>{p}</div>
-                      {provider === p && <CheckCircle2 size={24} color="var(--color-accent)" />}
-                    </div>
-                  ))}
-                </div>
-
-                <button 
-                  className="btn btn-primary btn-block btn-lg" 
-                  onClick={handlePayment}
-                  disabled={loading || status === 'PENDING'}
-                  style={{ padding: '1rem', borderRadius: '8px', fontSize: '1.1rem' }}
-                >
-                  {loading ? (
-                    <span>Traitement en cours...</span>
-                  ) : (
-                    <span><ShieldCheck size={18} /> Payer {formatPrice(total, plan.currency)}</span>
-                  )}
-                </button>
-              </>
-            )}
           </div>
         </div>
       )}
 
       <style>{`
-        .form-control { 
-          width: 100%; 
-          padding: 0.75rem; 
-          border: 1px solid var(--color-border); 
-          border-radius: var(--border-radius-sm); 
-          font-family: inherit; 
-          font-size: 0.95rem; 
-          margin-top: 0.25rem; 
-          background-color: white;
+        .checkout-page-modern {
+          max-width: 1000px;
+          margin: 0 auto;
+          padding: 3rem 1rem;
+          font-family: 'Inter', sans-serif;
+          color: #333;
         }
-        .form-control:focus { 
-          outline: none; 
-          border-color: var(--color-primary); 
-          box-shadow: 0 0 0 2px rgba(11, 31, 58, 0.1); 
+
+        .checkout-header {
+          margin-bottom: 3rem;
+        }
+        
+        .checkout-header h1 {
+          font-size: 1.8rem;
+          font-weight: 500;
+          color: #111;
+        }
+
+        .checkout-container {
+          display: flex;
+          gap: 4rem;
+          align-items: flex-start;
+        }
+
+        /* Left Form */
+        .checkout-form-section {
+          flex: 1;
+        }
+
+        .section-title {
+          font-size: 1.1rem;
+          font-weight: 500;
+          margin-bottom: 1.5rem;
+          color: #555;
+        }
+
+        .form-row {
+          display: flex;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+        
+        .form-row .form-group {
+          flex: 1;
+          margin-bottom: 0;
+        }
+
+        .form-group {
+          margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #555;
+        }
+
+        .form-group input {
+          width: 100%;
+          padding: 0.8rem 1rem;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 1rem;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+          border-color: #22c55e;
+        }
+
+        .phone-input-container {
+          display: flex;
+          align-items: center;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          background: white;
+          overflow: hidden;
+        }
+
+        .phone-input-container:focus-within {
+          border-color: #22c55e;
+        }
+
+        .country-select {
+          padding: 0.8rem 0.5rem;
+          border: none;
+          background: transparent;
+          font-size: 1.2rem;
+          outline: none;
+          cursor: pointer;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          padding-left: 1rem;
+        }
+
+        .dial-code {
+          color: #666;
+          font-size: 0.95rem;
+          margin-left: 0.2rem;
+          margin-right: 0.5rem;
+        }
+
+        .phone-input {
+          flex: 1;
+          border: none !important;
+          border-radius: 0 !important;
+          padding-left: 0 !important;
+        }
+        .phone-input:focus {
+          border-color: transparent !important;
+          box-shadow: none !important;
+        }
+
+        .gift-option {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 2rem;
+          font-size: 0.95rem;
+          color: #555;
+          cursor: pointer;
+        }
+
+        .btn-pay-now {
+          width: 100%;
+          background-color: #15803d; /* Nice green like in the image */
+          color: white;
+          border: none;
+          padding: 1rem;
+          border-radius: 8px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .btn-pay-now:hover {
+          background-color: #166534;
+        }
+
+        .terms-text {
+          text-align: center;
+          margin-top: 1rem;
+          font-size: 0.8rem;
+          color: #888;
+          line-height: 1.4;
+        }
+        
+        .terms-text a {
+          color: #666;
+          text-decoration: underline;
+        }
+
+        /* Right Summary */
+        .checkout-summary-section {
+          width: 420px;
+        }
+
+        .summary-card {
+          background-color: #f8f9fa;
+          border-radius: 12px;
+          padding: 2rem;
+        }
+
+        .summary-title {
+          font-size: 1.1rem;
+          font-weight: 500;
+          margin-bottom: 1.5rem;
+          color: #333;
+        }
+
+        .product-details {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .product-icon {
+          width: 70px;
+          height: 70px;
+          background: #111;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .product-info h4 {
+          font-size: 0.95rem;
+          margin: 0 0 0.4rem 0;
+          font-weight: 500;
+          line-height: 1.4;
+          color: #111;
+        }
+
+        .product-info p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: #666;
+        }
+
+        .discount-row {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .discount-row input {
+          flex: 1;
+          padding: 0.8rem 1rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          outline: none;
+          background: white;
+        }
+
+        .btn-apply {
+          padding: 0 1.2rem;
+          background: white;
+          border: 1px solid #111;
+          border-radius: 8px;
+          font-weight: 500;
+          color: #111;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .btn-apply:hover {
+          background: #f1f5f9;
+        }
+
+        .divider {
+          border: 0;
+          height: 1px;
+          background: #e2e8f0;
+          margin: 1.5rem 0;
+        }
+
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.95rem;
+          color: #555;
+        }
+
+        .price-row.total-row {
+          font-size: 1.8rem;
+          color: #111;
+          font-weight: 700;
+          margin-top: 1rem;
+        }
+
+        .total-row .label {
+          font-size: 1.4rem;
+          font-weight: 500;
+        }
+
+        /* Modal backdrop for the temp step 2 */
+        .modal-backdrop {
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+        .modal-card {
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          width: 400px;
+          position: relative;
+        }
+        .close-btn {
+          position: absolute;
+          top: 1rem; right: 1rem;
+          background: none; border: none; font-size: 1.5rem; cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+          .checkout-container {
+            flex-direction: column-reverse;
+            gap: 2rem;
+          }
+          .checkout-summary-section {
+            width: 100%;
+          }
         }
       `}</style>
     </div>
