@@ -138,7 +138,7 @@ router.get('/my', requireAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const property = await prisma.property.findUnique({
-      where: { id: req.params.id },
+      where: { id: String(req.params.id) },
       include: {
         images: { orderBy: { position: 'asc' } },
         amenities: { include: { amenity: true } },
@@ -168,7 +168,7 @@ router.get('/:id', async (req, res) => {
 router.delete('/:id', requireAuth, requireOwnerOrAgency, async (req, res) => {
   try {
     const property = await prisma.property.findUnique({
-      where: { id: req.params.id }
+      where: { id: String(req.params.id) }
     });
 
     if (!property) {
@@ -181,7 +181,7 @@ router.delete('/:id', requireAuth, requireOwnerOrAgency, async (req, res) => {
     }
 
     await prisma.property.delete({
-      where: { id: req.params.id }
+      where: { id: String(req.params.id) }
     });
 
     res.json({ message: 'Propriété supprimée avec succès' });
