@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, CreditCard, Smartphone } from 'lucide-react';
 import { formatPrice } from '../config/monetization';
 import api from '../lib/api';
@@ -13,9 +13,23 @@ export default function Checkout() {
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
+  const [searchParams] = useSearchParams();
+  const urlStatus = searchParams.get('status');
+  const urlPaymentId = searchParams.get('payment_id');
+
   const { plan, type, propertyId } = location.state as { plan: any, type: string, propertyId?: string } || { plan: null, type: '' };
 
-  if (!plan) {
+  useEffect(() => {
+    if (urlStatus === 'success' && urlPaymentId) {
+      setStatus('SUCCESS');
+      setPaymentResult({ paymentId: urlPaymentId });
+    } else if (urlStatus === 'canceled') {
+      setStatus('FAILED');
+      setErrorMessage('Le paiement a été annulé.');
+    }
+  }, [urlStatus, urlPaymentId]);
+
+  if (!plan && status !== 'SUCCESS') {
     return (
       <div className="text-center mt-5">
         <h2>Aucun plan sélectionné</h2>
@@ -25,32 +39,40 @@ export default function Checkout() {
   }
 
   // Define payment type internally based on context
-  const paymentType = type.toLowerCase().includes('boost') ? 'BOOST' : 'SUBSCRIPTION';
+  const paymentType = type?.toLowerCase().includes('boost') ? 'BOOST' : 'SUBSCRIPTION';
 
-  const taxAmount = plan.price * 0.18; // 18% tax
-  const total = plan.price + taxAmount;
+  const taxAmount = (plan?.price || 0) * 0.18; // 18% tax
+  const total = (plan?.price || 0) + taxAmount;
 
   const handlePayment = async () => {
     setLoading(true);
     setErrorMessage('');
     
     try {
+      const selectedProvider = provider === 'Carte Bancaire' ? 'Stripe' : provider;
       // 1. Initialiser le paiement côté serveur (sécurisé)
       const initResponse = await api.post('/payments/checkout', {
         type: paymentType,
         planId: plan.id,
         propertyId,
-        provider
+        provider: selectedProvider
       });
       
-      const { paymentId } = initResponse.data;
+      const { paymentId, url } = initResponse.data;
+      
+      if (url) {
+        // Redirection vers Stripe
+        window.location.href = url;
+        return;
+      }
+
       setStatus('PENDING');
 
       // 2. Simuler le traitement par le fournisseur (car on n'a pas encore la vraie API OrangeMoney)
       setTimeout(async () => {
         try {
           // Simulation du Webhook
-          await api.post(`/payments/webhook/${provider.toLowerCase().replace(' ', '')}`, {
+          await api.post(`/payments/webhook/${selectedProvider.toLowerCase().replace(' ', '')}`, {
             paymentId,
             status: 'SUCCESS',
             providerTransactionId: 'TXN-' + Math.floor(Math.random() * 100000000)

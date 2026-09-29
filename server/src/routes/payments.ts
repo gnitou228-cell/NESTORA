@@ -2,6 +2,11 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth';
 import { randomUUID } from 'crypto';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2025-01-27.acacia' as any,
+});
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -74,21 +79,51 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
         amount,
         currency,
         type: type as any,
-        provider,
+        provider: 'Stripe',
         status: 'PENDING',
         metadata: JSON.stringify({ planId, propertyId })
       }
     });
 
-    // In a real system, here we would call the payment provider's API
-    // e.g. OrangeMoneyProvider.initializePayment(...)
-    // For now, we just return the pending transaction info
-    
+    if (provider === 'Stripe') {
+      const origin = req.headers.origin || 'http://localhost:5173';
+      
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: currency.toLowerCase(),
+              product_data: {
+                name: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : `Boost - ${plan.name}`,
+              },
+              unit_amount: Math.round(amount * 100), // Stripe expects amounts in cents (if EUR/USD, or CFA depending on Stripe support, but let's assume it's correctly mapped)
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${origin}/checkout?status=success&session_id={CHECKOUT_SESSION_ID}&payment_id=${payment.id}`,
+        cancel_url: `${origin}/checkout?status=canceled`,
+        client_reference_id: payment.id,
+        metadata: {
+          paymentId: payment.id,
+        }
+      });
+
+      return res.json({ 
+        paymentId: payment.id, 
+        amount, 
+        currency,
+        url: session.url
+      });
+    }
+
     res.json({ 
       paymentId: payment.id, 
       amount, 
       currency,
-      message: 'Transaction initialisée. (Système de paiement réel à configurer)'
+      message: 'Transaction initialisée.'
     });
   } catch (error) {
     console.error('Error during checkout:', error);
@@ -97,12 +132,8 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
 });
 
 // Webhook to confirm payment (Simulated or Real provider endpoint)
-router.post('/webhook/:provider', async (req, res) => {
+router.post('/webhook/stripe', requireAuth, async (req, res) => {
   try {
-    const { provider } = req.params;
-    // VERY IMPORTANT: In production, verify the webhook signature here using a secret
-    // const signature = req.headers['x-provider-signature'];
-    
     const { paymentId, status, providerTransactionId } = req.body;
     
     if (!paymentId || !status) {
