@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader } from 'lucide-react';
+import { LocationPicker } from '../components/LocationPicker';
 
 
 export default function Publish() {
@@ -57,7 +58,9 @@ export default function Publish() {
     surface: '',
     bedrooms: '',
     bathrooms: '',
-    amenities: [] as string[]
+    amenities: [] as string[],
+    latitude: null as number | null,
+    longitude: null as number | null
   });
 
   const [images, setImages] = useState<File[]>([]);
@@ -386,6 +389,15 @@ export default function Publish() {
             <div className="form-group mb-3">
               <label>Adresse complète (Facultatif)</label>
               <input type="text" name="address" className="form-control" value={formData.address} onChange={handleChange} placeholder="Ex: Rue 123, Porte 45" />
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Emplacement exact sur la carte (Recommandé)</label>
+              <p className="text-light" style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>Cliquez sur la carte pour placer un repère. La localisation restera approximative pour les visiteurs.</p>
+              <LocationPicker 
+                position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : null}
+                onChange={(lat, lng) => setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }))}
+              />
             </div>
           </div>
         )}

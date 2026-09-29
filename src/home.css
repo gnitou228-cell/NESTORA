@@ -556,3 +556,44 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ----------------- SEARCH PAGE MAP & LAYOUT ----------------- */
+.search-page-container {
+  display: flex;
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media (max-width: 992px) {
+  .search-page-container {
+    flex-direction: column;
+  }
+}
+
+.mobile-hide {
+  display: none !important;
+}
+
+@media (min-width: 993px) {
+  .mobile-hide {
+    display: block !important;
+  }
+  .desktop-only {
+    display: inline !important;
+  }
+  .search-mobile-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+.leaflet-container {
+  font-family: 'Inter', 'Manrope', system-ui, sans-serif;
+}

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, MapPin, Filter, ChevronLeft, ChevronRight, X, Loader } from 'lucide-react';
+import { Search, MapPin, Filter, ChevronLeft, ChevronRight, X, Loader, Map as MapIcon, List as ListIcon, Navigation } from 'lucide-react';
 import '../home.css';
 import PropertyCard from '../components/PropertyCard';
+import { NestoraMap } from '../components/Map';
 
 const AMENITIES_LIST = [
   "Parking", "Garage", "Jardin", "Piscine", "Terrasse", "Balcon",
@@ -42,13 +43,16 @@ export default function SearchPage() {
     maxArea: searchParams.get('maxArea') || '',
     amenities: searchParams.get('amenities') ? searchParams.get('amenities')!.split(',') : [],
     sort: searchParams.get('sort') || 'newest',
-    page: parseInt(searchParams.get('page') || '1')
+    page: parseInt(searchParams.get('page') || '1'),
+    bounds: searchParams.get('bounds') || ''
   });
 
   const [results, setResults] = useState<any[]>([]);
+  const [mapProperties, setMapProperties] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
   const [error, setError] = useState('');
 
   const [countries, setCountries] = useState<any[]>([]);
@@ -57,6 +61,10 @@ export default function SearchPage() {
   const [neighborhoods, setNeighborhoods] = useState<any[]>([]);
   
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([12.368, -1.527]);
+  const [mapZoom, setMapZoom] = useState(6);
 
   // Initial fetches
   useEffect(() => {
@@ -134,10 +142,41 @@ export default function SearchPage() {
     }
   };
 
+  const fetchMapProperties = async (params: URLSearchParams) => {
+    setMapLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/properties/map?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMapProperties(data || []);
+      }
+    } catch (err) {
+      console.error('Map fetch error', err);
+    } finally {
+      setMapLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        if (Array.isArray(value) && value.length > 0) {
+          params.set(key, value.join(','));
+        } else if (!Array.isArray(value)) {
+          params.set(key, String(value));
+        }
+      }
+    });
+    // fetch results and map separately to not block UI
+    fetchResults(params);
+    fetchMapProperties(params);
+  }, [searchParams]); // listen directly to searchParams instead of doing loop inside
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters(prev => {
-      const newFilters = { ...prev, [name]: value, page: 1 };
+      const newFilters = { ...prev, [name]: value, page: 1, bounds: '' }; // reset bounds on new search
       if (name === 'countryId') { newFilters.regionId = ''; newFilters.cityId = ''; newFilters.neighborhoodId = ''; }
       if (name === 'regionId') { newFilters.cityId = ''; newFilters.neighborhoodId = ''; }
       if (name === 'cityId') { newFilters.neighborhoodId = ''; }
@@ -171,8 +210,31 @@ export default function SearchPage() {
       q: '', countryId: '', regionId: '', cityId: '', neighborhoodId: '',
       transactionType: '', propertyType: '', minPrice: '', maxPrice: '',
       minBedrooms: '', minBathrooms: '', minArea: '', maxArea: '',
-      amenities: [], sort: 'newest', page: 1
+      amenities: [], sort: 'newest', page: 1, bounds: ''
     });
+  };
+
+  const handleBoundsChange = (bounds: string) => {
+    setFilters(prev => ({ ...prev, bounds, page: 1 }));
+  };
+
+  const handleLocateMe = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setUserLocation([lat, lng]);
+          setMapCenter([lat, lng]);
+          setMapZoom(12);
+        },
+        (error) => {
+          alert("La localisation n'est pas disponible. Vous pouvez rechercher manuellement une ville ou un quartier.");
+        }
+      );
+    } else {
+      alert("La localisation n'est pas supportée par votre navigateur.");
+    }
   };
 
   const handlePageChange = (newPage: number) => {
@@ -251,12 +313,15 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <div className="search-page-container">
-        {/* BOUTON MOBILE FILTRES */}
-        <div className="search-mobile-btn" style={{ width: '100%', marginBottom: '1rem' }}>
-          <button className="btn btn-outline btn-block" onClick={() => setShowMobileFilters(true)}>
+      <div className="search-page-container" style={{ position: 'relative' }}>
+        {/* BOUTON MOBILE FILTRES & VUES */}
+        <div className="search-mobile-btn" style={{ width: '100%', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={() => setShowMobileFilters(true)}>
             <Filter size={18} />
             Filtres ({activeFiltersCount})
+          </button>
+          <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}>
+            {viewMode === 'list' ? <><MapIcon size={18} /> Carte</> : <><ListIcon size={18} /> Liste</>}
           </button>
         </div>
 
@@ -405,27 +470,38 @@ export default function SearchPage() {
         </div>
 
         {/* RESULTATS */}
-        <div className="search-results-area">
+        <div className={`search-results-area ${viewMode === 'map' ? 'mobile-hide' : ''}`} style={{ flex: viewMode === 'list' ? '1 1 50%' : '1 1 100%' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
               {total > 0 ? `${total} annonce${total > 1 ? 's' : ''} trouvée${total > 1 ? 's' : ''}` : 'Recherche'}
             </h1>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }}>Trier par :</span>
-              <select name="sort" value={filters.sort} onChange={handleChange} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--color-border)', outline: 'none' }}>
-                <option value="newest">Plus récent</option>
-                <option value="price_asc">Prix croissant</option>
-                <option value="price_desc">Prix décroissant</option>
-                <option value="area_asc">Surface croissante</option>
-                <option value="area_desc">Surface décroissante</option>
-              </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button 
+                onClick={handleLocateMe}
+                className="btn btn-outline"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+              >
+                <Navigation size={18} /> Me localiser
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }} className="desktop-only">Trier par :</span>
+                <select name="sort" value={filters.sort} onChange={handleChange} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--color-border)', outline: 'none' }}>
+                  <option value="newest">Plus récent</option>
+                  <option value="price_asc">Prix croissant</option>
+                  <option value="price_desc">Prix décroissant</option>
+                  <option value="area_asc">Surface croissante</option>
+                  <option value="area_desc">Surface décroissante</option>
+                </select>
+              </div>
             </div>
           </div>
 
           {/* Active Filters Tags */}
           {activeFiltersCount > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              {/* ... (Tags) ... */}
               {filters.transactionType && (
                 <span className="badge badge-success" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   {filters.transactionType === 'RENT' ? 'Location' : 'Vente'}
@@ -460,6 +536,12 @@ export default function SearchPage() {
                 <span className="badge" style={{ backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   Max: {filters.maxPrice}
                   <X size={12} style={{ cursor: 'pointer' }} onClick={() => removeFilter('maxPrice')} />
+                </span>
+              )}
+              {filters.bounds && (
+                <span className="badge badge-danger" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  Zone sur la carte
+                  <X size={12} style={{ cursor: 'pointer' }} onClick={() => removeFilter('bounds')} />
                 </span>
               )}
               {filters.amenities.map(amenity => (
@@ -529,6 +611,18 @@ export default function SearchPage() {
             </>
           )}
         </div>
+
+        {/* SECTION CARTE (Droite sur Desktop, affichable sur mobile via ViewMode) */}
+        <div className={`map-container ${viewMode === 'list' ? 'mobile-hide' : ''}`} style={{ flex: '1 1 50%', height: 'calc(100vh - 120px)', position: 'sticky', top: '20px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          <NestoraMap 
+            properties={mapProperties}
+            center={mapCenter}
+            zoom={mapZoom}
+            onBoundsChange={handleBoundsChange}
+            showSearchHereButton={true}
+          />
+        </div>
+
       </div>
     </div>
   );

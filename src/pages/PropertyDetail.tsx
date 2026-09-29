@@ -3,8 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Move, Calendar, User, Building, 
   Heart, MessageCircle, Share2, X, ChevronLeft, 
-  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag
+  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag, Navigation
 } from 'lucide-react';
+import { NestoraMap } from '../components/Map';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import '../home.css';
@@ -543,6 +544,33 @@ const PropertyDetail = () => {
                       <span>{pa.amenity.name}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* LOCALISATION MAP */}
+            {property.latitude && property.longitude && (
+              <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+                <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Localisation</h3>
+                
+                <div style={{ marginBottom: '1rem', color: 'var(--color-text-dark)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <MapPin size={18} color="var(--color-accent)" />
+                  <span style={{ fontWeight: 600 }}>{property.city?.name}</span>
+                  {property.neighborhood?.name && (
+                    <span> - {property.neighborhood.name}</span>
+                  )}
+                </div>
+                
+                <div style={{ height: '350px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+                  <NestoraMap 
+                    properties={[property]}
+                    center={[property.latitude, property.longitude]}
+                    zoom={14}
+                  />
+                </div>
+                <div style={{ marginTop: '0.8rem', fontSize: '0.85rem', color: 'var(--color-text-light)', display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
+                  <AlertCircle size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <span>La localisation affichée est approximative pour protéger la confidentialité de l'annonceur.</span>
                 </div>
               </div>
             )}

@@ -23,6 +23,8 @@ router.post('/', requireAuth, requireOwnerOrAgency, async (req, res) => {
       cityId,
       neighborhoodId,
       address,
+      latitude,
+      longitude,
       images, // array of strings (URLs)
       amenities // array of strings (Amenity names or IDs)
     } = req.body;
@@ -52,6 +54,8 @@ router.post('/', requireAuth, requireOwnerOrAgency, async (req, res) => {
       cityId,
       neighborhoodId: neighborhoodId || null,
       address: address || null,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
       ownerId: req.user.id,
       status: PropertyStatus.PUBLISHED, // Direct publish for now
     };
@@ -134,6 +138,108 @@ router.get('/my', requireAuth, async (req, res) => {
   } catch (error: any) {
     console.error('Error fetching properties:', error);
     res.status(500).json({ message: 'Erreur lors de la récupération des propriétés' });
+  }
+});
+
+// GET /api/properties/map - Map specific search
+router.get('/map', async (req, res) => {
+  try {
+    const {
+      countryId,
+      regionId,
+      cityId,
+      neighborhoodId,
+      transactionType,
+      propertyType,
+      minPrice,
+      maxPrice,
+      minBedrooms,
+      minArea,
+      bounds, // format: "swLat,swLng,neLat,neLng"
+      latitude,
+      longitude,
+      radius // in kilometers
+    } = req.query;
+
+    const where: any = { 
+      status: PropertyStatus.PUBLISHED,
+      latitude: { not: null },
+      longitude: { not: null }
+    };
+
+    if (countryId) where.countryId = String(countryId);
+    if (regionId) where.regionId = String(regionId);
+    if (cityId) where.cityId = String(cityId);
+    if (neighborhoodId) where.neighborhoodId = String(neighborhoodId);
+    if (transactionType) where.transactionType = String(transactionType);
+    if (propertyType) where.propertyType = String(propertyType);
+
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = parseFloat(String(minPrice));
+      if (maxPrice) where.price.lte = parseFloat(String(maxPrice));
+    }
+    if (minBedrooms) where.bedrooms = { gte: parseInt(String(minBedrooms)) };
+    if (minArea) where.surface = { gte: parseFloat(String(minArea)) };
+
+    // Bounds filtering
+    if (bounds) {
+      const [swLat, swLng, neLat, neLng] = String(bounds).split(',').map(parseFloat);
+      if (!isNaN(swLat) && !isNaN(swLng) && !isNaN(neLat) && !isNaN(neLng)) {
+        where.latitude = { gte: swLat, lte: neLat };
+        where.longitude = { gte: swLng, lte: neLng };
+      }
+    }
+
+    const properties = await prisma.property.findMany({
+      where,
+      take: 500, // Limit to 500 for map performance
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        currency: true,
+        propertyType: true,
+        transactionType: true,
+        latitude: true,
+        longitude: true,
+        surface: true,
+        bedrooms: true,
+        city: { select: { name: true } },
+        neighborhood: { select: { name: true } },
+        images: { orderBy: { position: 'asc' }, take: 1, select: { url: true } }
+      }
+    });
+
+    // Handle Radius filtering in JS since Prisma doesn't support PostGIS directly out of the box without raw query
+    let filteredProperties = properties;
+    if (latitude && longitude && radius) {
+      const lat = parseFloat(String(latitude));
+      const lng = parseFloat(String(longitude));
+      const r = parseFloat(String(radius)); // in km
+
+      if (!isNaN(lat) && !isNaN(lng) && !isNaN(r)) {
+        filteredProperties = properties.filter(p => {
+          if (!p.latitude || !p.longitude) return false;
+          // Haversine formula
+          const R = 6371; // Radius of earth in km
+          const dLat = (p.latitude - lat) * (Math.PI/180);
+          const dLon = (p.longitude - lng) * (Math.PI/180);
+          const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat * (Math.PI/180)) * Math.cos(p.latitude * (Math.PI/180)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+          const distance = R * c;
+          return distance <= r;
+        });
+      }
+    }
+
+    res.json(filteredProperties);
+  } catch (error: any) {
+    console.error('Error in map search:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des propriétés pour la carte', error: error.message });
   }
 });
 
