@@ -4,12 +4,16 @@ import {
   FileText, Heart, Search as SearchIcon, FileQuestion, Users, Activity, LogOut, MapPin
 } from 'lucide-react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import NestoraLogo from './brand/NestoraLogo';
+import Footer from './Footer';
+import EditProfileModal from './forms/EditProfileModal';
 
 export default function Layout() {
   const { user, role, logout } = useAuth();
   const location = useLocation();
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   let menuItems = [];
 
@@ -70,13 +74,25 @@ export default function Layout() {
 
         <nav className="nav-menu">
           {menuItems.map((item, index) => (
-            <Link key={index} to={item.path} className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}>
-              {item.icon}
-              <span>{item.label}</span>
-              {item.badge && <span className="nav-badge">{item.badge}</span>}
-            </Link>
+            item.label === 'Profil' ? (
+              <button 
+                key={index} 
+                className={`nav-item ${showProfileModal ? 'active' : ''}`}
+                onClick={() => setShowProfileModal(true)} 
+                style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ) : (
+              <Link key={index} to={item.path} className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}>
+                {item.icon}
+                <span>{item.label}</span>
+                {item.badge && <span className="nav-badge">{item.badge}</span>}
+              </Link>
+            )
           ))}
-          <button className="nav-item text-danger" onClick={logout} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', marginTop: '1rem' }}>
+          <button className="nav-item text-danger" onClick={logout} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', marginTop: '1rem', fontFamily: 'inherit' }}>
             <LogOut size={20} />
             <span>Déconnexion</span>
           </button>
@@ -135,10 +151,20 @@ export default function Layout() {
             </div>
           </div>
         </header>
-        <main className="page-content">
+        <main className="page-content" style={{ minHeight: 'calc(100vh - 80px)', paddingBottom: '3rem' }}>
           <Outlet />
         </main>
+        <div className="layout-footer" style={{ marginTop: 'auto', borderTop: '1px solid var(--color-border)', backgroundColor: '#fff' }}>
+          <Footer />
+        </div>
       </div>
+      
+      {showProfileModal && (
+        <EditProfileModal 
+          onClose={() => setShowProfileModal(false)}
+          onSuccess={() => setShowProfileModal(false)}
+        />
+      )}
     </div>
   );
 }

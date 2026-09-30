@@ -144,7 +144,7 @@ export default function Checkout() {
     setErrorMessage('');
     
     try {
-      const selectedProvider = provider.includes('Carte') ? 'Stripe' : provider;
+      const selectedProvider = provider.includes('Carte') ? 'Stripe' : 'SaasPay';
       const initResponse = await api.post('/payments/checkout', {
         type: paymentType,
         planId: plan.id,

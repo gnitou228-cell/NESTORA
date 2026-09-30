@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { chartData, pieData } from '../data/mockData';
+import EditProfileModal from '../components/forms/EditProfileModal';
 
 export default function Dashboard() {
   const { role, user } = useAuth();
@@ -21,6 +22,7 @@ export default function Dashboard() {
 
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -353,7 +355,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <button className="btn btn-outline btn-block">Modifier mon profil</button>
+              <button className="btn btn-outline btn-block" onClick={() => setShowEditProfile(true)}>Modifier mon profil</button>
             </div>
           </div>
         </div>
@@ -496,6 +498,15 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      
+      {showEditProfile && (
+        <EditProfileModal 
+          onClose={() => setShowEditProfile(false)} 
+          onSuccess={() => {
+            setShowEditProfile(false);
+          }} 
+        />
+      )}
     </>
   );
 }

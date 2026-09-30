@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import NestoraLogo from './brand/NestoraLogo';
+import { useAuth } from '../context/AuthContext';
 import '../home.css';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,7 +20,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`public-navbar ${scrolled ? 'scrolled' : ''}`} style={!scrolled ? { backgroundColor: 'var(--color-primary)' } : {}}>
+      <nav className={`public-navbar ${scrolled ? 'scrolled' : ''}`}>
         <Link to="/" className="nav-brand" style={{ display: 'flex', alignItems: 'center' }}>
           <NestoraLogo size="small" />
         </Link>
@@ -33,8 +35,19 @@ export default function Navbar() {
         </div>
 
         <div className="nav-actions">
-          <Link to="/connexion" className="nav-login">Connexion</Link>
-          <Link to="/inscription" className="btn btn-outline" style={{ display: 'none' }}>Créer un compte</Link>
+          {user ? (
+            <Link to="/dashboard" className="nav-login" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <img 
+                src={user.profile?.avatar || `https://ui-avatars.com/api/?name=${user.profile?.firstName || 'User'}`} 
+                alt="Avatar" 
+                style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-border)' }} 
+              />
+              <span style={{ fontWeight: 600 }}>Mon espace</span>
+            </Link>
+          ) : (
+            <Link to="/connexion" className="nav-login">Connexion</Link>
+          )}
+          {!user && <Link to="/inscription" className="btn btn-outline" style={{ display: 'none' }}>Créer un compte</Link>}
           <Link to="/publier" className="btn btn-primary">Publier une annonce</Link>
           <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -51,8 +64,14 @@ export default function Navbar() {
         <Link to="/comment-ca-marche" onClick={() => setMobileMenuOpen(false)}>Comment ça marche</Link>
         <Link to="/tarifs" onClick={() => setMobileMenuOpen(false)}>Tarifs</Link>
         <hr className="divider" />
-        <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
-        <Link to="/inscription" onClick={() => setMobileMenuOpen(false)}>Créer un compte</Link>
+        {user ? (
+          <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>Mon espace</Link>
+        ) : (
+          <>
+            <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+            <Link to="/inscription" onClick={() => setMobileMenuOpen(false)}>Créer un compte</Link>
+          </>
+        )}
         <Link to="/publier" className="btn btn-primary text-center mt-2" onClick={() => setMobileMenuOpen(false)}>Publier une annonce</Link>
       </div>
     </>

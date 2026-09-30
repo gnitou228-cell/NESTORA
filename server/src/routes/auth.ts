@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../index';
 import { Role, UserStatus } from '@prisma/client';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey_change_in_production';
@@ -122,16 +123,11 @@ router.post('/login', async (req, res) => {
 });
 
 // Me (Get current user)
-router.get('/me', async (req, res) => {
+router.get('/me', requireAuth, async (req: any, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: 'Non autorisé' });
-
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-
+    const userId = req.user.id;
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: userId },
       include: { profile: true, agency: true }
     });
 
@@ -172,6 +168,37 @@ router.post('/verify-email', async (req, res) => {
     res.json({ message: 'Email vérifié avec succès.' });
   } catch (error: any) {
     res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Update Profile
+router.put('/profile', requireAuth, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { firstName, lastName, phone, bio, avatar, countryId, regionId, cityId, neighborhoodId, address } = req.body;
+
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      if (phone) {
+        const existing = await tx.user.findFirst({ where: { phone, id: { not: userId } } });
+        if (existing) throw new Error("Ce numéro de téléphone est déjà utilisé.");
+        await tx.user.update({ where: { id: userId }, data: { phone } });
+      }
+
+      await tx.profile.upsert({
+        where: { userId },
+        create: {
+          userId, firstName, lastName, bio, avatar, countryId, regionId, cityId, neighborhoodId, address
+        },
+        update: {
+          firstName, lastName, bio, avatar, countryId, regionId, cityId, neighborhoodId, address
+        }
+      });
+      return await tx.user.findUnique({ where: { id: userId }, include: { profile: true, agency: true } });
+    });
+
+    res.json({ message: "Profil mis à jour", user: updatedUser });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || "Erreur lors de la mise à jour du profil" });
   }
 });
 

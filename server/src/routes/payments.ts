@@ -120,6 +120,47 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
       });
     }
 
+    if (provider === 'SaasPay') {
+      const origin = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
+      
+      const { customerDetails } = req.body;
+      const countryCode = customerDetails?.country || 'CI';
+      
+      const payload = {
+        amount: amount.toFixed(2), // SasPay expects a string like "5000.00"
+        currency: currency,
+        description: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : `Boost - ${plan.name}`,
+        country: countryCode, 
+        customer_email: customerDetails?.email || req.user?.email || 'client@nestora.com',
+        customer_name: (customerDetails?.firstName || customerDetails?.lastName) 
+                        ? `${customerDetails.firstName || ''} ${customerDetails.lastName || ''}`.trim() 
+                        : `${req.user?.firstName || ''} ${req.user?.lastName || ''}`.trim() || 'Client Nestora',
+        reference: payment.id // Important pour retrouver le paiement dans le Webhook
+      };
+
+      const response = await fetch('https://api.saspay.me/api/v1/checkout-sessions/', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SAASPAY_API_KEY}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.checkout_url) {
+        return res.json({
+          paymentId: payment.id,
+          amount,
+          currency,
+          url: data.checkout_url
+        });
+      } else {
+        console.error('SaasPay error:', data);
+        return res.status(500).json({ error: 'Erreur lors de la création du lien SaasPay' });
+      }
+    }
     res.json({ 
       paymentId: payment.id, 
       amount, 
@@ -214,6 +255,111 @@ router.post('/webhook/stripe', requireAuth, async (req, res) => {
     res.json({ message: 'Webhook traité avec succès' });
   } catch (error) {
     console.error('Webhook error:', error);
+    res.status(500).json({ error: 'Erreur interne' });
+  }
+});
+
+// Webhook for SasPay
+router.post('/webhook/saaspay', async (req, res) => {
+  try {
+    const { event, data } = req.body;
+    
+    // SasPay n'envoie que transaction.success ou transaction.failed (entre autres)
+    if (!event || !data) {
+      return res.status(400).json({ error: 'Format invalide' });
+    }
+
+    // Nous utiliserons la "reference" pour stocker notre paymentId lors de la création
+    const paymentId = data.reference; 
+    const paymentStatus = data.status; // 'SUCCESS', 'FAILED', etc.
+    
+    if (!paymentId) {
+      return res.status(400).json({ error: 'Reference manquante' });
+    }
+
+    const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
+    if (!payment) return res.status(404).json({ error: 'Paiement non trouvé' });
+    if (payment.status !== 'PENDING') return res.json({ message: 'Paiement déjà traité' }); // Idempotency
+
+    // TODO: Sécurité - Idéalement, vérifier la signature X-Webhook-Signature ici 
+    // avec le PAYMENT_WEBHOOK_SECRET comme indiqué dans la doc SasPay.
+    
+    // Sécurité supplémentaire: vérifier le statut réel sur la passerelle
+    const verifyResponse = await fetch(`https://api.saspay.me/api/v1/payments/${data.id}/verify/`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.SAASPAY_API_KEY}`
+      }
+    });
+    const verifyData = await verifyResponse.json();
+
+    if (event === 'transaction.success' && paymentStatus === 'SUCCESS' && verifyData.status === 'SUCCESS') {
+      await prisma.payment.update({
+        where: { id: paymentId },
+        data: { 
+          status: 'SUCCESS',
+          providerTransactionId: data.id // L'ID réel côté SasPay
+        }
+      });
+
+      // Generate invoice
+      const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      await prisma.invoice.create({
+        data: {
+          userId: payment.userId,
+          paymentId: payment.id,
+          invoiceNumber,
+          amount: payment.amount,
+          currency: payment.currency,
+          status: 'PAID'
+        }
+      });
+
+      const meta = JSON.parse(payment.metadata || '{}');
+
+      // Create Subscription or Boost
+      if (payment.type === 'SUBSCRIPTION') {
+        const plan = await prisma.subscriptionPlan.findUnique({ where: { id: meta.planId } });
+        if (plan) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + plan.duration);
+
+          await prisma.subscription.create({
+            data: {
+              userId: payment.userId,
+              planId: plan.id,
+              status: 'ACTIVE',
+              endDate
+            }
+          });
+        }
+      } else if (payment.type === 'BOOST') {
+        const plan = await prisma.boostPlan.findUnique({ where: { id: meta.planId } });
+        if (plan && meta.propertyId) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + plan.duration);
+
+          await prisma.boost.create({
+            data: {
+              userId: payment.userId,
+              propertyId: meta.propertyId,
+              planId: plan.id,
+              status: 'ACTIVE',
+              endDate
+            }
+          });
+        }
+      }
+    } else {
+      // Payment failed
+      await prisma.payment.update({
+        where: { id: paymentId },
+        data: { status: 'FAILED' }
+      });
+    }
+
+    res.json({ message: 'Webhook SaasPay traité avec succès' });
+  } catch (error) {
+    console.error('SaasPay Webhook error:', error);
     res.status(500).json({ error: 'Erreur interne' });
   }
 });

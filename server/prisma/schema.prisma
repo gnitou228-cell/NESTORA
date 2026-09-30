@@ -3,9 +3,475 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  phone               String?              @unique
+  password            String?
+  role                Role
+  status              UserStatus           @default(ACTIVE)
+  emailVerified       Boolean              @default(false)
+  phoneVerified       Boolean              @default(false)
+  lastLoginAt         DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  adminLogs           AdminAuditLog[]      @relation("AdminAuditLogs")
+  agency              Agency?              @relation("AgencyOwner")
+  agencyMember        AgencyMember?
+  boosts              Boost[]
+  conversationMembers ConversationMember[]
+  favorites           Favorite[]
+  housingReqs         HousingRequest[]
+  invoices            Invoice[]
+  messagesSent        Message[]
+  notifications       Notification[]
+  payments            Payment[]
+  profile             Profile?
+  properties          Property[]
+  reportsReceived     Report[]             @relation("ReportedUser")
+  reportsMade         Report[]             @relation("ReportedBy")
+  subscriptions       Subscription[]
+  verifications       Verification[]
+  visits              Visit[]              @relation("VisitRequester")
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+model Profile {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  firstName      String
+  lastName       String
+  avatar         String?
+  countryId      String?
+  regionId       String?
+  cityId         String?
+  neighborhoodId String?
+  address        String?
+  bio            String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  city           City?         @relation(fields: [cityId], references: [id])
+  country        Country?      @relation(fields: [countryId], references: [id])
+  neighborhood   Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  region         Region?       @relation(fields: [regionId], references: [id])
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agency {
+  id                 String             @id @default(uuid())
+  ownerUserId        String             @unique
+  name               String
+  logo               String?
+  phone              String
+  email              String             @unique
+  address            String?
+  countryId          String?
+  regionId           String?
+  cityId             String?
+  neighborhoodId     String?
+  description        String?
+  registrationNumber String?
+  website            String?
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  city               City?              @relation(fields: [cityId], references: [id])
+  country            Country?           @relation(fields: [countryId], references: [id])
+  neighborhood       Neighborhood?      @relation(fields: [neighborhoodId], references: [id])
+  owner              User               @relation("AgencyOwner", fields: [ownerUserId], references: [id])
+  region             Region?            @relation(fields: [regionId], references: [id])
+  members            AgencyMember[]
+  properties         Property[]
+  subscriptions      Subscription[]
+  verifications      Verification[]
+  visits             Visit[]
+
+  @@index([ownerUserId])
+  @@index([countryId])
+  @@index([cityId])
+}
+
+model AgencyMember {
+  id        String     @id @default(uuid())
+  agencyId  String
+  userId    String     @unique
+  role      Role       @default(AGENT)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  agency    Agency     @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Country {
+  id             String           @id @default(uuid())
+  name           String
+  code           String           @unique
+  phoneCode      String
+  currency       String
+  currencySymbol String
+  continent      String           @default("Africa")
+  active         Boolean          @default(true)
+  agencies       Agency[]
+  housingReqs    HousingRequest[]
+  profiles       Profile[]
+  properties     Property[]
+  regions        Region[]
+}
+
+model Region {
+  id          String           @id @default(uuid())
+  countryId   String
+  name        String
+  code        String?
+  active      Boolean          @default(true)
+  agencies    Agency[]
+  cities      City[]
+  housingReqs HousingRequest[]
+  profiles    Profile[]
+  properties  Property[]
+  country     Country          @relation(fields: [countryId], references: [id], onDelete: Cascade)
+}
+
+model City {
+  id            String           @id @default(uuid())
+  regionId      String
+  name          String
+  active        Boolean          @default(true)
+  agencies      Agency[]
+  region        Region           @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  housingReqs   HousingRequest[]
+  neighborhoods Neighborhood[]
+  profiles      Profile[]
+  properties    Property[]
+}
+
+model Neighborhood {
+  id          String           @id @default(uuid())
+  cityId      String
+  name        String
+  active      Boolean          @default(true)
+  agencies    Agency[]
+  housingReqs HousingRequest[]
+  city        City             @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  profiles    Profile[]
+  properties  Property[]
+}
+
+model Property {
+  id                 String             @id @default(uuid())
+  ownerId            String
+  agencyId           String?
+  title              String
+  description        String
+  transactionType    TransactionType
+  propertyType       PropertyType
+  price              Float
+  currency           String
+  surface            Float?
+  bedrooms           Int?
+  bathrooms          Int?
+  countryId          String
+  regionId           String
+  cityId             String
+  neighborhoodId     String?
+  address            String?
+  latitude           Float?
+  longitude          Float?
+  status             PropertyStatus     @default(DRAFT)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  publishedAt        DateTime?
+  expiresAt          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  boosts             Boost[]
+  conversations      Conversation[]
+  favorites          Favorite[]
+  agency             Agency?            @relation(fields: [agencyId], references: [id])
+  city               City               @relation(fields: [cityId], references: [id])
+  country            Country            @relation(fields: [countryId], references: [id])
+  neighborhood       Neighborhood?      @relation(fields: [neighborhoodId], references: [id])
+  owner              User               @relation(fields: [ownerId], references: [id])
+  region             Region             @relation(fields: [regionId], references: [id])
+  amenities          PropertyAmenity[]
+  images             PropertyImage[]
+  reports            Report[]
+  verifications      Verification[]
+  visits             Visit[]
+
+  @@index([ownerId])
+  @@index([transactionType])
+  @@index([propertyType])
+  @@index([cityId])
+  @@index([status])
+  @@index([price])
+  @@index([createdAt])
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String
+  url        String
+  storageKey String?
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model HousingRequest {
+  id              String           @id @default(uuid())
+  seekerId        String
+  title           String
+  description     String
+  transactionType TransactionType
+  propertyType    PropertyType
+  countryId       String
+  regionId        String
+  cityId          String
+  neighborhoodId  String?
+  minPrice        Float?
+  maxPrice        Float?
+  bedrooms        Int?
+  status          HousingReqStatus @default(DRAFT)
+  publishedAt     DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  city            City             @relation(fields: [cityId], references: [id])
+  country         Country          @relation(fields: [countryId], references: [id])
+  neighborhood    Neighborhood?    @relation(fields: [neighborhoodId], references: [id])
+  region          Region           @relation(fields: [regionId], references: [id])
+  seeker          User             @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+}
+
+model Conversation {
+  id         String               @id @default(uuid())
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  propertyId String?
+  property   Property?            @relation(fields: [propertyId], references: [id])
+  members    ConversationMember[]
+  messages   Message[]
+}
+
+model ConversationMember {
+  conversationId String
+  userId         String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Visit {
+  id            String      @id @default(uuid())
+  propertyId    String
+  requesterId   String
+  agencyId      String?
+  requestedDate DateTime
+  requestedTime String
+  status        VisitStatus @default(PENDING)
+  message       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  agency        Agency?     @relation(fields: [agencyId], references: [id])
+  property      Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  requester     User        @relation("VisitRequester", fields: [requesterId], references: [id])
+}
+
+model SubscriptionPlan {
+  id            String         @id @default(uuid())
+  name          String
+  targetRole    Role
+  duration      Int
+  price         Float
+  currency      String
+  features      String?
+  popular       Boolean        @default(false)
+  active        Boolean        @default(true)
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  userId    String
+  agencyId  String?
+  planId    String
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  autoRenew Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  agency    Agency?            @relation(fields: [agencyId], references: [id])
+  plan      SubscriptionPlan   @relation(fields: [planId], references: [id])
+  user      User               @relation(fields: [userId], references: [id])
+}
+
+model BoostPlan {
+  id       String  @id @default(uuid())
+  name     String
+  duration Int
+  price    Float
+  currency String
+  active   Boolean @default(true)
+  boosts   Boost[]
+}
+
+model Boost {
+  id         String      @id @default(uuid())
+  propertyId String
+  userId     String
+  planId     String
+  status     BoostStatus @default(ACTIVE)
+  startDate  DateTime    @default(now())
+  endDate    DateTime
+  createdAt  DateTime    @default(now())
+  plan       BoostPlan   @relation(fields: [planId], references: [id])
+  property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  userId                String
+  amount                Float
+  currency              String
+  type                  PaymentType
+  provider              String
+  providerTransactionId String?
+  status                PaymentStatus @default(PENDING)
+  metadata              String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  invoice               Invoice?
+  user                  User          @relation(fields: [userId], references: [id])
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  userId        String
+  paymentId     String        @unique
+  invoiceNumber String        @unique
+  amount        Float
+  currency      String
+  status        InvoiceStatus @default(ISSUED)
+  issuedAt      DateTime      @default(now())
+  payment       Payment       @relation(fields: [paymentId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Amenity {
+  id         String            @id @default(uuid())
+  name       String            @unique
+  icon       String?
+  properties PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  propertyId String
+  amenityId  String
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, amenityId])
+}
+
+model Report {
+  id             String         @id @default(uuid())
+  reporterUserId String
+  propertyId     String?
+  reportedUserId String?
+  category       ReportCategory
+  description    String
+  status         ReportStatus   @default(PENDING)
+  adminNote      String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  property       Property?      @relation(fields: [propertyId], references: [id])
+  reportedUser   User?          @relation("ReportedUser", fields: [reportedUserId], references: [id])
+  reporter       User           @relation("ReportedBy", fields: [reporterUserId], references: [id])
+
+  @@index([reporterUserId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model Verification {
+  id         String             @id @default(uuid())
+  userId     String?
+  agencyId   String?
+  propertyId String?
+  type       VerificationType
+  status     VerificationStatus @default(PENDING)
+  verifiedAt DateTime?
+  reviewedBy String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  agency     Agency?            @relation(fields: [agencyId], references: [id])
+  property   Property?          @relation(fields: [propertyId], references: [id])
+  user       User?              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([agencyId])
+  @@index([propertyId])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String
+  entityType String
+  entityId   String
+  oldValue   String?
+  newValue   String?
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([entityType, entityId])
 }
 
 enum Role {
@@ -23,178 +489,11 @@ enum UserStatus {
   BANNED
 }
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  phone         String?   @unique
-  password      String?
-  role          Role
-  status        UserStatus @default(ACTIVE)
-  emailVerified Boolean   @default(false)
-  phoneVerified Boolean   @default(false)
-  
-  profile       Profile?
-  agency        Agency?   @relation("AgencyOwner")
-  agencyMember  AgencyMember?
-  properties    Property[]
-  favorites     Favorite[]
-  messagesSent  Message[]
-  visits        Visit[]   @relation("VisitRequester")
-  subscriptions Subscription[]
-  boosts        Boost[]
-  payments      Payment[]
-  invoices      Invoice[]
-  notifications Notification[]
-  housingReqs   HousingRequest[]
-  reportsMade   Report[]  @relation("ReportedBy")
-  reportsReceived Report[] @relation("ReportedUser")
-  verifications Verification[]
-  conversationMembers ConversationMember[]
-  adminLogs     AdminAuditLog[] @relation("AdminAuditLogs")
-
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@index([email])
-  @@index([role])
-  @@index([status])
-}
-
-model Profile {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String   @unique
-  firstName   String
-  lastName    String
-  avatar      String?
-  countryId   String?
-  regionId    String?
-  cityId      String?
-  neighborhoodId String?
-  address     String?
-  bio         String?
-  
-  country     Country? @relation(fields: [countryId], references: [id])
-  region      Region?  @relation(fields: [regionId], references: [id])
-  city        City?    @relation(fields: [cityId], references: [id])
-  neighborhood Neighborhood? @relation(fields: [neighborhoodId], references: [id])
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 enum VerificationStatus {
   UNVERIFIED
   PENDING
   VERIFIED
   REJECTED
-}
-
-model Agency {
-  id                 String   @id @default(uuid())
-  owner              User     @relation("AgencyOwner", fields: [ownerUserId], references: [id])
-  ownerUserId        String   @unique
-  name               String
-  logo               String?
-  phone              String
-  email              String   @unique
-  address            String?
-  countryId          String?
-  regionId           String?
-  cityId             String?
-  neighborhoodId     String?
-  description        String?
-  registrationNumber String?
-  website            String?
-  verificationStatus VerificationStatus @default(UNVERIFIED)
-  
-  country            Country? @relation(fields: [countryId], references: [id])
-  region             Region?  @relation(fields: [regionId], references: [id])
-  city               City?    @relation(fields: [cityId], references: [id])
-  neighborhood       Neighborhood? @relation(fields: [neighborhoodId], references: [id])
-  members            AgencyMember[]
-  properties         Property[]
-  subscriptions      Subscription[]
-  visits             Visit[]
-  verifications      Verification[]
-
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  @@index([ownerUserId])
-  @@index([countryId])
-  @@index([cityId])
-}
-
-model AgencyMember {
-  id        String   @id @default(uuid())
-  agency    Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-  agencyId  String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String   @unique
-  role      Role     @default(AGENT)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime @default(now())
-}
-
-model Country {
-  id             String    @id @default(uuid())
-  name           String
-  code           String    @unique
-  phoneCode      String
-  currency       String
-  currencySymbol String
-  continent      String    @default("Africa")
-  active         Boolean   @default(true)
-  
-  regions        Region[]
-  profiles       Profile[]
-  agencies       Agency[]
-  properties     Property[]
-  housingReqs    HousingRequest[]
-}
-
-model Region {
-  id           String    @id @default(uuid())
-  country      Country   @relation(fields: [countryId], references: [id], onDelete: Cascade)
-  countryId    String
-  name         String
-  code         String?
-  active       Boolean   @default(true)
-  
-  cities       City[]
-  profiles     Profile[]
-  agencies     Agency[]
-  properties   Property[]
-  housingReqs  HousingRequest[]
-}
-
-model City {
-  id           String    @id @default(uuid())
-  region       Region    @relation(fields: [regionId], references: [id], onDelete: Cascade)
-  regionId     String
-  name         String
-  active       Boolean   @default(true)
-  
-  neighborhoods Neighborhood[]
-  profiles      Profile[]
-  agencies      Agency[]
-  properties    Property[]
-  housingReqs   HousingRequest[]
-}
-
-model Neighborhood {
-  id           String    @id @default(uuid())
-  city         City      @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  cityId       String
-  name         String
-  active       Boolean   @default(true)
-  
-  profiles     Profile[]
-  agencies     Agency[]
-  properties   Property[]
-  housingReqs  HousingRequest[]
 }
 
 enum TransactionType {
@@ -222,152 +521,12 @@ enum PropertyStatus {
   ARCHIVED
 }
 
-model Property {
-  id                 String          @id @default(uuid())
-  owner              User            @relation(fields: [ownerId], references: [id])
-  ownerId            String
-  agency             Agency?         @relation(fields: [agencyId], references: [id])
-  agencyId           String?
-  
-  title              String
-  description        String
-  transactionType    TransactionType
-  propertyType       PropertyType
-  price              Float
-  currency           String
-  surface            Float?
-  bedrooms           Int?
-  bathrooms          Int?
-  
-  country            Country         @relation(fields: [countryId], references: [id])
-  countryId          String
-  region             Region          @relation(fields: [regionId], references: [id])
-  regionId           String
-  city               City            @relation(fields: [cityId], references: [id])
-  cityId             String
-  neighborhood       Neighborhood?   @relation(fields: [neighborhoodId], references: [id])
-  neighborhoodId     String?
-  address            String?
-  latitude           Float?
-  longitude          Float?
-  
-  status             PropertyStatus  @default(DRAFT)
-  verificationStatus VerificationStatus @default(UNVERIFIED)
-  
-  publishedAt        DateTime?
-  expiresAt          DateTime?
-  
-  images             PropertyImage[]
-  favorites          Favorite[]
-  visits             Visit[]
-  boosts             Boost[]
-  amenities          PropertyAmenity[]
-  reports            Report[]
-  verifications      Verification[]
-  conversations      Conversation[]
-
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-
-  @@index([ownerId])
-  @@index([transactionType])
-  @@index([propertyType])
-  @@index([cityId])
-  @@index([status])
-  @@index([price])
-  @@index([createdAt])
-}
-
-model PropertyImage {
-  id         String   @id @default(uuid())
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId String
-  url        String
-  storageKey String?
-  position   Int      @default(0)
-  createdAt  DateTime @default(now())
-}
-
 enum HousingReqStatus {
   DRAFT
   PENDING
   PUBLISHED
   EXPIRED
   ARCHIVED
-}
-
-model HousingRequest {
-  id              String          @id @default(uuid())
-  seeker          User            @relation(fields: [seekerId], references: [id], onDelete: Cascade)
-  seekerId        String
-  
-  title           String
-  description     String
-  transactionType TransactionType
-  propertyType    PropertyType
-  
-  country         Country         @relation(fields: [countryId], references: [id])
-  countryId       String
-  region          Region          @relation(fields: [regionId], references: [id])
-  regionId        String
-  city            City            @relation(fields: [cityId], references: [id])
-  cityId          String
-  neighborhood    Neighborhood?   @relation(fields: [neighborhoodId], references: [id])
-  neighborhoodId  String?
-  
-  minPrice        Float?
-  maxPrice        Float?
-  bedrooms        Int?
-  
-  status          HousingReqStatus @default(DRAFT)
-  publishedAt     DateTime?
-  expiresAt       DateTime?
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-}
-
-model Favorite {
-  id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId String
-  createdAt  DateTime @default(now())
-
-  @@unique([userId, propertyId])
-}
-
-model Conversation {
-  id         String   @id @default(uuid())
-  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  propertyId String?
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
-  members    ConversationMember[]
-  messages   Message[]
-}
-
-model ConversationMember {
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  conversationId String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  
-  @@id([conversationId, userId])
-}
-
-model Message {
-  id             String       @id @default(uuid())
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  conversationId String
-  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  senderId       String
-  content        String
-  readAt         DateTime?
-  createdAt      DateTime     @default(now())
 }
 
 enum VisitStatus {
@@ -379,38 +538,6 @@ enum VisitStatus {
   COMPLETED
 }
 
-model Visit {
-  id            String      @id @default(uuid())
-  property      Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId    String
-  requester     User        @relation("VisitRequester", fields: [requesterId], references: [id])
-  requesterId   String
-  agency        Agency?     @relation(fields: [agencyId], references: [id])
-  agencyId      String?
-  
-  requestedDate DateTime
-  requestedTime String
-  status        VisitStatus @default(PENDING)
-  message       String?
-  
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-}
-
-model SubscriptionPlan {
-  id            String   @id @default(uuid())
-  name          String
-  targetRole    Role
-  duration      Int      // in days
-  price         Float
-  currency      String
-  features      String?  // JSON string
-  popular       Boolean  @default(false)
-  active        Boolean  @default(true)
-  
-  subscriptions Subscription[]
-}
-
 enum SubscriptionStatus {
   ACTIVE
   CANCELED
@@ -418,55 +545,10 @@ enum SubscriptionStatus {
   PAST_DUE
 }
 
-model Subscription {
-  id        String             @id @default(uuid())
-  user      User               @relation(fields: [userId], references: [id])
-  userId    String
-  agency    Agency?            @relation(fields: [agencyId], references: [id])
-  agencyId  String?
-  plan      SubscriptionPlan   @relation(fields: [planId], references: [id])
-  planId    String
-  
-  status    SubscriptionStatus @default(ACTIVE)
-  startDate DateTime           @default(now())
-  endDate   DateTime
-  autoRenew Boolean            @default(true)
-  
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-}
-
-model BoostPlan {
-  id       String  @id @default(uuid())
-  name     String
-  duration Int     // in days
-  price    Float
-  currency String
-  active   Boolean @default(true)
-  
-  boosts   Boost[]
-}
-
 enum BoostStatus {
   ACTIVE
   EXPIRED
   CANCELLED
-}
-
-model Boost {
-  id         String      @id @default(uuid())
-  property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId String
-  user       User        @relation(fields: [userId], references: [id])
-  userId     String
-  plan       BoostPlan   @relation(fields: [planId], references: [id])
-  planId     String
-  
-  status     BoostStatus @default(ACTIVE)
-  startDate  DateTime    @default(now())
-  endDate    DateTime
-  
-  createdAt  DateTime    @default(now())
 }
 
 enum PaymentType {
@@ -483,42 +565,11 @@ enum PaymentStatus {
   REFUNDED
 }
 
-model Payment {
-  id                    String        @id @default(uuid())
-  user                  User          @relation(fields: [userId], references: [id])
-  userId                String
-  amount                Float
-  currency              String
-  type                  PaymentType
-  provider              String
-  providerTransactionId String?
-  status                PaymentStatus @default(PENDING)
-  metadata              String?       // JSON string
-  
-  invoice               Invoice?
-  
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-}
-
 enum InvoiceStatus {
   DRAFT
   ISSUED
   PAID
   VOID
-}
-
-model Invoice {
-  id            String        @id @default(uuid())
-  user          User          @relation(fields: [userId], references: [id])
-  userId        String
-  payment       Payment       @relation(fields: [paymentId], references: [id])
-  paymentId     String        @unique
-  invoiceNumber String        @unique
-  amount        Float
-  currency      String
-  status        InvoiceStatus @default(ISSUED)
-  issuedAt      DateTime      @default(now())
 }
 
 enum NotificationType {
@@ -532,39 +583,6 @@ enum NotificationType {
   SUBSCRIPTION_EXPIRING
   NEW_MESSAGE
   NEW_VISIT_REQUEST
-}
-
-model Notification {
-  id        String           @id @default(uuid())
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  type      NotificationType
-  title     String
-  message   String
-  read      Boolean          @default(false)
-  createdAt DateTime         @default(now())
-
-  @@index([userId])
-}
-
-// -----------------------------------------
-// NOUVEAUX MODÈLES (ÉTAPE 5)
-// -----------------------------------------
-
-model Amenity {
-  id          String            @id @default(uuid())
-  name        String            @unique
-  icon        String?
-  properties  PropertyAmenity[]
-}
-
-model PropertyAmenity {
-  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId  String
-  amenity     Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
-  amenityId   String
-
-  @@id([propertyId, amenityId])
 }
 
 enum ReportCategory {
@@ -582,28 +600,6 @@ enum ReportStatus {
   DISMISSED
 }
 
-model Report {
-  id               String          @id @default(uuid())
-  reporter         User            @relation("ReportedBy", fields: [reporterUserId], references: [id])
-  reporterUserId   String
-  property         Property?       @relation(fields: [propertyId], references: [id])
-  propertyId       String?
-  reportedUser     User?           @relation("ReportedUser", fields: [reportedUserId], references: [id])
-  reportedUserId   String?
-  
-  category         ReportCategory
-  description      String
-  status           ReportStatus    @default(PENDING)
-  adminNote        String?
-  
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  
-  @@index([reporterUserId])
-  @@index([propertyId])
-  @@index([status])
-}
-
 enum VerificationType {
   PHONE
   EMAIL
@@ -611,41 +607,3 @@ enum VerificationType {
   AGENCY
   PROPERTY
 }
-
-model Verification {
-  id           String             @id @default(uuid())
-  user         User?              @relation(fields: [userId], references: [id])
-  userId       String?
-  agency       Agency?            @relation(fields: [agencyId], references: [id])
-  agencyId     String?
-  property     Property?          @relation(fields: [propertyId], references: [id])
-  propertyId   String?
-  
-  type         VerificationType
-  status       VerificationStatus @default(PENDING)
-  verifiedAt   DateTime?
-  reviewedBy   String?            // Admin user id
-  
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  
-  @@index([userId])
-  @@index([agencyId])
-  @@index([propertyId])
-}
-
-model AdminAuditLog {
-  id             String   @id @default(uuid())
-  adminId        String
-  admin          User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
-  action         String
-  entityType     String
-  entityId       String
-  oldValue       String?
-  newValue       String?
-  createdAt      DateTime @default(now())
-
-  @@index([adminId])
-  @@index([entityType, entityId])
-}
-

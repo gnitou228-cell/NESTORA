@@ -9,10 +9,13 @@ export interface User {
   role: Role;
   status: string;
   emailVerified: boolean;
+  phone?: string;
   profile?: {
     firstName: string;
     lastName: string;
     avatar?: string;
+    bio?: string;
+    address?: string;
   };
   agency?: {
     name: string;
@@ -26,6 +29,7 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   checkSession: () => Promise<void>;
+  updateUser: (user: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,41 +51,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Récupérer le profil pour avoir le rôle exact
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      let currentRole: Role = 'SEEKER';
-      let firstName = '';
-      let lastName = '';
+      // Récupérer le profil complet depuis le backend
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
       
-      if (profile) {
-        currentRole = profile.role as Role;
-        firstName = profile.first_name;
-        lastName = profile.last_name;
-      } else if (session.user.user_metadata?.role) {
-        currentRole = session.user.user_metadata.role as Role;
-        firstName = session.user.user_metadata.first_name || '';
-        lastName = session.user.user_metadata.last_name || '';
+      if (res.ok) {
+        const { user: dbUser } = await res.json();
+        
+        const userData: User = {
+          id: dbUser.id,
+          email: dbUser.email,
+          role: dbUser.role as Role,
+          status: dbUser.status,
+          emailVerified: dbUser.emailVerified || !!session.user.email_confirmed_at,
+          phone: dbUser.phone,
+          profile: dbUser.profile ? {
+            firstName: dbUser.profile.firstName,
+            lastName: dbUser.profile.lastName,
+            avatar: dbUser.profile.avatar,
+            bio: dbUser.profile.bio,
+            address: dbUser.profile.address
+          } : undefined,
+          agency: dbUser.agency ? {
+            name: dbUser.agency.name
+          } : undefined
+        };
+
+        setUser(userData);
+        setRole(userData.role);
+      } else {
+        // Fallback en cas d'erreur de l'API
+        const fallbackRole = session.user.user_metadata?.role || 'SEEKER';
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          role: fallbackRole as Role,
+          status: 'ACTIVE',
+          emailVerified: !!session.user.email_confirmed_at,
+          profile: {
+            firstName: session.user.user_metadata?.first_name || '',
+            lastName: session.user.user_metadata?.last_name || '',
+          }
+        });
+        setRole(fallbackRole as Role);
       }
-
-      const userData: User = {
-        id: session.user.id,
-        email: session.user.email || '',
-        role: currentRole,
-        status: 'ACTIVE',
-        emailVerified: !!session.user.email_confirmed_at,
-        profile: {
-          firstName,
-          lastName,
-        }
-      };
-
-      setUser(userData);
-      setRole(currentRole);
     } catch (err) {
       console.error('Session check failed', err);
       setUser(null);
@@ -89,6 +103,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateUser = (updatedUserData: any) => {
+    // Adapter le modèle renvoyé par le backend
+    const userData: User = {
+      id: updatedUserData.id,
+      email: updatedUserData.email,
+      role: updatedUserData.role as Role,
+      status: updatedUserData.status,
+      emailVerified: updatedUserData.emailVerified,
+      phone: updatedUserData.phone,
+      profile: updatedUserData.profile ? {
+        firstName: updatedUserData.profile.firstName,
+        lastName: updatedUserData.profile.lastName,
+        avatar: updatedUserData.profile.avatar,
+        bio: updatedUserData.profile.bio,
+        address: updatedUserData.profile.address
+      } : undefined,
+      agency: updatedUserData.agency ? {
+        name: updatedUserData.agency.name
+      } : undefined
+    };
+    setUser(userData);
+    setRole(userData.role);
   };
 
   useEffect(() => {
@@ -122,7 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, loading, login, logout, checkSession }}>
+    <AuthContext.Provider value={{ user, role, loading, login, logout, checkSession, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
