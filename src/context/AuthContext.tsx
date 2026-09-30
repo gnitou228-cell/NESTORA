@@ -15,8 +15,11 @@ export interface User {
     lastName: string;
     avatar?: string;
     bio?: string;
+    birthDate?: string;
+    idDocumentType?: string;
     address?: string;
     documentUrl?: string;
+    documentBackUrl?: string;
     selfieUrl?: string;
   };
   agency?: {
@@ -73,8 +76,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             lastName: dbUser.profile.lastName,
             avatar: dbUser.profile.avatar,
             bio: dbUser.profile.bio,
+            birthDate: dbUser.profile.birthDate,
+            idDocumentType: dbUser.profile.idDocumentType,
             address: dbUser.profile.address,
             documentUrl: dbUser.profile.documentUrl,
+            documentBackUrl: dbUser.profile.documentBackUrl,
             selfieUrl: dbUser.profile.selfieUrl
           } : undefined,
           agency: dbUser.agency ? {

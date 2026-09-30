@@ -6,7 +6,7 @@ import {
   ChevronRight, CheckCircle2, AlertCircle, Loader, Flag
 } from 'lucide-react';
 import { NestoraMap } from '../components/Map';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import '../home.css';
 import { useAuth } from '../context/AuthContext';
@@ -166,6 +166,18 @@ const PropertyDetail = () => {
       setReportError('Erreur réseau');
     } finally {
       setSubmittingReport(false);
+    }
+  };
+
+  const getMemberDuration = (createdAt?: string) => {
+    if (!createdAt) return 'Membre de la plateforme';
+    try {
+      const date = new Date(createdAt);
+      const formattedDate = format(date, 'dd MMMM yyyy', { locale: fr });
+      const duration = formatDistanceToNow(date, { locale: fr });
+      return `Inscrit le ${formattedDate} (sur la plateforme depuis ${duration})`;
+    } catch(e) {
+      return 'Membre de la plateforme';
     }
   };
 
@@ -591,7 +603,10 @@ const PropertyDetail = () => {
                       )}
                     </div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary)' }}>{property.agency.name}</div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }}>Agence immobilière</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>Agence immobilière</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '0.25rem 0.75rem', borderRadius: '1rem', display: 'inline-block' }}>
+                      {getMemberDuration(property.agency.createdAt)}
+                    </div>
                   </>
                 ) : (
                   <>
@@ -605,7 +620,10 @@ const PropertyDetail = () => {
                     <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary)' }}>
                       {property.owner?.profile?.firstName} {property.owner?.profile?.lastName}
                     </div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }}>Propriétaire</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>Propriétaire</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '0.25rem 0.75rem', borderRadius: '1rem', display: 'inline-block' }}>
+                      {getMemberDuration(property.owner?.createdAt)}
+                    </div>
                   </>
                 )}
               </div>

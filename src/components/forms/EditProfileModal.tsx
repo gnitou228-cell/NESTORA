@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Camera, Upload, ShieldCheck } from 'lucide-react';
+import { X, Camera, Upload, ShieldCheck, Mail, Calendar } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import api from '../../lib/api';
@@ -18,21 +18,28 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
   const [bio, setBio] = useState(user?.profile?.bio || '');
   const [avatar, setAvatar] = useState(user?.profile?.avatar || '');
   
-  // Agence
-  const [documentUrl, setDocumentUrl] = useState(user?.profile?.documentUrl || '');
+  // Date of birth
+  const [birthDate, setBirthDate] = useState(user?.profile?.birthDate ? new Date(user.profile.birthDate).toISOString().split('T')[0] : '');
+
+  // Documents
+  const [idDocumentType, setIdDocumentType] = useState(user?.profile?.idDocumentType || (role === 'AGENCY' ? 'COMPANY_REGISTRATION' : ''));
+  const [documentUrl, setDocumentUrl] = useState(user?.profile?.documentUrl || ''); // Recto ou Passeport
+  const [documentBackUrl, setDocumentBackUrl] = useState(user?.profile?.documentBackUrl || ''); // Verso
   const [selfieUrl, setSelfieUrl] = useState(user?.profile?.selfieUrl || '');
 
-  // Propriétaire & Agence
   const needsDocument = role === 'AGENCY' || role === 'OWNER';
+  const hasVerso = idDocumentType === 'ID_CARD' || idDocumentType === 'DRIVER_LICENSE';
 
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadingDocBack, setUploadingDocBack] = useState(false);
   const [uploadingSelfie, setUploadingSelfie] = useState(false);
   const [error, setError] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  const docBackInputRef = useRef<HTMLInputElement>(null);
   const selfieInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,43 +63,51 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
     }
   };
 
-  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
+  const uploadToSupabase = async (file: File, prefix: string) => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user?.id}-doc-${Math.random()}.${fileExt}`;
+    const fileName = `${user?.id}-${prefix}-${Math.random()}.${fileExt}`;
     const filePath = `documents/${fileName}`;
 
+    const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file);
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
     setUploadingDoc(true);
     try {
-      // Assuming a "documents" bucket exists
-      const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file);
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
-      setDocumentUrl(data.publicUrl);
-    } catch (err: any) {
+      const url = await uploadToSupabase(e.target.files[0], 'doc-recto');
+      setDocumentUrl(url);
+    } catch (err) {
       setError("Erreur lors de l'upload du document.");
     } finally {
       setUploadingDoc(false);
     }
   };
 
+  const handleDocBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setUploadingDocBack(true);
+    try {
+      const url = await uploadToSupabase(e.target.files[0], 'doc-verso');
+      setDocumentBackUrl(url);
+    } catch (err) {
+      setError("Erreur lors de l'upload du verso.");
+    } finally {
+      setUploadingDocBack(false);
+    }
+  };
+
   const handleSelfieUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user?.id}-selfie-${Math.random()}.${fileExt}`;
-    const filePath = `documents/${fileName}`;
-
     setUploadingSelfie(true);
     try {
-      const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file);
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
-      setSelfieUrl(data.publicUrl);
-    } catch (err: any) {
+      const url = await uploadToSupabase(e.target.files[0], 'selfie');
+      setSelfieUrl(url);
+    } catch (err) {
       setError("Erreur lors de l'upload du selfie.");
     } finally {
       setUploadingSelfie(false);
@@ -111,12 +126,14 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
         phone,
         avatar,
         bio,
+        birthDate,
+        idDocumentType,
         documentUrl,
+        documentBackUrl,
         selfieUrl
       });
 
       if (updateUser && res.data?.user) {
-        // Use the returned user to ensure exact sync
         updateUser({
           ...res.data.user,
           profile: {
@@ -137,20 +154,32 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
   let completionScore = 0;
   const missingFields: string[] = [];
   
-  if (firstName.trim()) completionScore += 15; else missingFields.push("Prénom");
-  if (lastName.trim()) completionScore += 15; else missingFields.push("Nom");
-  if (phone.trim()) completionScore += 20; else missingFields.push("Téléphone");
-  if (avatar) completionScore += 20; else missingFields.push("Photo de profil");
+  if (firstName.trim()) completionScore += 10; else missingFields.push("Prénom");
+  if (lastName.trim()) completionScore += 10; else missingFields.push("Nom");
+  if (phone.trim()) completionScore += 15; else missingFields.push("Téléphone");
+  if (avatar) completionScore += 15; else missingFields.push("Photo de profil");
   if (bio.trim()) completionScore += 10; else missingFields.push("Bio");
+  
+  if (birthDate) completionScore += 10; else missingFields.push("Date de naissance");
+
   if (needsDocument) {
-    if (documentUrl) completionScore += 10; else missingFields.push("Document légal/ID");
-    if (selfieUrl) completionScore += 10; else missingFields.push("Selfie de vérification");
+    if (idDocumentType) {
+      completionScore += 5;
+      if (documentUrl) completionScore += 10; else missingFields.push(hasVerso ? "Document (Recto)" : "Document");
+      if (hasVerso) {
+        if (documentBackUrl) completionScore += 5; else missingFields.push("Document (Verso)");
+      } else {
+        completionScore += 5; // On donne les points du verso au recto si pas de verso requis
+      }
+      if (selfieUrl) completionScore += 10; else missingFields.push("Selfie de vérification");
+    } else {
+      missingFields.push("Type de document", "Documents d'identité");
+    }
   } else {
-    // Si pas de document requis, répartir les 20% restants
-    completionScore += 20;
+    // Si pas de document requis, répartir les 30% restants
+    completionScore += 30;
   }
 
-  // Empêcher d'avoir plus de 100% ou moins de 0%
   completionScore = Math.min(100, Math.max(0, completionScore));
 
   const getProgressColor = () => {
@@ -164,7 +193,7 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
       <div className="modal-content profile-modal">
         <div className="modal-header">
           <h2 className="modal-title">Modifier mon profil</h2>
-          <button className="modal-close" onClick={onClose}>
+          <button type="button" className="modal-close" onClick={onClose}>
             <X size={24} />
           </button>
         </div>
@@ -222,6 +251,18 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
             />
           </div>
 
+          <div className="form-group mb-3">
+            <label><Mail size={16} className="me-2 text-light" style={{ verticalAlign: 'text-bottom' }}/> Adresse Email</label>
+            <input 
+              type="email" 
+              className="form-control" 
+              value={user?.email || ''}
+              disabled
+              style={{ backgroundColor: '#f8fafc', color: '#64748b', cursor: 'not-allowed' }}
+            />
+            <small className="text-light text-sm mt-1 d-block">Votre adresse email ne peut pas être modifiée ici.</small>
+          </div>
+
           <div className="form-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
             <div className="form-group" style={{ flex: 1 }}>
               <label>Prénom *</label>
@@ -245,105 +286,179 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
             </div>
           </div>
 
-          <div className="form-group mb-3">
-            <label>Téléphone / WhatsApp *</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              placeholder="+228 XX XX XX XX"
-              required
-            />
+          <div className="form-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Téléphone / WhatsApp *</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="+228 XX XX XX XX"
+                required
+              />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label><Calendar size={16} className="me-2 text-light" style={{ verticalAlign: 'text-bottom' }}/> Date de naissance</label>
+              <input 
+                type="date" 
+                className="form-control" 
+                value={birthDate}
+                onChange={e => setBirthDate(e.target.value)}
+              />
+            </div>
           </div>
 
           {needsDocument && (
-            <>
-              <div className="form-group mb-3 document-upload-group">
-                <label>
-                  {role === 'AGENCY' ? "Document d'entreprise (RCCM, NIF, etc.)" : "Pièce d'identité (Carte, Passeport, Permis)"}
-                  <span className="text-light text-sm d-block mt-1">Requis pour garantir votre crédibilité sur la plateforme</span>
-                </label>
-                <div className="document-upload-box" onClick={() => docInputRef.current?.click()}>
-                  {uploadingDoc ? (
-                    <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
-                  ) : documentUrl ? (
-                    <div className="document-success">
-                      <span className="badge-success">Document uploadé avec succès</span>
-                      <span className="text-sm">Cliquez pour modifier</span>
-                    </div>
+            <div className="verification-section mt-4 pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+              <h4 className="mb-3" style={{ fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                <ShieldCheck size={18} className="me-2 text-primary" /> 
+                Vérification d'identité
+              </h4>
+              
+              <div className="form-group mb-3">
+                <label>Type de document *</label>
+                <select 
+                  className="form-control" 
+                  value={idDocumentType} 
+                  onChange={(e) => {
+                    setIdDocumentType(e.target.value);
+                    setDocumentUrl('');
+                    setDocumentBackUrl('');
+                  }}
+                  required
+                >
+                  <option value="">Sélectionnez un type...</option>
+                  {role === 'AGENCY' ? (
+                    <option value="COMPANY_REGISTRATION">Document d'entreprise (RCCM, NIF, etc.)</option>
                   ) : (
                     <>
-                      <Upload size={20} color="var(--color-text-light)" />
-                      <span>Ajouter un document (PDF, JPG, PNG)</span>
+                      <option value="ID_CARD">Carte d'identité nationale</option>
+                      <option value="PASSPORT">Passeport</option>
+                      <option value="DRIVER_LICENSE">Permis de conduire</option>
                     </>
                   )}
-                </div>
-                <input 
-                  type="file" 
-                  ref={docInputRef}
-                  onChange={handleDocUpload}
-                  accept=".pdf,image/*"
-                  style={{ display: 'none' }}
-                />
+                </select>
               </div>
 
-              <div className="form-group mb-3 document-upload-group">
-                <label>
-                  Selfie avec la pièce d'identité
-                  <span className="text-light text-sm d-block mt-1">Veuillez prendre un selfie clair où l'on voit votre visage et la pièce d'identité.</span>
-                </label>
-                <div className="document-upload-box" onClick={() => selfieInputRef.current?.click()}>
-                  {uploadingSelfie ? (
-                    <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
-                  ) : selfieUrl ? (
-                    <div className="document-success">
-                      <span className="badge-success">Selfie uploadé avec succès</span>
-                      <span className="text-sm">Cliquez pour modifier</span>
+              {idDocumentType && (
+                <div className="document-upload-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                  {/* Recto / Main */}
+                  <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
+                    <label>{hasVerso ? 'Recto du document' : 'Document (Page principale)'}</label>
+                    <div className="document-upload-box" onClick={() => docInputRef.current?.click()}>
+                      {uploadingDoc ? (
+                        <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
+                      ) : documentUrl ? (
+                        <div className="document-success text-center">
+                          <span className="badge-success mb-1">✓ Uploadé</span>
+                          <span className="text-sm">Modifier</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload size={20} color="var(--color-text-light)" />
+                          <span>Sélectionner</span>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      <Camera size={20} color="var(--color-text-light)" />
-                      <span>Prendre ou ajouter un selfie (JPG, PNG)</span>
-                    </>
-                  )}
-                </div>
-                <input 
-                  type="file" 
-                  ref={selfieInputRef}
-                  onChange={handleSelfieUpload}
-                  accept="image/*"
-                  capture="user"
-                  style={{ display: 'none' }}
-                />
-              </div>
+                    <input 
+                      type="file" 
+                      ref={docInputRef}
+                      onChange={handleDocUpload}
+                      accept=".pdf,image/*"
+                      style={{ display: 'none' }}
+                    />
+                  </div>
 
-              {(documentUrl || selfieUrl) && (
-                <div className="alert alert-info mb-4" style={{ fontSize: '0.85rem' }}>
-                  <ShieldCheck size={16} className="me-2" />
-                  <strong>En cours d'examination :</strong> Une fois vos deux documents (Pièce + Selfie) envoyés, l'administrateur validera manuellement votre identité. Vous recevrez un email de confirmation.
+                  {/* Verso (if applicable) */}
+                  {hasVerso && (
+                    <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
+                      <label>Verso du document</label>
+                      <div className="document-upload-box" onClick={() => docBackInputRef.current?.click()}>
+                        {uploadingDocBack ? (
+                          <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
+                        ) : documentBackUrl ? (
+                          <div className="document-success text-center">
+                            <span className="badge-success mb-1">✓ Uploadé</span>
+                            <span className="text-sm">Modifier</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload size={20} color="var(--color-text-light)" />
+                            <span>Sélectionner</span>
+                          </>
+                        )}
+                      </div>
+                      <input 
+                        type="file" 
+                        ref={docBackInputRef}
+                        onChange={handleDocBackUpload}
+                        accept=".pdf,image/*"
+                        style={{ display: 'none' }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
-            </>
+
+              {idDocumentType && (
+                <div className="form-group mb-4">
+                  <label>
+                    Selfie de vérification
+                    <span className="text-light text-sm d-block mt-1">Prenez un selfie clair où l'on voit votre visage et la pièce d'identité en main.</span>
+                  </label>
+                  <div className="document-upload-box" onClick={() => selfieInputRef.current?.click()} style={{ backgroundColor: '#f0fdf4', borderColor: '#86efac' }}>
+                    {uploadingSelfie ? (
+                      <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
+                    ) : selfieUrl ? (
+                      <div className="document-success text-center">
+                        <span className="badge-success mb-1" style={{ backgroundColor: '#16a34a' }}>✓ Selfie validé</span>
+                        <span className="text-sm text-success">Modifier le selfie</span>
+                      </div>
+                    ) : (
+                      <>
+                        <Camera size={24} color="#16a34a" />
+                        <span style={{ color: '#16a34a', fontWeight: 500 }}>Prendre une photo (Caméra)</span>
+                      </>
+                    )}
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={selfieInputRef}
+                    onChange={handleSelfieUpload}
+                    accept="image/*"
+                    capture="user"
+                    style={{ display: 'none' }}
+                  />
+                </div>
+              )}
+
+              {(documentUrl && selfieUrl) && (
+                <div className="alert alert-info mb-4" style={{ fontSize: '0.85rem' }}>
+                  <ShieldCheck size={16} className="me-2" />
+                  <strong>En cours d'examination :</strong> Vos documents ont été reçus. Un administrateur va vérifier votre identité sous peu. Vous recevrez un email de confirmation.
+                </div>
+              )}
+            </div>
           )}
 
-          <div className="form-group mb-4">
+          <div className="form-group mb-4 mt-3">
             <label>À propos de vous (Bio)</label>
             <textarea 
               className="form-control" 
               value={bio}
               onChange={e => setBio(e.target.value)}
-              rows={4}
+              rows={3}
               placeholder="Décrivez votre profil en quelques mots..."
             />
           </div>
 
-          <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+          <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
             <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>
               Annuler
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading || uploadingAvatar || uploadingDoc}>
-              {loading ? 'Enregistrement...' : 'Enregistrer'}
+            <button type="submit" className="btn btn-primary" disabled={loading || uploadingAvatar || uploadingDoc || uploadingDocBack || uploadingSelfie}>
+              {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
             </button>
           </div>
         </form>
@@ -365,7 +480,7 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
           background: #fff;
           border-radius: 12px;
           width: 100%;
-          max-width: 500px;
+          max-width: 550px;
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
           overflow: hidden;
         }
@@ -452,7 +567,7 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
         .document-upload-box {
           border: 2px dashed var(--color-border);
           border-radius: 8px;
-          padding: 1.5rem;
+          padding: 1.25rem;
           text-align: center;
           cursor: pointer;
           background-color: var(--color-background);
@@ -464,6 +579,8 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
           font-size: 0.9rem;
           transition: all 0.2s;
           margin-top: 0.25rem;
+          height: 100%;
+          justify-content: center;
         }
         .document-upload-box:hover {
           border-color: var(--color-primary);

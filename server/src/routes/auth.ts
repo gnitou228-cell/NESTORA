@@ -175,7 +175,7 @@ router.post('/verify-email', async (req, res) => {
 router.put('/profile', requireAuth, async (req: any, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, phone, bio, avatar, documentUrl, selfieUrl, countryId, regionId, cityId, neighborhoodId, address } = req.body;
+    const { firstName, lastName, phone, bio, avatar, documentUrl, documentBackUrl, selfieUrl, idDocumentType, birthDate, countryId, regionId, cityId, neighborhoodId, address } = req.body;
 
     const updatedUser = await prisma.$transaction(async (tx) => {
       if (phone) {
@@ -187,10 +187,10 @@ router.put('/profile', requireAuth, async (req: any, res) => {
       await tx.profile.upsert({
         where: { userId },
         create: {
-          userId, firstName, lastName, bio, avatar, documentUrl, selfieUrl, countryId, regionId, cityId, neighborhoodId, address
+          userId, firstName, lastName, bio, avatar, documentUrl, documentBackUrl, selfieUrl, idDocumentType, birthDate: birthDate ? new Date(birthDate) : null, countryId, regionId, cityId, neighborhoodId, address
         },
         update: {
-          firstName, lastName, bio, avatar, documentUrl, selfieUrl, countryId, regionId, cityId, neighborhoodId, address
+          firstName, lastName, bio, avatar, documentUrl, documentBackUrl, selfieUrl, idDocumentType, birthDate: birthDate ? new Date(birthDate) : null, countryId, regionId, cityId, neighborhoodId, address
         }
       });
 
