@@ -69,9 +69,9 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     req.agencyId = dbUser.agency?.id;
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Auth middleware error:', error);
-    res.status(500).json({ message: 'Erreur lors de la vérification de l\'authentification' });
+    res.status(500).json({ message: 'Erreur lors de la vérification de l\'authentification', error: error?.message || 'Erreur inconnue' });
   }
 };
 

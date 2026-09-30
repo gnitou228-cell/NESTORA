@@ -29,11 +29,11 @@ export const checkExpiredSubscriptions = async () => {
 
     console.log(`${expiredSubscriptions.length} abonnement(s) expiré(s) trouvé(s). Désactivation en cours...`);
 
-    // Met à jour le statut en 'INACTIVE'
+    // Met à jour le statut en 'EXPIRED'
     for (const sub of expiredSubscriptions) {
       await prisma.subscription.update({
         where: { id: sub.id },
-        data: { status: 'INACTIVE' },
+        data: { status: 'EXPIRED' },
       });
 
       // Ici on pourrait aussi envoyer un email ou une notification

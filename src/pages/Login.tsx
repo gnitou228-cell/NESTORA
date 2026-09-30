@@ -47,18 +47,20 @@ export default function Login() {
       if (data.session) {
         login();
         
-        // Wait a small tick so AuthContext can fetch profile for exact role redirection
-        // or we check user metadata if available
         let role = data.user.user_metadata?.role as Role;
         
-        // Let's manually fetch profile for reliable routing
         if (!role) {
-          const { data: userRecord } = await supabase
-            .from('User')
-            .select('role')
-            .eq('id', data.user.id)
-            .single();
-          if (userRecord) role = userRecord.role as Role;
+          try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+              headers: { 'Authorization': `Bearer ${data.session.access_token}` }
+            });
+            if (res.ok) {
+              const { user: dbUser } = await res.json();
+              role = dbUser.role;
+            }
+          } catch (e) {
+            console.error("Failed to fetch role from backend", e);
+          }
         }
 
         if (role === 'SEEKER') navigate('/dashboard/seeker');

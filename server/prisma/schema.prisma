@@ -45,29 +45,29 @@ model User {
 }
 
 model Profile {
-  id             String        @id @default(uuid())
-  userId         String        @unique
-  firstName      String
-  lastName       String
-  avatar         String?
-  countryId      String?
-  regionId       String?
-  cityId         String?
-  neighborhoodId String?
-  address        String?
-  bio            String?
-  birthDate      DateTime?
-  idDocumentType String?
-  documentUrl    String?
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  firstName       String
+  lastName        String
+  avatar          String?
+  countryId       String?
+  regionId        String?
+  cityId          String?
+  neighborhoodId  String?
+  address         String?
+  bio             String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  documentUrl     String?
+  selfieUrl       String?
+  birthDate       DateTime?
   documentBackUrl String?
-  selfieUrl      String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  city           City?         @relation(fields: [cityId], references: [id])
-  country        Country?      @relation(fields: [countryId], references: [id])
-  neighborhood   Neighborhood? @relation(fields: [neighborhoodId], references: [id])
-  region         Region?       @relation(fields: [regionId], references: [id])
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idDocumentType  String?
+  city            City?         @relation(fields: [cityId], references: [id])
+  country         Country?      @relation(fields: [countryId], references: [id])
+  neighborhood    Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  region          Region?       @relation(fields: [regionId], references: [id])
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Agency {
@@ -192,11 +192,11 @@ model Property {
   longitude          Float?
   status             PropertyStatus     @default(DRAFT)
   verificationStatus VerificationStatus @default(UNVERIFIED)
-  views              Int                @default(0)
   publishedAt        DateTime?
   expiresAt          DateTime?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
+  views              Int                @default(0)
   boosts             Boost[]
   conversations      Conversation[]
   favorites          Favorite[]
