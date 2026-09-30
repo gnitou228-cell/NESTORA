@@ -13,6 +13,7 @@ import adminRoutes from './routes/admin';
 import reportsRoutes from './routes/reports';
 import statsRoutes from './routes/stats';
 import { PrismaClient } from '@prisma/client';
+import { initCronJobs } from './jobs/subscriptionCron';
 
 dotenv.config();
 
@@ -49,4 +50,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  
+  // Initialisation des tâches planifiées (cron jobs)
+  initCronJobs();
 });
