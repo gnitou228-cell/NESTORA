@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Move, Calendar, User, Building, 
   Heart, MessageCircle, Share2, X, ChevronLeft, 
-  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag
+  ChevronRight, CheckCircle2, AlertCircle, Loader, Flag,
+  Lock, Phone, Crown, CheckCircle
 } from 'lucide-react';
 import { NestoraMap } from '../components/Map';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -921,61 +922,124 @@ const PropertyDetail = () => {
             >
               <X size={24} />
             </button>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>Contacter l'annonceur</h2>
-            <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-              Veuillez renseigner vos coordonnées. L'annonceur recevra ces informations et vous recontactera rapidement.
-            </p>
+            
+            {(() => {
+              const isVIP = user?.hasActiveSubscription || localStorage.getItem('nestora_is_premium') === 'true';
+              const hasUnlocked = isVIP || localStorage.getItem(`unlocked_contact_${property?.id}`) === 'true' || user?.role !== 'SEEKER';
+              
+              if (!hasUnlocked) {
+                return (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ background: '#f1f5f9', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                      <Lock size={32} color="#64748b" />
+                    </div>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>Contact Masqué</h2>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+                      Le numéro de l'annonceur est masqué. Débloquez-le pour le contacter directement ou passez Premium.
+                    </p>
 
-            <form onSubmit={handleContactSubmit}>
-              <div className="mb-3">
-                <label className="form-label">Prénom</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  required
-                  value={contactForm.firstName}
-                  onChange={e => setContactForm({...contactForm, firstName: e.target.value})}
-                  placeholder="Ex: Komi"
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Nom</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  required
-                  value={contactForm.lastName}
-                  onChange={e => setContactForm({...contactForm, lastName: e.target.value})}
-                  placeholder="Ex: Mensah"
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Numéro WhatsApp</label>
-                <input 
-                  type="tel" 
-                  className="form-control" 
-                  required
-                  value={contactForm.whatsapp}
-                  onChange={e => setContactForm({...contactForm, whatsapp: e.target.value})}
-                  placeholder="Ex: 90 00 11 22"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="form-label">Votre Localité / Ville</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  required
-                  value={contactForm.locality}
-                  onChange={e => setContactForm({...contactForm, locality: e.target.value})}
-                  placeholder="Ex: Ouagadougou, Zone 1"
-                />
-              </div>
-              <button type="submit" className="btn btn-primary btn-block" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem', fontSize: '1.1rem' }}>
-                <MessageCircle size={20} />
-                Envoyer ma demande
-              </button>
-            </form>
+                    <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                      <Phone size={20} color="#94a3b8" />
+                      <span style={{ fontSize: '1.2rem', fontWeight: 600, color: '#475569', letterSpacing: '2px' }}>+228 ** ** ** **</span>
+                    </div>
+
+                    <div className="d-flex flex-column" style={{ gap: '1rem' }}>
+                      <button 
+                        className="btn btn-primary" 
+                        style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                        onClick={() => {
+                          // Simulate payment page navigation for single unlock
+                          navigate(`/paiement`, { state: { plan: { name: 'Contact Annonceur', price: 500 }, type: 'Unlock Contact', propertyId: property?.id } });
+                        }}
+                      >
+                        <CheckCircle size={18} /> Débloquer ce contact (500 FCFA)
+                      </button>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
+                        <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }}></div>
+                        <span style={{ padding: '0 1rem', color: '#94a3b8', fontSize: '0.9rem' }}>OU</span>
+                        <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }}></div>
+                      </div>
+
+                      <button 
+                        className="btn btn-outline" 
+                        style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, color: '#d97706', borderColor: '#fef3c7', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                        onClick={() => navigate('/abonnement')}
+                      >
+                        <Crown size={18} /> Débloquer en illimité (Pass VIP)
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Normal form when unlocked
+              const phoneNumber = property?.agency?.phone || property?.owner?.profile?.phone || '+228 90 00 00 00';
+              return (
+                <>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>Contacter l'annonceur</h2>
+                  <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+                    Vous pouvez appeler l'annonceur directement ou lui laisser un message.
+                  </p>
+
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                    <Phone size={20} color="#16a34a" />
+                    <a href={`tel:${phoneNumber}`} style={{ fontSize: '1.2rem', fontWeight: 700, color: '#166534', textDecoration: 'none' }}>{phoneNumber}</a>
+                  </div>
+
+                  <form onSubmit={handleContactSubmit}>
+                    <div className="mb-3">
+                      <label className="form-label">Prénom</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        required
+                        value={contactForm.firstName}
+                        onChange={e => setContactForm({...contactForm, firstName: e.target.value})}
+                        placeholder="Ex: Komi"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Nom</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        required
+                        value={contactForm.lastName}
+                        onChange={e => setContactForm({...contactForm, lastName: e.target.value})}
+                        placeholder="Ex: Mensah"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Numéro WhatsApp</label>
+                      <input 
+                        type="tel" 
+                        className="form-control" 
+                        required
+                        value={contactForm.whatsapp}
+                        onChange={e => setContactForm({...contactForm, whatsapp: e.target.value})}
+                        placeholder="Ex: 90 00 11 22"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="form-label">Votre Localité / Ville</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        required
+                        value={contactForm.locality}
+                        onChange={e => setContactForm({...contactForm, locality: e.target.value})}
+                        placeholder="Ex: Ouagadougou, Zone 1"
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary btn-block" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem', fontSize: '1.1rem' }}>
+                      <MessageCircle size={20} />
+                      Envoyer ma demande
+                    </button>
+                  </form>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

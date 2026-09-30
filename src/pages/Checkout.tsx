@@ -95,6 +95,18 @@ export default function Checkout() {
     }
   }, [urlStatus, urlPaymentId]);
 
+  useEffect(() => {
+    if (status === 'SUCCESS') {
+      if (type === 'Unlock Contact' && propertyId) {
+        localStorage.setItem(`unlocked_contact_${propertyId}`, 'true');
+      } else if (type === 'Unlock Lead' && location.state?.leadId) {
+        localStorage.setItem(`unlocked_lead_${location.state.leadId}`, 'true');
+      } else if (plan?.name?.includes('Premium') || plan?.name?.includes('VIP')) {
+        localStorage.setItem('nestora_is_premium', 'true');
+      }
+    }
+  }, [status, type, propertyId, plan, location.state]);
+
   // Countdown timer logic
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
@@ -216,7 +228,9 @@ export default function Checkout() {
         </div>
         <h1 className="mb-1">Paiement Réussi !</h1>
         <p className="text-light mb-3">Votre achat de <strong>{plan.name}</strong> a été validé avec succès.</p>
-        <Link to="/dashboard" className="btn btn-primary">Retour au tableau de bord</Link>
+        <Link to={propertyId ? `/annonces/${propertyId}` : "/dashboard"} className="btn btn-primary">
+          {propertyId ? "Retour à l'annonce" : "Retour au tableau de bord"}
+        </Link>
       </div>
     );
   }
