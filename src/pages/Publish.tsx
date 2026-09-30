@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader, Crown, Lock } from 'lucide-react';
+import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Trash2, Plus, ArrowLeft, ArrowRight, Loader, Crown, Lock } from 'lucide-react';
 import { LocationPicker } from '../components/LocationPicker';
 const SeekerPublishForm = () => {
   const navigate = useNavigate();
