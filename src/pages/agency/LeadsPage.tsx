@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Search, Filter, Phone, Mail, MapPin, Clock, ArrowRight, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter, Phone, Mail, MapPin, Clock, User, Lock, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MOCK_LEADS = [
-  { id: '1', name: 'Alice Dubois', email: 'alice.d@email.com', phone: '+228 90 00 11 22', property: 'Villa T4 - Ouagadougou', type: 'Vente', status: 'Nouveau', date: '2023-11-20', lastContact: 'Hier' },
-  { id: '2', name: 'Komi Mensah', email: 'komi.m@email.com', phone: '+228 99 11 22 33', property: 'Appartement Centre-ville', type: 'Location', status: 'En contact', date: '2023-11-18', lastContact: 'Il y a 2 jours' },
-  { id: '3', name: 'Sarah L.', email: 'sarah.l@email.com', phone: '+228 91 22 33 44', property: 'Terrain 500m² - Banlieue', type: 'Vente', status: 'Visite planifiée', date: '2023-11-15', lastContact: 'Ce matin' },
-  { id: '4', name: 'Marc Koffi', email: 'marc.k@email.com', phone: '+228 92 33 44 55', property: 'Bureau commercial', type: 'Location', status: 'Conclu', date: '2023-11-01', lastContact: 'Il y a 1 semaine' },
+  { id: '1', name: 'Alice Dubois', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80', email: 'alice.d@email.com', phone: '22890001122', property: 'Villa T4 - Ouagadougou', type: 'Vente', status: 'Nouveau', date: '2023-11-20', lastContact: 'Hier' },
+  { id: '2', name: 'Komi Mensah', avatar: '', email: 'komi.m@email.com', phone: '22899112233', property: 'Appartement Centre-ville', type: 'Location', status: 'En contact', date: '2023-11-18', lastContact: 'Il y a 2 jours' },
+  { id: '3', name: 'Sarah L.', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80', email: 'sarah.l@email.com', phone: '22891223344', property: 'Terrain 500m² - Banlieue', type: 'Vente', status: 'Visite planifiée', date: '2023-11-15', lastContact: 'Ce matin' },
+  { id: '4', name: 'Marc Koffi', avatar: '', email: 'marc.k@email.com', phone: '22892334455', property: 'Bureau commercial', type: 'Location', status: 'Conclu', date: '2023-11-01', lastContact: 'Il y a 1 semaine' },
 ];
 
 const getStatusColor = (status: string) => {
@@ -21,6 +22,12 @@ const getStatusColor = (status: string) => {
 export default function LeadsPage() {
   const [leads] = useState(MOCK_LEADS);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isPremium, setIsPremium] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsPremium(localStorage.getItem('nestora_is_premium') === 'true');
+  }, []);
 
   return (
     <div className="container mt-4">
@@ -59,49 +66,84 @@ export default function LeadsPage() {
           <div key={lead.id} className="col-md-6 mb-4">
             <div className="card h-100" style={{ border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
               
-              <div className="d-flex justify-content-between align-items-start mb-3">
-                <div className="d-flex gap-3">
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-                    <User size={24} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#0f172a' }}>{lead.name}</h3>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Client potentiel</span>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex" style={{ gap: '1.5rem', alignItems: 'center' }}>
+                  {lead.avatar ? (
+                    <img src={lead.avatar} alt={lead.name} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }} />
+                  ) : (
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', border: '2px solid #e2e8f0' }}>
+                      <User size={28} />
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#0f172a' }}>{lead.name}</h3>
+                    <span style={{ 
+                      backgroundColor: getStatusColor(lead.status).bg, 
+                      color: getStatusColor(lead.status).text, 
+                      padding: '0.2rem 0.6rem', 
+                      borderRadius: '1rem', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {lead.status}
+                    </span>
                   </div>
                 </div>
-                <span style={{ 
-                  backgroundColor: getStatusColor(lead.status).bg, 
-                  color: getStatusColor(lead.status).text, 
-                  padding: '0.25rem 0.75rem', 
-                  borderRadius: '2rem', 
-                  fontSize: '0.8rem', 
-                  fontWeight: 600 
-                }}>
-                  {lead.status}
-                </span>
               </div>
 
-              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div className="d-flex align-items-center gap-2" style={{ color: '#334155', fontSize: '0.9rem' }}>
+              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div className="d-flex align-items-center gap-2" style={{ color: '#334155', fontSize: '0.95rem' }}>
                   <MapPin size={16} color="#64748b" /> <strong>Intéressé par :</strong> {lead.property}
                 </div>
-                <div className="d-flex gap-4">
-                  <div className="d-flex align-items-center gap-2" style={{ color: '#334155', fontSize: '0.9rem' }}>
-                    <Phone size={14} color="#64748b" /> {lead.phone}
-                  </div>
-                  <div className="d-flex align-items-center gap-2" style={{ color: '#334155', fontSize: '0.9rem' }}>
-                    <Mail size={14} color="#64748b" /> Email envoyé
-                  </div>
+                
+                <div className="d-flex flex-column" style={{ gap: '0.5rem', marginTop: '0.5rem' }}>
+                  {isPremium ? (
+                    <>
+                      <div className="d-flex align-items-center gap-2" style={{ color: '#334155', fontSize: '0.95rem', fontWeight: 500 }}>
+                        <Phone size={16} color="#64748b" /> +{lead.phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})(\d{2})/, "$1 $2 $3 $4 $5")}
+                      </div>
+                      <div className="d-flex align-items-center gap-2" style={{ color: '#334155', fontSize: '0.95rem' }}>
+                        <Mail size={16} color="#64748b" /> {lead.email}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="d-flex align-items-center gap-2" style={{ color: '#94a3b8', fontSize: '0.95rem', fontStyle: 'italic' }}>
+                        <Phone size={16} color="#cbd5e1" /> <span style={{ filter: 'blur(4px)' }}>+228 90 00 11 22</span> <Lock size={14} color="#f59e0b" style={{ marginLeft: '0.5rem' }}/> Premium requis
+                      </div>
+                      <div className="d-flex align-items-center gap-2" style={{ color: '#94a3b8', fontSize: '0.95rem', fontStyle: 'italic' }}>
+                        <Mail size={16} color="#cbd5e1" /> <span style={{ filter: 'blur(4px)' }}>contact@email.com</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                  <Clock size={14} /> Dernier contact : {lead.lastContact}
+                  <Clock size={14} /> Contact : {lead.lastContact}
                 </div>
-                <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 1rem', color: 'var(--color-primary)', borderColor: 'var(--color-border)' }}>
-                  Gérer <ArrowRight size={16} />
-                </button>
+                
+                {isPremium ? (
+                  <a 
+                    href={`https://wa.me/${lead.phone}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn" 
+                    style={{ background: '#25D366', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 600, border: 'none', textDecoration: 'none' }}
+                  >
+                    <MessageCircle size={18} /> WhatsApp
+                  </a>
+                ) : (
+                  <button 
+                    onClick={() => navigate('/tarifs')}
+                    className="btn" 
+                    style={{ background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 600 }}
+                  >
+                    <Lock size={16} /> Débloquer
+                  </button>
+                )}
               </div>
 
             </div>
