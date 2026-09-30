@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader, Zap, ShieldCheck } from 'lucide-react';
+import { Loader, Zap, ShieldCheck, Heart, Search, Lock, Unlock, Phone, Rocket, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 
@@ -14,9 +14,18 @@ const PREMIUM_UI_DATA = [
 
 
 export default function Pricing() {
-  const { role } = useAuth();
-  // On utilise le rôle de l'utilisateur pour afficher l'interface (par défaut SEEKER)
+  const { role, user } = useAuth();
   const userRole = role || 'SEEKER';
+  
+  // Extract user first name for personalized hero
+  let firstName = 'Cher Partenaire';
+  if (user) {
+    if (userRole === 'OWNER' && user.profile?.firstName) {
+      firstName = user.profile.firstName;
+    } else if (userRole === 'AGENCY' && user.agency?.name) {
+      firstName = user.agency.name;
+    }
+  }
   
   const navigate = useNavigate();
   
@@ -60,6 +69,131 @@ export default function Pricing() {
     } else {
       alert("Ce plan n'est pas disponible pour le moment.");
     }
+  };
+
+  const renderPremiumHero = () => {
+    return (
+      <div style={{ padding: '0 1rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-secondary)' }}>
+            <i style={{ fontFamily: 'Georgia, serif', color: '#1e293b' }}>{firstName},</i><br/>
+            ton futur {userRole === 'AGENCY' ? 'client' : 'locataire/acheteur'} t'attend. <span style={{ color: '#d97706' }}>Ne le rate pas.</span>
+          </h1>
+          <p style={{ fontSize: '1.1rem', color: 'var(--color-text-light)', maxWidth: '800px', margin: '1.5rem auto', lineHeight: '1.6' }}>
+            Sans Premium, ton annonce reste noyée. <strong>Avec Premium, tu apparais en premier, tu vois qui s'intéresse à toi, et tu réponds sans limite.</strong>
+          </p>
+          
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', background: '#fef3c7', padding: '1.5rem', borderRadius: '16px', maxWidth: '800px', margin: '0 auto', border: '1px solid #fde68a' }}>
+            <div style={{ textAlign: 'center', flex: 1, minWidth: '150px' }}>
+              <h3 style={{ fontSize: '2.2rem', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>3x</h3>
+              <p style={{ fontSize: '0.95rem', color: '#92400e', margin: 0, fontWeight: 600 }}>plus de contacts</p>
+            </div>
+            <div style={{ width: '1px', background: '#fde68a' }}></div>
+            <div style={{ textAlign: 'center', flex: 1, minWidth: '150px' }}>
+              <h3 style={{ fontSize: '2.2rem', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>10 000+</h3>
+              <p style={{ fontSize: '0.95rem', color: '#92400e', margin: 0, fontWeight: 600 }}>chercheurs actifs</p>
+            </div>
+            <div style={{ width: '1px', background: '#fde68a' }}></div>
+            <div style={{ textAlign: 'center', flex: 1, minWidth: '150px' }}>
+              <h3 style={{ fontSize: '2.2rem', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>100%</h3>
+              <p style={{ fontSize: '0.95rem', color: '#92400e', margin: 0, fontWeight: 600 }}>visibilité garantie</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Features list breakdown */}
+        <div style={{ background: '#fff', borderRadius: '16px', padding: '2rem', maxWidth: '800px', margin: '2rem auto', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>Ce que Premium débloque pour toi</h3>
+            <p style={{ color: '#64748b', margin: 0 }}>Tout ce qui change pour trouver ton preneur plus vite</p>
+          </div>
+
+          {/* Feature 1 */}
+          <div style={{ background: '#fffbeb', borderRadius: '12px', padding: '1.5rem', display: 'flex', gap: '1rem', border: '1px solid #fef3c7', marginBottom: '1rem', alignItems: 'center' }}>
+            <div style={{ background: '#fcd34d', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Heart size={24} color="#b45309" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#92400e' }}>Vois qui t'a mis en favori</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#b45309', lineHeight: '1.4' }}>Découvre tous les chercheurs intéressés par tes biens. Le plus puissant signal d'intérêt.</p>
+            </div>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '80px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Lock size={12}/> Bloqué</span>
+              <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Unlock size={12}/> Débloqué</span>
+            </div>
+          </div>
+
+          {/* Feature 2 */}
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', display: 'flex', gap: '1rem', border: '1px solid #f1f5f9', marginBottom: '1rem', alignItems: 'center' }}>
+            <div style={{ background: '#e2e8f0', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Search size={24} color="#475569" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#334155' }}>Vois qui consulte ton annonce</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: '1.4' }}>Identifie en un clic les chercheurs actifs. Fini les doutes.</p>
+            </div>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '80px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Lock size={12}/> Bloqué</span>
+              <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Unlock size={12}/> Débloqué</span>
+            </div>
+          </div>
+
+          {/* Feature 3 */}
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', display: 'flex', gap: '1rem', border: '1px solid #f1f5f9', marginBottom: '1rem', alignItems: 'center' }}>
+            <div style={{ background: '#e2e8f0', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Phone size={24} color="#475569" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#334155' }}>Débloque les numéros des chercheurs</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: '1.4' }}>Contacte directement n'importe quel chercheur sans limites.</p>
+            </div>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '80px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Lock size={12}/> Bloqué</span>
+              <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Unlock size={12}/> Débloqué</span>
+            </div>
+          </div>
+
+          {/* Feature 4 */}
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.5rem', display: 'flex', gap: '1rem', border: '1px solid #f1f5f9', marginBottom: '1rem', alignItems: 'center' }}>
+            <div style={{ background: '#e2e8f0', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Rocket size={24} color="#475569" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#334155' }}>Apparais en tête de liste</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: '1.4' }}>Ton badge Premium te propulse au-dessus de tout le monde dans les résultats.</p>
+            </div>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '80px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Lock size={12}/> Bloqué</span>
+              <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.25rem' }}><Unlock size={12}/> Débloqué</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Reassurance Block */}
+        <div style={{ background: '#fffbeb', borderRadius: '16px', padding: '1.5rem 2rem', maxWidth: '800px', margin: '0 auto 3rem', border: '1px solid #fde68a', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: '#dcfce7', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Check size={18} color="#16a34a" />
+            </div>
+            <span style={{ color: '#92400e', fontWeight: 600, fontSize: '1.05rem' }}>Annulable à tout moment, en 1 clic depuis tes paramètres</span>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: '#dcfce7', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Check size={18} color="#16a34a" />
+            </div>
+            <span style={{ color: '#92400e', fontWeight: 600, fontSize: '1.05rem' }}>Sans engagement, tu gardes tes avantages jusqu'à la fin</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: '#dcfce7', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ShieldCheck size={18} color="#16a34a" />
+            </div>
+            <span style={{ color: '#92400e', fontWeight: 600, fontSize: '1.05rem' }}>Paiement 100% sécurisé, données jamais partagées</span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderPremiumUI = (uiDataArray: any[], activePlans: any[]) => {
@@ -201,12 +335,14 @@ export default function Pricing() {
 
       {userRole === 'OWNER' && (
         <div className="pricing-section premium-section">
+          {renderPremiumHero()}
           {renderPremiumUI(PREMIUM_UI_DATA, plans.owner)}
         </div>
       )}
 
       {userRole === 'AGENCY' && (
         <div className="pricing-section premium-section">
+          {renderPremiumHero()}
           {renderPremiumUI(PREMIUM_UI_DATA, plans.agency)}
         </div>
       )}
