@@ -253,8 +253,6 @@ export default function Dashboard() {
             <div className="properties-grid">
               {isOwnerOrAgency ? (
                 (stats?.recentProperties || []).map((property: any) => (
-              {isOwnerOrAgency ? (
-                (stats?.recentProperties || []).map((property: any) => (
                   <div className="property-card" key={property.id}>
                     <div className="property-img-container">
                       <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} alt={property.title} className="property-img" />
