@@ -42,7 +42,7 @@ export default function Layout() {
       { icon: <Rocket size={20} />, label: 'Boost & Visibilité', path: '/boost' },
       { icon: <CreditCard size={20} />, label: 'Premium', path: '/tarifs' },
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },
-      { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '#' },
+      { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '/statistiques' },
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
       { icon: <UserIcon size={20} />, label: 'Profil', path: '#' },
     ];
@@ -64,7 +64,7 @@ export default function Layout() {
       { icon: <Users size={20} />, label: 'Agents', path: '#' },
       { icon: <Activity size={20} />, label: 'Prospects / Leads', path: '#' },
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },
-      { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '#' },
+      { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '/statistiques' },
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
       { icon: <Settings size={20} />, label: 'Paramètres', path: '#' },
     ];

@@ -192,6 +192,7 @@ model Property {
   longitude          Float?
   status             PropertyStatus     @default(DRAFT)
   verificationStatus VerificationStatus @default(UNVERIFIED)
+  views              Int                @default(0)
   publishedAt        DateTime?
   expiresAt          DateTime?
   createdAt          DateTime           @default(now())

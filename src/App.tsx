@@ -37,6 +37,7 @@ import CookiePolicy from './pages/CookiePolicy';
 import LegalNotices from './pages/LegalNotices';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import Statistics from './pages/Statistics';
 import { FavoritesProvider } from './context/FavoritesContext';
 
 function App() {
@@ -93,6 +94,7 @@ function App() {
               
               <Route element={<ProtectedRoute allowedRoles={['OWNER', 'AGENCY']} />}>
                 <Route path="demandes-visites" element={<ReceivedVisitsPage />} />
+                <Route path="statistiques" element={<Statistics />} />
               </Route>
 
               {/* Rôles mixtes ou accessibles à tous les connectés */}

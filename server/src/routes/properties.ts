@@ -378,6 +378,14 @@ router.get('/:id', async (req, res) => {
       }
     });
 
+    if (property) {
+      // Increment views asynchronously
+      prisma.property.update({
+        where: { id: property.id },
+        data: { views: { increment: 1 } }
+      }).catch(err => console.error("Could not increment views", err));
+    }
+
     if (!property) {
       return res.status(404).json({ message: 'Propriété introuvable' });
     }
