@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Rocket, TrendingUp, Crown, Clock, ChevronLeft } from 'lucide-react';
 import api from '../lib/api';
