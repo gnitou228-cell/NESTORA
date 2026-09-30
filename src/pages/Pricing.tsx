@@ -11,15 +11,13 @@ const PREMIUM_UI_DATA = [
   { duration: 180, name: 'Premium 6 Mois', refPrice: 29400, discount: '-49%', boosts: 6, monthlyEq: '2 483 FCFA/mois', isPopular: false }
 ];
 
-const AGENCY_UI_DATA = [
-  { duration: 30, name: 'STARTER - 1 Mois', refPrice: 20000, discount: '-25%', boosts: 5, monthlyEq: '15 000 FCFA/mois', isPopular: false },
-  { duration: 90, name: 'PRO - 3 Mois', refPrice: 100000, discount: '-20%', boosts: 15, monthlyEq: '26 666 FCFA/mois', isPopular: true },
-  { duration: 365, name: 'BUSINESS - 1 An', refPrice: 600000, discount: '-10%', boosts: 50, monthlyEq: '45 000 FCFA/mois', isPopular: false }
-];
+
 
 export default function Pricing() {
   const { role } = useAuth();
-  const [activeTab, setActiveTab] = useState(role || 'SEEKER');
+  // On utilise le rôle de l'utilisateur pour afficher l'interface (par défaut SEEKER)
+  const userRole = role || 'SEEKER';
+  
   const navigate = useNavigate();
   
   const [plans, setPlans] = useState<any>({ seeker: [], owner: [], agency: [] });
@@ -54,7 +52,7 @@ export default function Pricing() {
 
   const handlePremiumCheckout = () => {
     // Trouver le plan DB correspondant à la durée sélectionnée pour le rôle actif
-    const activePlans = activeTab === 'OWNER' ? plans.owner : plans.agency;
+    const activePlans = userRole === 'OWNER' ? plans.owner : plans.agency;
     const dbPlan = activePlans.find((p: any) => p.duration === selectedDuration);
     
     if (dbPlan) {
@@ -194,45 +192,22 @@ export default function Pricing() {
   }
 
   return (
-    <div className="pricing-page">
-      <div className="tabs-container" style={{ marginTop: '2rem' }}>
-        <div className="tabs">
-          <button 
-            className={`tab ${activeTab === 'SEEKER' ? 'active' : ''}`}
-            onClick={() => setActiveTab('SEEKER')}
-          >
-            Chercheur
-          </button>
-          <button 
-            className={`tab ${activeTab === 'OWNER' ? 'active' : ''}`}
-            onClick={() => setActiveTab('OWNER')}
-          >
-            Propriétaire
-          </button>
-          <button 
-            className={`tab ${activeTab === 'AGENCY' ? 'active' : ''}`}
-            onClick={() => setActiveTab('AGENCY')}
-          >
-            Agence
-          </button>
-        </div>
-      </div>
-
-      {activeTab === 'SEEKER' && (
+    <div className="pricing-page" style={{ paddingTop: '2rem' }}>
+      {userRole === 'SEEKER' && (
         <div className="pricing-section premium-section">
           {renderSeekerUI()}
         </div>
       )}
 
-      {activeTab === 'OWNER' && (
+      {userRole === 'OWNER' && (
         <div className="pricing-section premium-section">
           {renderPremiumUI(PREMIUM_UI_DATA, plans.owner)}
         </div>
       )}
 
-      {activeTab === 'AGENCY' && (
+      {userRole === 'AGENCY' && (
         <div className="pricing-section premium-section">
-          {renderPremiumUI(AGENCY_UI_DATA, plans.agency)}
+          {renderPremiumUI(PREMIUM_UI_DATA, plans.agency)}
         </div>
       )}
     </div>
