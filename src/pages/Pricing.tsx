@@ -12,6 +12,12 @@ const PREMIUM_UI_DATA = [
   { duration: 180, name: 'Premium 6 Mois', refPrice: 29400, discount: '-49%', boosts: 6, monthlyEq: '2 483 FCFA/mois', isPopular: false }
 ];
 
+const AGENCY_UI_DATA = [
+  { duration: 30, name: 'STARTER - 1 Mois', refPrice: 20000, discount: '-25%', boosts: 5, monthlyEq: '15 000 FCFA/mois', isPopular: false },
+  { duration: 90, name: 'PRO - 3 Mois', refPrice: 100000, discount: '-20%', boosts: 15, monthlyEq: '26 666 FCFA/mois', isPopular: true },
+  { duration: 365, name: 'BUSINESS - 1 An', refPrice: 600000, discount: '-10%', boosts: 50, monthlyEq: '45 000 FCFA/mois', isPopular: false }
+];
+
 export default function Pricing() {
   const { role } = useAuth();
   const [activeTab, setActiveTab] = useState(role || 'SEEKER');
@@ -49,7 +55,7 @@ export default function Pricing() {
 
   const handlePremiumCheckout = () => {
     // Trouver le plan DB correspondant à la durée sélectionnée pour le rôle actif
-    const activePlans = activeTab === 'OWNER' ? plans.owner : plans.seeker;
+    const activePlans = activeTab === 'OWNER' ? plans.owner : plans.agency;
     const dbPlan = activePlans.find((p: any) => p.duration === selectedDuration);
     
     if (dbPlan) {
@@ -59,11 +65,9 @@ export default function Pricing() {
     }
   };
 
-  const renderPremiumUI = () => {
-    const activePlans = activeTab === 'OWNER' ? plans.owner : plans.seeker;
-    
+  const renderPremiumUI = (uiDataArray: any[], activePlans: any[]) => {
     // On fusionne les données de l'UI avec les données de la DB
-    const displayCards = PREMIUM_UI_DATA.map(uiData => {
+    const displayCards = uiDataArray.map(uiData => {
       const dbPlan = activePlans.find((p: any) => p.duration === uiData.duration);
       return { ...uiData, dbPlan };
     }).filter(card => card.dbPlan); // On n'affiche que les plans qui existent en DB
@@ -135,31 +139,49 @@ export default function Pricing() {
     );
   };
 
-  const renderAgencyPlanCard = (plan: any, type: string) => {
-    const features = plan.features ? JSON.parse(plan.features) : [];
-    
+  const renderSeekerUI = () => {
     return (
-      <div 
-        key={plan.id} 
-        className={`pricing-card ${plan.popular ? 'popular' : ''}`}
-      >
-        {plan.popular && <div className="pricing-badge popular-badge"><Star size={14} fill="currentColor" /> POPULAIRE</div>}
-        
-        <div className="pricing-duration">{plan.name}</div>
-        <div className="pricing-price">{formatPrice(plan.price, plan.currency)}</div>
-        
-        <ul className="pricing-features">
-          {features.map((feature: string, idx: number) => (
-            <li key={idx}><Check size={16} className="text-success" /> {feature}</li>
-          ))}
-        </ul>
-        
-        <button 
-          className={`btn btn-block ${plan.popular ? 'btn-primary' : 'btn-outline'}`}
-          onClick={() => handleSelectPlan(plan, type)}
-        >
-          Choisir ce plan
-        </button>
+      <div className="premium-subscription-container">
+        <div className="text-center mb-5">
+          <h2 style={{ color: 'var(--color-secondary)', fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Options Chercheur</h2>
+          <p style={{ color: 'var(--color-text-light)', fontSize: '1.1rem' }}>Payez uniquement pour ce dont vous avez besoin</p>
+        </div>
+
+        <div className="premium-cards-stack">
+          {/* Card 1: Publier une annonce */}
+          <div className="premium-card selected" style={{ cursor: 'default' }}>
+            <div className="premium-card-left">
+              <div className="premium-card-info">
+                <div className="premium-card-title-row">
+                  <span className="premium-card-title">Publier une annonce</span>
+                </div>
+                <div className="premium-card-monthly">Payez une seule fois pour poster votre demande</div>
+              </div>
+            </div>
+            <div className="premium-card-right">
+              <button className="btn btn-outline" onClick={() => navigate('/publier')}>
+                Publier
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2: Débloquer un numéro */}
+          <div className="premium-card selected" style={{ cursor: 'default', marginTop: '1rem' }}>
+            <div className="premium-card-left">
+              <div className="premium-card-info">
+                <div className="premium-card-title-row">
+                  <span className="premium-card-title">Débloquer un numéro</span>
+                </div>
+                <div className="premium-card-monthly">Accédez aux coordonnées d'un propriétaire</div>
+              </div>
+            </div>
+            <div className="premium-card-right">
+              <button className="btn btn-primary" onClick={() => alert("Trouvez une annonce pour débloquer le numéro.")}>
+                Rechercher
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -174,15 +196,7 @@ export default function Pricing() {
 
   return (
     <div className="pricing-page">
-      {/* We hide the title if it's the premium UI, to match the clean design */}
-      {activeTab === 'AGENCY' && (
-        <div className="text-center mb-4">
-          <h1 className="page-title">Tarifs & Monétisation</h1>
-          <p className="page-subtitle">Choisissez le plan adapté à vos besoins immobiliers.</p>
-        </div>
-      )}
-
-      <div className="tabs-container">
+      <div className="tabs-container" style={{ marginTop: '2rem' }}>
         <div className="tabs">
           <button 
             className={`tab ${activeTab === 'SEEKER' ? 'active' : ''}`}
@@ -207,30 +221,19 @@ export default function Pricing() {
 
       {activeTab === 'SEEKER' && (
         <div className="pricing-section premium-section">
-          {renderPremiumUI()}
+          {renderSeekerUI()}
         </div>
       )}
 
       {activeTab === 'OWNER' && (
         <div className="pricing-section premium-section">
-          {renderPremiumUI()}
+          {renderPremiumUI(PREMIUM_UI_DATA, plans.owner)}
         </div>
       )}
 
       {activeTab === 'AGENCY' && (
-        <div className="pricing-section">
-          <div className="section-header text-center mb-3">
-            <h2>Abonnement Professionnel Agence</h2>
-            <p>La solution complète pour gérer votre portefeuille immobilier et vos agents.</p>
-          </div>
-          
-          <div className="agency-plans-container">
-            <div className="pricing-grid">
-                {plans.agency.map((plan: any) => 
-                  renderAgencyPlanCard(plan, 'Abonnement Agence')
-                )}
-            </div>
-          </div>
+        <div className="pricing-section premium-section">
+          {renderPremiumUI(AGENCY_UI_DATA, plans.agency)}
         </div>
       )}
     </div>
