@@ -26,6 +26,15 @@ export default function Login() {
     setError('');
 
     try {
+      if (!import.meta.env.VITE_SUPABASE_URL) {
+        throw new Error("L'URL Supabase est vide. Vite n'a pas rechargé le fichier .env !");
+      }
+      if (!import.meta.env.VITE_SUPABASE_ANON_KEY?.startsWith('eyJ')) {
+        throw new Error("La clé Supabase est invalide. Vite n'a pas rechargé le fichier .env !");
+      }
+      
+      console.log("Tentative de connexion depuis l'origine:", window.location.origin);
+      
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
