@@ -157,16 +157,16 @@ export default function DemandesChercheursPage() {
                   </div>
                   <div className="d-flex align-items-center gap-3 mb-3">
                     <Phone size={20} color="#64748b" />
-                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a' }}>+228 90 12 34 56</span>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a' }}>{selectedLead.phone || '+228 90 12 34 56'}</span>
                   </div>
                   <div className="d-flex align-items-center gap-3">
                     <Mail size={20} color="#64748b" />
-                    <span style={{ fontSize: '1rem', color: '#475569' }}>client@email.com</span>
+                    <span style={{ fontSize: '1rem', color: '#475569' }}>{selectedLead.email || 'Non renseigné'}</span>
                   </div>
                 </div>
 
                 <div className="d-flex flex-column gap-3">
-                  <a href="tel:+22890123456" className="btn btn-success" style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <a href={`tel:${selectedLead.phone?.replace(/\s+/g, '')}`} className="btn btn-success" style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                     <Phone size={18} /> Appeler maintenant
                   </a>
                   <button className="btn btn-outline" style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>

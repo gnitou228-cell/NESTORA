@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Edit, Trash2, Globe, Rocket } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
 import api from '../lib/api';
 import BoostModal from '../components/BoostModal';
 
@@ -31,18 +30,18 @@ export default function MyListings() {
   const fetchProperties = async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      const token = localStorage.getItem('nestora_token');
       
       if (!token) throw new Error("Veuillez vous connecter.");
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/my`, {
+      const endpoint = role === 'SEEKER' ? '/api/housing-requests/my' : '/api/properties/my';
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${endpoint}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (!response.ok) throw new Error("Erreur lors du chargement des annonces.");
+      if (!response.ok) throw new Error(`Erreur lors du chargement des ${role === 'SEEKER' ? 'demandes' : 'annonces'}.`);
       
       const data = await response.json();
       setProperties(data);
@@ -54,32 +53,99 @@ export default function MyListings() {
   };
 
   useEffect(() => {
-    if (role === 'OWNER' || role === 'AGENCY' || role === 'ADMIN') {
+    if (role) {
       fetchProperties();
     }
   }, [role]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.")) return;
+    const isSeeker = role === 'SEEKER';
+    const typeLabel = isSeeker ? 'demande' : 'annonce';
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer cette ${typeLabel} ? Cette action est irréversible.`)) return;
     
     try {
-      await api.delete(`/properties/${id}`);
+      const endpoint = isSeeker ? `/housing-requests/${id}` : `/properties/${id}`;
+      await api.delete(endpoint);
       
       setProperties(prev => prev.filter(p => p.id !== id));
-      setSuccessMsg("Annonce supprimée avec succès.");
+      setSuccessMsg(`${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} supprimée avec succès.`);
     } catch (err: any) {
-      alert("Erreur lors de la suppression de l'annonce.");
+      alert(`Erreur lors de la suppression de l'${typeLabel}.`);
     }
   };
 
   if (role === 'SEEKER') {
     return (
-      <div className="mylistings-page" style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
-        <Search size={48} color="#C9A227" style={{ margin: '0 auto 1rem' }} />
-        <h1 className="page-title mb-3">Mes demandes de logement</h1>
-        <p className="text-light mb-4">
-          L'historique de vos demandes sera affiché ici. Cette fonctionnalité est en cours de développement.
-        </p>
+      <div className="mylistings-page">
+        <div className="d-flex justify-between mb-4" style={{ alignItems: 'center' }}>
+          <div>
+            <h1 className="page-title">Mes demandes</h1>
+            <p className="page-subtitle text-light">Gérez vos demandes de logement publiées.</p>
+          </div>
+          <Link to="/publier" className="btn btn-primary">
+            Publier une demande
+          </Link>
+        </div>
+
+        {successMsg && (
+          <div className="alert alert-success mb-4" style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '1rem', borderRadius: '8px', border: '1px solid #10b981' }}>
+            {successMsg}
+          </div>
+        )}
+        
+        {error && (
+          <div className="alert alert-danger mb-4" style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '1rem', borderRadius: '8px', border: '1px solid #ef4444' }}>
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center p-5">
+            <div className="spinner-border text-primary" role="status"></div>
+            <p className="mt-2 text-light">Chargement de vos demandes...</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="text-center p-5 card" style={{ border: '1px dashed #cbd5e1', backgroundColor: '#f8fafc' }}>
+            <Search size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
+            <h3 style={{ fontSize: '1.25rem', color: '#334155', marginBottom: '0.5rem' }}>Aucune demande publiée</h3>
+            <p className="text-light mb-4">Vous n'avez pas encore publié de demande de recherche.</p>
+            <div>
+              <Link to="/publier" className="btn btn-primary">
+                Créer ma première demande
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="row">
+            {properties.map(req => (
+              <div key={req.id} className="col-md-12 mb-4">
+                <div className="card" style={{ border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', padding: '1.5rem', borderRadius: '12px' }}>
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600, color: '#0f172a' }}>{req.type} : {req.propertyType}</h3>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Publié le {req.date}</span>
+                    </div>
+                    <span className="badge bg-success" style={{ color: 'white', padding: '0.4rem 0.8rem', borderRadius: '2rem' }}>
+                      Actif
+                    </span>
+                  </div>
+                  <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '1rem', whiteSpace: 'pre-wrap' }}>
+                    {req.description}
+                  </p>
+                  <div className="d-flex gap-3 mb-4 text-muted" style={{ fontSize: '0.9rem' }}>
+                    <div><strong>Zone:</strong> {req.location}</div>
+                    <div><strong>Budget:</strong> {req.budget}</div>
+                  </div>
+                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                    <button onClick={() => handleDelete(req.id)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', borderColor: '#ef4444' }}>
+                      <Trash2 size={16} /> Supprimer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
