@@ -147,17 +147,19 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
         body: JSON.stringify(payload)
       });
       
-      const data = await response.json();
+      const result = await response.json();
       
-      if (response.ok && data.checkout_url) {
+      const checkoutUrl = result.checkout_url || (result.data && result.data.checkout_url);
+      
+      if (response.ok && checkoutUrl) {
         return res.json({
           paymentId: payment.id,
           amount,
           currency,
-          url: data.checkout_url
+          url: checkoutUrl
         });
       } else {
-        console.error('SaasPay error:', data);
+        console.error('SaasPay error:', result);
         return res.status(500).json({ error: 'Erreur lors de la création du lien SaasPay' });
       }
     }
