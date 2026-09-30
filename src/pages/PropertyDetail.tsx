@@ -965,7 +965,7 @@ const PropertyDetail = () => {
                           navigate(`/paiement`, { state: { plan: { name: 'Contact Annonceur', price: 1000 }, type: 'Unlock Contact', propertyId: property?.id } });
                         }}
                       >
-                        <CheckCircle size={18} /> {property.agency ? "Contacter l'agent immobilier" : "Contacter le propriétaire"} (1000 FCFA)
+                        <CheckCircle size={18} /> Contacter l'annonceur (1000 FCFA)
                       </button>
                       
                       <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
@@ -977,9 +977,9 @@ const PropertyDetail = () => {
                       <button 
                         className="btn btn-outline" 
                         style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, color: '#d97706', borderColor: '#fef3c7', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                        onClick={() => navigate('/abonnement')}
+                        onClick={() => navigate(`/paiement`, { state: { plan: { id: 'c_1m', name: 'Pass VIP (1 mois)', price: 5000 }, type: 'Subscription' } })}
                       >
-                        <Crown size={18} /> Débloquer en illimité (Pass VIP)
+                        <Crown size={18} /> Devenir VIP (Accès illimité)
                       </button>
                     </div>
                   </div>

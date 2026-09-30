@@ -51,9 +51,13 @@ export default function Subscription() {
               <p className="text-light mb-4" style={{ fontSize: '1.1rem' }}>
                 Accédez aux annonces exclusives 48h avant tout le monde, et obtenez le badge VIP pour que les propriétaires priorisent vos demandes.
               </p>
-              <Link to="/tarifs" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '1rem 2rem', fontSize: '1.1rem', background: 'linear-gradient(135deg, #C9A227 0%, #B89320 100%)', border: 'none' }}>
-                <Crown size={20} /> Découvrir les Pass VIP
-              </Link>
+              <button 
+                className="btn btn-primary" 
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '1rem 2rem', fontSize: '1.1rem', background: 'linear-gradient(135deg, #C9A227 0%, #B89320 100%)', border: 'none', cursor: 'pointer' }}
+                onClick={() => navigate(`/paiement`, { state: { plan: { id: 'c_1m', name: 'Pass VIP (1 mois)', price: 5000 }, type: 'Subscription' } })}
+              >
+                <Crown size={20} /> Obtenir mon Pass pour 5000 FCFA/mois
+              </button>
             </>
           )}
         </div>
