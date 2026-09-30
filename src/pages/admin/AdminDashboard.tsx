@@ -27,13 +27,13 @@ export default function AdminDashboard() {
   
   const [loading, setLoading] = useState(true);
 
-  if (role !== 'ADMIN') {
-    return <Navigate to="/dashboard" />;
-  }
-
   useEffect(() => {
     fetchData();
   }, [activeTab]);
+
+  if (role !== 'ADMIN') {
+    return <Navigate to="/dashboard" />;
+  }
 
   const fetchData = async () => {
     setLoading(true);
