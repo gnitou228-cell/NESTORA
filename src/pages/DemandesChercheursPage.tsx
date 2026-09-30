@@ -2,27 +2,31 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Filter, DollarSign, BedDouble, User, Lock, Phone, Crown, CheckCircle, Unlock, MessageCircle, Mail } from 'lucide-react';
 
-// Mock data for searchers' requests (Housing Requests)
-const MOCK_REQUESTS = [
-  { id: '1', seekerName: 'Komi A.', type: 'Location', propertyType: 'Appartement', location: 'Ouagadougou (Centre)', budget: 'Max 150 000 CFA', bedrooms: '2-3', description: 'Je cherche un appartement sécurisé et proche des commodités pour ma petite famille.', date: 'Il y a 2h' },
-  { id: '2', seekerName: 'Sarah D.', type: 'Achat', propertyType: 'Villa', location: 'Ouagadougou (Ouaga 2000)', budget: 'Max 60 000 000 CFA', bedrooms: '4+', description: 'Recherche grande villa avec jardin et piscine si possible. Paiement comptant.', date: 'Hier' },
-  { id: '3', seekerName: 'Marc O.', type: 'Location', propertyType: 'Bureau', location: 'Bobo-Dioulasso', budget: 'Max 300 000 CFA', bedrooms: 'N/A', description: 'Recherche espace commercial ou bureau pour ouverture d\'une nouvelle agence. Environ 100m².', date: 'Il y a 3 jours' },
-];
+// Fetch from API in useEffect
 
 export default function DemandesChercheursPage() {
-  const [requests] = useState(MOCK_REQUESTS);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const navigate = useNavigate();
 
-  // Pour la démonstration, on simule que l'utilisateur a un abonnement Premium 
-  // s'il a acheté le plan (on pourrait stocker ça dans le AuthContext ou localStorage)
   const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
-    // Check if user has premium in local storage (mock for now)
     const hasPremium = localStorage.getItem('nestora_is_premium') === 'true';
     setIsPremium(hasPremium);
+
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/housing-requests`)
+      .then(res => res.json())
+      .then(data => {
+        setRequests(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
   const handleUnlockLead = (lead: any) => {
@@ -65,7 +69,18 @@ export default function DemandesChercheursPage() {
       </div>
 
       <div className="row">
-        {requests.map(req => (
+        {loading ? (
+          <div className="text-center p-5">
+            <div className="spinner-border text-primary" role="status"></div>
+            <p className="mt-2 text-light">Chargement des demandes...</p>
+          </div>
+        ) : requests.length === 0 ? (
+          <div className="text-center p-5">
+            <h4 className="text-muted">Aucune demande trouvée</h4>
+            <p className="text-light">Les nouvelles recherches de clients s'afficheront ici.</p>
+          </div>
+        ) : (
+          requests.map(req => (
           <div key={req.id} className="col-md-12 mb-4">
             <div className="card" style={{ border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', padding: '1.5rem', borderRadius: '12px' }}>
               <div className="d-flex justify-content-between align-items-start mb-3">
@@ -116,7 +131,7 @@ export default function DemandesChercheursPage() {
               </div>
             </div>
           </div>
-        ))}
+        )))}
       </div>
       {selectedLead && (
         <div className="modal-overlay" onClick={() => setSelectedLead(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem' }}>

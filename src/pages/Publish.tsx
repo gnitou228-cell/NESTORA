@@ -79,15 +79,28 @@ const SeekerPublishForm = () => {
     }
   }, [formData.cityId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate API submission
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const token = localStorage.getItem('nestora_token');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/housing-requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Erreur lors de la publication');
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 3000);
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      alert("Une erreur s'est produite lors de la publication de la demande.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (success) {
