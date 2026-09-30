@@ -128,7 +128,16 @@ router.get('/me', requireAuth, async (req: any, res) => {
     const userId = req.user.id;
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { profile: true, agency: true }
+      include: { 
+        profile: true, 
+        agency: true,
+        subscriptions: {
+          where: {
+            status: 'ACTIVE',
+            endDate: { gt: new Date() }
+          }
+        }
+      }
     });
 
     if (!user) return res.status(404).json({ message: 'Utilisateur introuvable' });

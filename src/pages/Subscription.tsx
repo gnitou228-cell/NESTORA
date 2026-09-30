@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Crown, CreditCard, Check, AlertCircle, XCircle } from 'lucide-react';
+import { Crown, CreditCard, Check, AlertCircle, XCircle, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { invoices } from '../data/mockData';
 
@@ -25,14 +25,38 @@ export default function Subscription() {
     }
   };
 
-  // If Chercheur, they don't have a global subscription, they pay per request.
   if (role === 'SEEKER') {
     return (
-      <div className="text-center mt-5">
-        <Crown size={48} color="#C9A227" style={{ margin: '0 auto 1rem' }} />
-        <h2>Espace Abonnement</h2>
-        <p className="text-light mb-3">En tant que chercheur, vous ne payez qu'à la demande lors de la publication.</p>
-        <Link to="/publier" className="btn btn-primary">Publier une demande</Link>
+      <div className="subscription-page">
+        <div className="mb-4">
+          <h1 className="page-title">Pass Premium (Chercheur VIP)</h1>
+          <p className="page-subtitle text-light">Débloquez les meilleures opportunités en exclusivité.</p>
+        </div>
+        <div className="text-center mt-5" style={{ background: '#fff', borderRadius: '16px', padding: '3rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', maxWidth: '600px', margin: '0 auto' }}>
+          {isPremium ? (
+            <>
+              <Crown size={48} color="#C9A227" style={{ margin: '0 auto 1rem' }} />
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>Votre Pass Premium est Actif !</h2>
+              <p className="text-light mb-4" style={{ fontSize: '1.1rem' }}>
+                Vous avez accès à toutes les annonces exclusives en avant-première pendant 48h et votre badge VIP accélère vos demandes de visite.
+              </p>
+              <button onClick={handleCancelSubscription} className="btn" style={{ background: 'transparent', border: '1px solid #cbd5e1', color: '#64748b' }}>Résilier mon pass</button>
+            </>
+          ) : (
+            <>
+              <div style={{ background: '#f1f5f9', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <Lock size={32} color="#64748b" />
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>Passez au statut VIP</h2>
+              <p className="text-light mb-4" style={{ fontSize: '1.1rem' }}>
+                Accédez aux annonces exclusives 48h avant tout le monde, et obtenez le badge VIP pour que les propriétaires priorisent vos demandes.
+              </p>
+              <Link to="/checkout?plan=seeker-premium" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '1rem 2rem', fontSize: '1.1rem', background: 'linear-gradient(135deg, #C9A227 0%, #B89320 100%)', border: 'none' }}>
+                <Crown size={20} /> Obtenir mon Pass pour 5000 FCFA/mois
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     );
   }

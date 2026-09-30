@@ -25,6 +25,7 @@ export interface User {
   agency?: {
     name: string;
   };
+  hasActiveSubscription?: boolean;
 }
 
 interface AuthContextType {
@@ -85,7 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } : undefined,
           agency: dbUser.agency ? {
             name: dbUser.agency.name
-          } : undefined
+          } : undefined,
+          hasActiveSubscription: dbUser.subscriptions && dbUser.subscriptions.length > 0
         };
 
         setUser(userData);

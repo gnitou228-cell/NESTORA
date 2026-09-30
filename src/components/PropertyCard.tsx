@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPin, Bed, Bath, Move, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Move, Heart, Lock, Crown } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -31,9 +31,34 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
     }
   };
 
+  const isRecent = property.createdAt 
+    ? new Date().getTime() - new Date(property.createdAt).getTime() < 48 * 60 * 60 * 1000 
+    : false;
+  
+  const isLocked = isRecent && (!user || (user.role === 'SEEKER' && !user.hasActiveSubscription));
+
   return (
-    <div className="property-card">
+    <div className={`property-card ${isLocked ? 'locked-card' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
       <div className="property-img-container" style={{ position: 'relative' }}>
+        {isLocked && (
+          <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(11, 31, 58, 0.4)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            padding: '1rem',
+            textAlign: 'center'
+          }}>
+            <Crown size={32} color="#C9A227" style={{ marginBottom: '8px' }} />
+            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Exclusivité VIP (48h)</span>
+          </div>
+        )}
         <img 
           src={property.images && property.images.length > 0 ? property.images[0].url : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"} 
           alt={property.title} 
@@ -93,9 +118,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
               {property.transactionType === 'RENT' ? 'À louer' : 'À vendre'}
             </div>
           </div>
-          <Link to={`/annonces/${property.id}`} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
-            Voir l'annonce
-          </Link>
+          {isLocked ? (
+            <Link to="/abonnement" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', background: 'linear-gradient(135deg, #C9A227 0%, #B89320 100%)', border: 'none' }}>
+              <Lock size={14} /> Débloquer
+            </Link>
+          ) : (
+            <Link to={`/annonces/${property.id}`} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+              Voir l'annonce
+            </Link>
+          )}
         </div>
       </div>
     </div>
