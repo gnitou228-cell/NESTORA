@@ -106,7 +106,7 @@ export default function Layout() {
           <div className="sidebar-widget-text">
             Plus de visibilité, plus de contacts, plus de résultats !
           </div>
-          <Link to="/boost" className="btn btn-primary btn-block">Voir les offres</Link>
+          <Link to="/mes-annonces" className="btn btn-primary btn-block">Voir les offres</Link>
         </div>
 
         <div className="sidebar-widget" style={{ marginBottom: '2rem' }}>

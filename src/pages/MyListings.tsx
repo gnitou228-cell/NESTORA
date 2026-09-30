@@ -12,10 +12,10 @@ export default function MyListings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  
-  // For Boost Modal
+
+  // Boost Modal state
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
-  const [selectedPropertyIdForBoost, setSelectedPropertyIdForBoost] = useState<string | null>(null);
+  const [selectedPropertyToBoost, setSelectedPropertyToBoost] = useState<string>('');
 
   // Check for success param from Publish page
   useEffect(() => {
@@ -175,7 +175,7 @@ export default function MyListings() {
                           className="btn btn-primary d-flex align-items-center" 
                           style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                           onClick={() => {
-                            setSelectedPropertyIdForBoost(property.id);
+                            setSelectedPropertyToBoost(property.id);
                             setIsBoostModalOpen(true);
                           }}
                         >
@@ -201,7 +201,7 @@ export default function MyListings() {
       <BoostModal 
         isOpen={isBoostModalOpen} 
         onClose={() => setIsBoostModalOpen(false)} 
-        propertyId={selectedPropertyIdForBoost} 
+        propertyId={selectedPropertyToBoost} 
       />
     </div>
   );

@@ -4,7 +4,7 @@ import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
 import Dashboard from './pages/Dashboard';
 import Pricing from './pages/Pricing';
-import Boost from './pages/Boost';
+
 import Publish from './pages/Publish';
 import Checkout from './pages/Checkout';
 import Subscription from './pages/Subscription';
@@ -102,7 +102,7 @@ function App() {
               <Route path="publier" element={<Publish />} />
               <Route path="mes-annonces" element={<MyListings />} />
               <Route path="/tarifs" element={<Pricing />} />
-              <Route path="boost" element={<Boost />} />
+
               <Route path="paiement" element={<Checkout />} />
               <Route path="abonnement" element={<Subscription />} />
               <Route path="paiements" element={<Invoices />} />
