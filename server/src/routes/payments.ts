@@ -128,7 +128,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
       
       const payload = {
         amount: amount.toFixed(2), // SasPay expects a string like "5000.00"
-        currency: currency,
+        currency: currency === 'FCFA' ? 'XOF' : currency,
         description: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : `Boost - ${plan.name}`,
         country: countryCode, 
         customer_email: customerDetails?.email || req.user?.email || 'client@nestora.com',
