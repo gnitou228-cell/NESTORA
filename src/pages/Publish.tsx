@@ -4,7 +4,185 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader, Crown, Lock } from 'lucide-react';
 import { LocationPicker } from '../components/LocationPicker';
+const SeekerPublishForm = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  
+  const [countries, setCountries] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
+  const [neighborhoods, setNeighborhoods] = useState<any[]>([]);
+  
+  const [formData, setFormData] = useState({
+    propertyType: 'HOUSE',
+    budget: '',
+    countryId: '',
+    regionId: '',
+    cityId: '',
+    neighborhoodId: '',
+    description: '',
+  });
 
+  const propertyTypes = [
+    { value: 'HOUSE', label: 'Maison / Villa' },
+    { value: 'APARTMENT', label: 'Appartement' },
+    { value: 'STUDIO', label: 'Studio' },
+    { value: 'ROOM', label: 'Chambre' },
+    { value: 'LAND', label: 'Terrain' },
+    { value: 'OFFICE', label: 'Bureau / Commerce' }
+  ];
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/countries`)
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+        if (data.length > 0) setFormData(prev => ({ ...prev, countryId: data[0].id }));
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (formData.countryId) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/regions?countryId=${formData.countryId}`)
+        .then(res => res.json())
+        .then(data => {
+          setRegions(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, regionId: data[0].id }));
+          else setFormData(prev => ({ ...prev, regionId: '' }));
+        });
+    }
+  }, [formData.countryId]);
+
+  useEffect(() => {
+    if (formData.regionId) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/cities?regionId=${formData.regionId}`)
+        .then(res => res.json())
+        .then(data => {
+          setCities(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, cityId: data[0].id }));
+          else setFormData(prev => ({ ...prev, cityId: '' }));
+        });
+    }
+  }, [formData.regionId]);
+
+  useEffect(() => {
+    if (formData.cityId) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/neighborhoods?cityId=${formData.cityId}`)
+        .then(res => res.json())
+        .then(data => {
+          setNeighborhoods(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, neighborhoodId: data[0].id }));
+          else setFormData(prev => ({ ...prev, neighborhoodId: '' }));
+        });
+    }
+  }, [formData.cityId]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulate API submission
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(true);
+      setTimeout(() => navigate('/dashboard'), 3000);
+    }, 1500);
+  };
+
+  if (success) {
+    return (
+      <div style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
+        <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto 1rem' }} />
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '1rem', color: '#0f172a' }}>Demande publiée avec succès !</h2>
+        <p className="text-light text-lg">Votre recherche a été partagée. Les propriétaires et agences de cette zone vous contacteront s'ils ont un bien correspondant à vos critères.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="publish-page" style={{ maxWidth: '800px', margin: '2rem auto', padding: '2rem' }}>
+      <h1 className="page-title mb-1">Que recherchez-vous ?</h1>
+      <p className="text-light mb-4 text-lg">Décrivez le bien idéal. Les annonces correspondantes viendront à vous.</p>
+      
+      <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e293b', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <FileText size={20} color="#C9A227" /> Critères principaux
+        </h3>
+        
+        <div className="row mb-4">
+          <div className="col-md-6 mb-3 mb-md-0">
+            <label className="form-label">Type de bien souhaité <span className="text-danger">*</span></label>
+            <select className="form-control" style={{ background: '#f8fafc', padding: '0.75rem' }} value={formData.propertyType} onChange={e => setFormData({...formData, propertyType: e.target.value})} required>
+              {propertyTypes.map(pt => (
+                <option key={pt.value} value={pt.value}>{pt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="col-md-6">
+            <label className="form-label">Budget maximum (FCFA) <span className="text-danger">*</span></label>
+            <input type="number" className="form-control" style={{ background: '#f8fafc', padding: '0.75rem' }} value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})} placeholder="Ex: 50000" required />
+          </div>
+        </div>
+
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e293b', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <MapPin size={20} color="#C9A227" /> Localisation souhaitée
+        </h3>
+
+        <div className="row mb-4">
+          <div className="col-md-6 mb-3">
+            <label className="form-label">Pays</label>
+            <select className="form-control" style={{ background: '#f8fafc' }} value={formData.countryId} onChange={e => setFormData({...formData, countryId: e.target.value})}>
+              {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="col-md-6 mb-3">
+            <label className="form-label">Région</label>
+            <select className="form-control" style={{ background: '#f8fafc' }} value={formData.regionId} onChange={e => setFormData({...formData, regionId: e.target.value})}>
+              <option value="">Sélectionner</option>
+              {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+          </div>
+          <div className="col-md-6 mb-3">
+            <label className="form-label">Ville</label>
+            <select className="form-control" style={{ background: '#f8fafc' }} value={formData.cityId} onChange={e => setFormData({...formData, cityId: e.target.value})}>
+              <option value="">Sélectionner</option>
+              {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="col-md-6 mb-3">
+            <label className="form-label">Quartier</label>
+            <select className="form-control" style={{ background: '#f8fafc' }} value={formData.neighborhoodId} onChange={e => setFormData({...formData, neighborhoodId: e.target.value})}>
+              <option value="">Sélectionner</option>
+              {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e293b', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Info size={20} color="#C9A227" /> Description détaillée
+        </h3>
+        <div className="mb-4">
+          <label className="form-label">Parlez-nous de vos exigences (Commodités, sécurité, durée, etc.) <span className="text-danger">*</span></label>
+          <textarea 
+            className="form-control" 
+            style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px' }}
+            rows={5} 
+            value={formData.description} 
+            onChange={e => setFormData({...formData, description: e.target.value})}
+            placeholder="Ex: Je cherche une chambre avec cuisine interne, carrelée, dans une zone sécurisée, pas trop loin de la route principale..."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" className="btn btn-primary w-100" style={{ padding: '1rem', fontSize: '1.1rem', borderRadius: '8px', fontWeight: 600, background: 'var(--color-primary)' }} disabled={loading}>
+          {loading ? <Loader className="spin" size={24} /> : 'Soumettre ma demande de logement'}
+        </button>
+      </form>
+    </div>
+  );
+};
 
 export default function Publish() {
   const { role, user } = useAuth();
@@ -12,24 +190,7 @@ export default function Publish() {
   
   // SEEKER check
   if (role === 'SEEKER') {
-    return (
-      <div className="publish-page" style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
-        <Search size={48} color="#C9A227" style={{ margin: '0 auto 1rem' }} />
-        <h1 className="page-title mb-3">Espace Chercheur</h1>
-        <p className="text-light mb-4 text-lg">
-          En tant que chercheur, vous ne pouvez pas publier de biens immobiliers sur NESTORA.
-          Cet espace est réservé aux Propriétaires et Agences Immobilières.
-        </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Link to="/" className="btn btn-primary">
-            Retour à l'accueil
-          </Link>
-          <Link to="/recherche" className="btn btn-outline">
-            Voir les annonces
-          </Link>
-        </div>
-      </div>
-    );
+    return <SeekerPublishForm />;
   }
 
   const [step, setStep] = useState(1);
