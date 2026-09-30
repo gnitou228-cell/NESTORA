@@ -86,23 +86,21 @@ export default function Register() {
       const userId = authData.user.id;
       console.log("Utilisateur créé avec succès. ID :", userId);
 
-      // Création du profil utilisateur dans la table `profiles`
+      // Création du profil utilisateur dans la table `Profile` (nom généré par Prisma)
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from('Profile')
         .upsert({
           id: userId,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          role: selectedRole,
-          phone: formData.phone ? `${formData.phoneCode}${formData.phone}` : null,
-          whatsapp: formData.whatsapp ? `${formData.whatsappCode}${formData.whatsapp}` : null,
-          country_id: formData.countryId || null,
-          region_id: formData.regionId || null,
-          city_id: formData.cityId || null,
-          neighborhood_id: formData.neighborhoodId || null,
+          userId: userId,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          countryId: formData.countryId || null,
+          regionId: formData.regionId || null,
+          cityId: formData.cityId || null,
+          neighborhoodId: formData.neighborhoodId || null,
           address: formData.address || null,
-          owner_type: formData.ownerType,
-          updated_at: new Date().toISOString(),
+          bio: formData.ownerType === 'PRO' ? 'Propriétaire Professionnel' : null,
+          updatedAt: new Date().toISOString(),
         });
 
       if (profileError) {
@@ -112,22 +110,22 @@ export default function Register() {
         console.log("Profil inséré avec succès.");
       }
 
-      // Création de l'agence si rôle = AGENCY
+      // Création de l'agence si rôle = AGENCY dans la table `Agency`
       if (selectedRole === 'AGENCY' && formData.agencyName) {
         const { error: agencyError } = await supabase
-          .from('agencies')
+          .from('Agency')
           .insert({
-            owner_id: userId,
+            ownerUserId: userId,
             name: formData.agencyName,
             email: formData.email,
             phone: formData.whatsapp ? `${formData.whatsappCode}${formData.whatsapp}` : `${formData.phoneCode}${formData.phone}`,
             description: formData.description,
-            registration_number: formData.registrationNumber,
+            registrationNumber: formData.registrationNumber,
             address: formData.address || null,
-            country_id: formData.countryId || null,
-            region_id: formData.regionId || null,
-            city_id: formData.cityId || null,
-            neighborhood_id: formData.neighborhoodId || null
+            countryId: formData.countryId || null,
+            regionId: formData.regionId || null,
+            cityId: formData.cityId || null,
+            neighborhoodId: formData.neighborhoodId || null
           });
           
         if (agencyError) console.error("Supabase Agency Error:", agencyError);

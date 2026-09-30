@@ -14,7 +14,7 @@ router.post('/', requireAuth, async (req, res) => {
     if (!Object.values(ReportCategory).includes(category)) {
       return res.status(400).json({ error: 'Catégorie invalide' });
     }
-    
+
     if (!propertyId && !reportedUserId) {
       return res.status(400).json({ error: 'Vous devez spécifier une annonce ou un utilisateur à signaler' });
     }

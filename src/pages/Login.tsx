@@ -44,12 +44,12 @@ export default function Login() {
         
         // Let's manually fetch profile for reliable routing
         if (!role) {
-          const { data: profile } = await supabase
-            .from('profiles')
+          const { data: userRecord } = await supabase
+            .from('User')
             .select('role')
             .eq('id', data.user.id)
             .single();
-          if (profile) role = profile.role as Role;
+          if (userRecord) role = userRecord.role as Role;
         }
 
         if (role === 'SEEKER') navigate('/dashboard/seeker');
