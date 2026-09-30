@@ -149,19 +149,8 @@ export default function Register() {
       }
 
     } catch (err: any) {
-      console.error(err);
-      if (err.message.includes('fetch')) {
-        setError("Erreur réseau: impossible de contacter Supabase. Veuillez vérifier vos clés (URL, Anon Key) dans .env.");
-      } else {
-        // Traduction de quelques erreurs fréquentes
-        if (err.message.includes('User already registered')) {
-          setError("Un compte existe déjà avec cet e-mail.");
-        } else if (err.message.includes('Password should be')) {
-          setError("Le mot de passe est trop faible. Veuillez utiliser au moins 6 caractères.");
-        } else {
-          setError(err.message);
-        }
-      }
+      console.error("RAW ERROR:", err);
+      setError(`Erreur Supabase: ${err.message || 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }
