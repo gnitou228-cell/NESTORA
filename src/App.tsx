@@ -39,6 +39,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AgentsPage from './pages/agency/AgentsPage';
 import LeadsPage from './pages/agency/LeadsPage';
+import DemandesChercheursPage from './pages/DemandesChercheursPage';
 import Statistics from './pages/Statistics';
 import { FavoritesProvider } from './context/FavoritesContext';
 
@@ -82,6 +83,10 @@ function App() {
                 <Route path="/dashboard/seeker" element={<Dashboard />} />
               </Route>
               
+              <Route element={<ProtectedRoute allowedRoles={['OWNER', 'AGENCY']} />}>
+                <Route path="recherches-clients" element={<DemandesChercheursPage />} />
+              </Route>
+
               <Route element={<ProtectedRoute allowedRoles={['OWNER']} />}>
                 <Route path="/dashboard/owner" element={<Dashboard />} />
               </Route>
