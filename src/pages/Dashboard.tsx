@@ -402,7 +402,7 @@ export default function Dashboard() {
                   </div>
                   <ChevronRight size={16} color="#94a3b8" />
                 </Link>
-                <Link to="/mes-annonces" className="action-item">
+                <Link to="/boost" className="action-item">
                   <div className="action-left">
                     <div className="action-icon" style={{ color: '#C9A227' }}>
                       <Rocket size={20} />
@@ -492,7 +492,7 @@ export default function Dashboard() {
                 <div className="banner-ad-desc">
                   Soyez en tête des résultats de recherche et attirez plus de contacts qualifiés.
                 </div>
-                <Link to="/mes-annonces" className="btn btn-primary" style={{display: 'inline-block'}}>Découvrir les offres</Link>
+                <Link to="/boost" className="btn btn-primary" style={{display: 'inline-block'}}>Découvrir les offres</Link>
               </div>
             </div>
           )}

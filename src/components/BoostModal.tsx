@@ -32,6 +32,12 @@ export default function BoostModal({ isOpen, onClose, propertyId }: BoostModalPr
   if (!isOpen) return null;
 
   const handleSelectPlan = (plan: any) => {
+    if (!propertyId) {
+      alert("Veuillez sélectionner une annonce spécifique à booster depuis la page 'Mes annonces'.");
+      navigate('/mes-annonces');
+      onClose();
+      return;
+    }
     navigate('/paiement', { state: { plan, type: 'Boost Annonce', propertyId } });
     onClose();
   };
