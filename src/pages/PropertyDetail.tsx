@@ -48,6 +48,14 @@ const PropertyDetail = () => {
   // Galerie
   const [showGallery, setShowGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showContactModal, setShowContactModal] = useState(false);
+  
+  const [contactForm, setContactForm] = useState({
+    firstName: user?.profile?.firstName || '',
+    lastName: user?.profile?.lastName || '',
+    whatsapp: '',
+    locality: ''
+  });
 
   // Partage
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -264,7 +272,7 @@ const PropertyDetail = () => {
     }
   };
 
-  const handleContact = async () => {
+  const handleContactClick = () => {
     if (!user) {
       navigate('/connexion');
       return;
@@ -273,13 +281,21 @@ const PropertyDetail = () => {
       alert('Vous ne pouvez pas vous contacter vous-même.');
       return;
     }
+    setShowContactModal(true);
+  };
 
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
       if (!token) return;
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations`, {
+      // Simulation de l'envoi du lead
+      console.log("Nouveau lead généré:", contactForm);
+      
+      // Optionnel: Créer quand même une conversation
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -288,15 +304,11 @@ const PropertyDetail = () => {
         body: JSON.stringify({ propertyId: property?.id })
       });
 
-      if (res.ok) {
-        navigate('/messages');
-      } else {
-        const error = await res.json();
-        alert(error.error || 'Erreur lors de la création de la conversation');
-      }
+      setShowContactModal(false);
+      alert('Votre demande de contact a bien été envoyée à l\'annonceur !');
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur serveur');
+      alert('Erreur lors de l\'envoi de la demande');
     }
   };
 
@@ -635,7 +647,7 @@ const PropertyDetail = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <button 
                   className="btn btn-primary btn-block" 
-                  onClick={handleContact}
+                  onClick={handleContactClick}
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}
                 >
                   <MessageCircle size={20} />
@@ -899,7 +911,74 @@ const PropertyDetail = () => {
           </div>
         </div>
       )}
+      {/* Modal de Contact / Lead */}
+      {showContactModal && (
+        <div className="modal-overlay" onClick={() => setShowContactModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '1rem' }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '450px', position: 'relative' }}>
+            <button 
+              onClick={() => setShowContactModal(false)}
+              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+            >
+              <X size={24} />
+            </button>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>Contacter l'annonceur</h2>
+            <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+              Veuillez renseigner vos coordonnées. L'annonceur recevra ces informations et vous recontactera rapidement.
+            </p>
 
+            <form onSubmit={handleContactSubmit}>
+              <div className="mb-3">
+                <label className="form-label">Prénom</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required
+                  value={contactForm.firstName}
+                  onChange={e => setContactForm({...contactForm, firstName: e.target.value})}
+                  placeholder="Ex: Komi"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Nom</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required
+                  value={contactForm.lastName}
+                  onChange={e => setContactForm({...contactForm, lastName: e.target.value})}
+                  placeholder="Ex: Mensah"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Numéro WhatsApp</label>
+                <input 
+                  type="tel" 
+                  className="form-control" 
+                  required
+                  value={contactForm.whatsapp}
+                  onChange={e => setContactForm({...contactForm, whatsapp: e.target.value})}
+                  placeholder="Ex: 90 00 11 22"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="form-label">Votre Localité / Ville</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required
+                  value={contactForm.locality}
+                  onChange={e => setContactForm({...contactForm, locality: e.target.value})}
+                  placeholder="Ex: Ouagadougou, Zone 1"
+                />
+              </div>
+              <button type="submit" className="btn btn-primary btn-block" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem', fontSize: '1.1rem' }}>
+                <MessageCircle size={20} />
+                Envoyer ma demande
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
