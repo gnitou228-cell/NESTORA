@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Star, Loader, Zap, ShieldCheck } from 'lucide-react';
+import { Loader, Zap, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { formatPrice } from '../config/monetization';
 import api from '../lib/api';
 
 const PREMIUM_UI_DATA = [
