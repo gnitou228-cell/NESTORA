@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, Edit, Trash2, Globe, Rocket } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import BoostModal from '../components/BoostModal';
 
 export default function MyListings() {
   const { role } = useAuth();
@@ -11,6 +12,10 @@ export default function MyListings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  
+  // For Boost Modal
+  const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
+  const [selectedPropertyIdForBoost, setSelectedPropertyIdForBoost] = useState<string | null>(null);
 
   // Check for success param from Publish page
   useEffect(() => {
@@ -166,10 +171,17 @@ export default function MyListings() {
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title="Voir l'annonce">
                           <Globe size={16} />
                         </button>
-                        <Link to={`/boost?propertyId=${property.id}`} className="btn btn-primary d-flex align-items-center" style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                        <button 
+                          className="btn btn-primary d-flex align-items-center" 
+                          style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                          onClick={() => {
+                            setSelectedPropertyIdForBoost(property.id);
+                            setIsBoostModalOpen(true);
+                          }}
+                        >
                           <Rocket size={14} />
                           Booster
-                        </Link>
+                        </button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
                           <Edit size={16} />
                         </button>
@@ -185,6 +197,12 @@ export default function MyListings() {
           </div>
         )}
       </div>
+
+      <BoostModal 
+        isOpen={isBoostModalOpen} 
+        onClose={() => setIsBoostModalOpen(false)} 
+        propertyId={selectedPropertyIdForBoost} 
+      />
     </div>
   );
 }
