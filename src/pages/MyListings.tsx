@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, Edit, Trash2, Globe, Rocket } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import api from '../lib/api';
 import BoostModal from '../components/BoostModal';
 
 export default function MyListings() {
@@ -62,22 +63,12 @@ export default function MyListings() {
     if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.")) return;
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/properties/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) throw new Error("Erreur lors de la suppression.");
+      await api.delete(`/properties/${id}`);
       
       setProperties(prev => prev.filter(p => p.id !== id));
       setSuccessMsg("Annonce supprimée avec succès.");
     } catch (err: any) {
-      alert(err.message);
+      alert("Erreur lors de la suppression de l'annonce.");
     }
   };
 
@@ -182,7 +173,7 @@ export default function MyListings() {
                           <Rocket size={14} />
                           Booster
                         </button>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
+                        <button onClick={() => alert("La modification d'annonce sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
                           <Edit size={16} />
                         </button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#ef4444', borderColor: '#fee2e2' }} title="Supprimer" onClick={() => handleDelete(property.id)}>

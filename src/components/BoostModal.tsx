@@ -10,8 +10,10 @@ interface BoostModalProps {
 }
 
 export default function BoostModal({ isOpen, onClose, propertyId }: BoostModalProps) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [plans, setPlans] = useState<any[]>([]);
+  const [userProperties, setUserProperties] = useState<any[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,14 +33,24 @@ export default function BoostModal({ isOpen, onClose, propertyId }: BoostModalPr
 
   if (!isOpen) return null;
 
-  const handleSelectPlan = (plan: any) => {
+  const handleSelectPlan = async (plan: any) => {
     if (!propertyId) {
-      alert("Veuillez sélectionner une annonce spécifique à booster depuis la page 'Mes annonces'.");
-      navigate('/mes-annonces');
-      onClose();
+      setSelectedPlan(plan);
+      setStep(3);
+      try {
+        const response = await api.get('/properties/my');
+        setUserProperties(response.data || []);
+      } catch (err) {
+        console.error('Erreur chargement annonces', err);
+      }
       return;
     }
     navigate('/paiement', { state: { plan, type: 'Boost Annonce', propertyId } });
+    onClose();
+  };
+
+  const handleSelectProperty = (propId: string) => {
+    navigate('/paiement', { state: { plan: selectedPlan, type: 'Boost Annonce', propertyId: propId } });
     onClose();
   };
 
@@ -76,7 +88,7 @@ export default function BoostModal({ isOpen, onClose, propertyId }: BoostModalPr
               Plus tard
             </button>
           </div>
-        ) : (
+        ) : step === 2 ? (
           <div className="boost-step-2">
             <h2 className="boost-title-sm">Choisissez votre boost</h2>
             
@@ -95,6 +107,34 @@ export default function BoostModal({ isOpen, onClose, propertyId }: BoostModalPr
             </div>
 
             <button className="boost-back-btn" onClick={() => setStep(1)}>
+              <ChevronLeft size={16} /> Retour
+            </button>
+          </div>
+        ) : (
+          <div className="boost-step-3">
+            <h2 className="boost-title-sm">Sélectionnez l'annonce</h2>
+            
+            <div className="boost-plans-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {userProperties.length === 0 ? (
+                <p className="text-center text-light" style={{ padding: '2rem 0' }}>Aucune annonce disponible.</p>
+              ) : (
+                userProperties.map(prop => (
+                  <div key={prop.id} className="boost-plan-card" onClick={() => handleSelectProperty(prop.id)} style={{ alignItems: 'flex-start' }}>
+                    <img 
+                      src={prop.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'} 
+                      alt="" 
+                      style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '4px', marginRight: '1rem' }} 
+                    />
+                    <div className="boost-plan-left" style={{ flex: 1, overflow: 'hidden' }}>
+                      <span className="boost-plan-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prop.title}</span>
+                      <span className="boost-plan-duration" style={{ fontSize: '0.8rem' }}>{prop.city?.name}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <button className="boost-back-btn" onClick={() => setStep(2)}>
               <ChevronLeft size={16} /> Retour
             </button>
           </div>
