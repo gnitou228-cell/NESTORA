@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Camera, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
+import api from '../../lib/api';
 
 interface EditProfileModalProps {
   onClose: () => void;
@@ -18,8 +19,10 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
   const [avatar, setAvatar] = useState(user?.profile?.avatar || '');
   
   // Agence
-  const isAgency = role === 'AGENCY';
-  const [documentUrl, setDocumentUrl] = useState('');
+  const [documentUrl, setDocumentUrl] = useState(user?.profile?.documentUrl || '');
+
+  // Propriétaire & Agence
+  const needsDocument = role === 'AGENCY' || role === 'OWNER';
 
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -78,28 +81,22 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
     setError('');
 
     try {
-      // If we don't have a backend endpoint yet, we just update Supabase directly for profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: firstName,
-          last_name: lastName,
-          avatar: avatar,
-          bio: bio
-        })
-        .eq('id', user?.id);
+      const res = await api.put('/auth/profile', {
+        firstName,
+        lastName,
+        phone,
+        avatar,
+        bio,
+        documentUrl
+      });
 
-      if (profileError) throw profileError;
-
-      // Update phone in auth or users table if necessary.
-      // Here we just use the AuthContext to update local state smoothly
-      if (updateUser) {
+      if (updateUser && res.data?.user) {
+        // Use the returned user to ensure exact sync
         updateUser({
-          firstName,
-          lastName,
-          avatar,
-          bio,
-          phone
+          ...res.data.user,
+          profile: {
+            ...res.data.user.profile
+          }
         });
       }
 
@@ -109,6 +106,31 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
     } finally {
       setLoading(false);
     }
+  };
+
+  // Calcul du score de complétion
+  let completionScore = 0;
+  const missingFields: string[] = [];
+  
+  if (firstName.trim()) completionScore += 15; else missingFields.push("Prénom");
+  if (lastName.trim()) completionScore += 15; else missingFields.push("Nom");
+  if (phone.trim()) completionScore += 20; else missingFields.push("Téléphone");
+  if (avatar) completionScore += 20; else missingFields.push("Photo de profil");
+  if (bio.trim()) completionScore += 10; else missingFields.push("Bio");
+  if (needsDocument) {
+    if (documentUrl) completionScore += 20; else missingFields.push("Document légal/ID");
+  } else {
+    // Si pas de document requis, répartir les 20% restants
+    completionScore += 20;
+  }
+
+  // Empêcher d'avoir plus de 100% ou moins de 0%
+  completionScore = Math.min(100, Math.max(0, completionScore));
+
+  const getProgressColor = () => {
+    if (completionScore < 50) return '#e74c3c';
+    if (completionScore < 80) return '#f1c40f';
+    return '#2ecc71';
   };
 
   return (
@@ -123,6 +145,29 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
 
         <form onSubmit={handleSubmit} className="modal-body">
           {error && <div className="alert alert-danger mb-4">{error}</div>}
+
+          {/* Progress Bar */}
+          <div className="profile-progress-container mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="font-weight-bold" style={{ fontSize: '0.9rem' }}>Complétion du profil</span>
+              <span className="badge" style={{ backgroundColor: getProgressColor(), color: '#fff' }}>{completionScore}%</span>
+            </div>
+            <div className="progress" style={{ height: '8px', backgroundColor: '#e9ecef', borderRadius: '4px', overflow: 'hidden' }}>
+              <div 
+                className="progress-bar" 
+                style={{ 
+                  width: `${completionScore}%`, 
+                  backgroundColor: getProgressColor(),
+                  transition: 'width 0.3s ease, background-color 0.3s ease'
+                }} 
+              ></div>
+            </div>
+            {completionScore < 100 && (
+              <div className="mt-2 text-sm" style={{ color: '#64748b' }}>
+                <strong>Reste à compléter :</strong> {missingFields.join(', ')}
+              </div>
+            )}
+          </div>
 
           {/* Avatar Upload */}
           <div className="avatar-upload-container text-center mb-4">
@@ -186,9 +231,12 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
             />
           </div>
 
-          {isAgency && (
+          {needsDocument && (
             <div className="form-group mb-3 document-upload-group">
-              <label>Document d'entreprise (RCCM, NIF, etc.) <span className="text-light text-sm">- Requis pour la crédibilité</span></label>
+              <label>
+                {role === 'AGENCY' ? "Document d'entreprise (RCCM, NIF, etc.)" : "Pièce d'identité (Carte, Passeport, Permis)"}
+                <span className="text-light text-sm d-block mt-1">Requis pour garantir votre crédibilité sur la plateforme</span>
+              </label>
               <div className="document-upload-box" onClick={() => docInputRef.current?.click()}>
                 {uploadingDoc ? (
                   <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>

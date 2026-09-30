@@ -175,7 +175,7 @@ router.post('/verify-email', async (req, res) => {
 router.put('/profile', requireAuth, async (req: any, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, phone, bio, avatar, countryId, regionId, cityId, neighborhoodId, address } = req.body;
+    const { firstName, lastName, phone, bio, avatar, documentUrl, countryId, regionId, cityId, neighborhoodId, address } = req.body;
 
     const updatedUser = await prisma.$transaction(async (tx) => {
       if (phone) {
@@ -187,10 +187,10 @@ router.put('/profile', requireAuth, async (req: any, res) => {
       await tx.profile.upsert({
         where: { userId },
         create: {
-          userId, firstName, lastName, bio, avatar, countryId, regionId, cityId, neighborhoodId, address
+          userId, firstName, lastName, bio, avatar, documentUrl, countryId, regionId, cityId, neighborhoodId, address
         },
         update: {
-          firstName, lastName, bio, avatar, countryId, regionId, cityId, neighborhoodId, address
+          firstName, lastName, bio, avatar, documentUrl, countryId, regionId, cityId, neighborhoodId, address
         }
       });
       return await tx.user.findUnique({ where: { id: userId }, include: { profile: true, agency: true } });
