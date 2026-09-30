@@ -46,12 +46,10 @@ export default function BoostModal({ isOpen, onClose, propertyId }: BoostModalPr
       return;
     }
     navigate('/paiement', { state: { plan, type: 'Boost Annonce', propertyId } });
-    onClose();
   };
 
   const handleSelectProperty = (propId: string) => {
     navigate('/paiement', { state: { plan: selectedPlan, type: 'Boost Annonce', propertyId: propId } });
-    onClose();
   };
 
   const formatDurationText = (duration: number) => {
