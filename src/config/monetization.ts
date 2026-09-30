@@ -23,11 +23,11 @@ export const MONETIZATION_CONFIG = {
   paymentProviders: ['Orange Money', 'Moov Money', 'MTN Mobile Money', 'Wave', 'Carte Bancaire'],
 
   chercheurPlans: [
-    { id: 'c_15d', durationInDays: 15, label: '15 jours', price: 2000 },
-    { id: 'c_1m', durationInDays: 30, label: '1 mois', price: 3500, isPopular: true },
-    { id: 'c_3m', durationInDays: 90, label: '3 mois', price: 8500 },
-    { id: 'c_6m', durationInDays: 180, label: '6 mois', price: 15000 },
-    { id: 'c_1y', durationInDays: 365, label: '1 an', price: 25000, isBestValue: true },
+    { id: 'c_15d', durationInDays: 15, label: '15 jours', price: 3500 },
+    { id: 'c_1m', durationInDays: 30, label: '1 mois', price: 5000, isPopular: true },
+    { id: 'c_3m', durationInDays: 90, label: '3 mois', price: 12500 },
+    { id: 'c_6m', durationInDays: 180, label: '6 mois', price: 22000 },
+    { id: 'c_1y', durationInDays: 365, label: '1 an', price: 40000, isBestValue: true },
   ] as Plan[],
 
   proprietairePlans: [

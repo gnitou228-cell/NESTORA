@@ -282,6 +282,19 @@ const PropertyDetail = () => {
       alert('Vous ne pouvez pas vous contacter vous-même.');
       return;
     }
+
+    // Logique Freemium
+    if (user.role === 'SEEKER') {
+      const freeContactsUsed = parseInt(localStorage.getItem('nestora_free_contacts') || '0', 10);
+      const hasUnlocked = user?.hasActiveSubscription || localStorage.getItem('nestora_is_premium') === 'true' || localStorage.getItem(`unlocked_contact_${property?.id}`) === 'true';
+
+      if (!hasUnlocked && freeContactsUsed < 3) {
+        localStorage.setItem('nestora_free_contacts', (freeContactsUsed + 1).toString());
+        localStorage.setItem(`unlocked_contact_${property?.id}`, 'true');
+        alert(`Contact débloqué gratuitement ! Il vous reste ${2 - freeContactsUsed} contact(s) gratuit(s).`);
+      }
+    }
+
     setShowContactModal(true);
   };
 
@@ -652,7 +665,7 @@ const PropertyDetail = () => {
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}
                 >
                   <MessageCircle size={20} />
-                  Contacter l'annonceur
+                  {property.agency ? "Contacter l'agent immobilier" : "Contacter le propriétaire"}
                 </button>
                 <button 
                   className="btn btn-outline btn-block" 
@@ -949,10 +962,10 @@ const PropertyDetail = () => {
                         style={{ padding: '1rem', fontSize: '1.05rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                         onClick={() => {
                           // Simulate payment page navigation for single unlock
-                          navigate(`/paiement`, { state: { plan: { name: 'Contact Annonceur', price: 500 }, type: 'Unlock Contact', propertyId: property?.id } });
+                          navigate(`/paiement`, { state: { plan: { name: 'Contact Annonceur', price: 1000 }, type: 'Unlock Contact', propertyId: property?.id } });
                         }}
                       >
-                        <CheckCircle size={18} /> Débloquer ce contact (500 FCFA)
+                        <CheckCircle size={18} /> {property.agency ? "Contacter l'agent immobilier" : "Contacter le propriétaire"} (1000 FCFA)
                       </button>
                       
                       <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
