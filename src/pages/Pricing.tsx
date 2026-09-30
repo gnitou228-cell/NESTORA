@@ -91,7 +91,7 @@ export default function Pricing() {
               >
                 <div className="premium-card-left">
                   <div className={`premium-radio ${isSelected ? 'checked' : ''}`}>
-                    {isSelected && <Check size={14} color="#fff" strokeWidth={3} />}
+                    {/* Le point du bouton radio est géré en CSS via ::after */}
                   </div>
                   <div className="premium-card-info">
                     <div className="premium-card-title-row">
