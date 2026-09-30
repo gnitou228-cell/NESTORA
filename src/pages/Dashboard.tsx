@@ -62,7 +62,7 @@ export default function Dashboard() {
           <div className="welcome-banner">
             <div className="welcome-content">
               <h1 className="welcome-title">Bonjour {user?.profile?.firstName || 'Utilisateur'} 👋</h1>
-              <h2 className="welcome-subtitle">Votre espace {role?.toLowerCase() || ''} est prêt !</h2>
+              <h2 className="welcome-subtitle">Votre espace {role === 'SEEKER' ? 'chercheur' : role === 'OWNER' ? 'propriétaire' : role === 'AGENCY' ? 'agence' : 'personnel'} est prêt !</h2>
               <p className="welcome-desc">
                 {isOwnerOrAgency 
                   ? "Gérez facilement vos annonces, suivez vos visites, boostez votre visibilité et développez votre activité." 
@@ -243,64 +243,114 @@ export default function Dashboard() {
                 {isOwnerOrAgency ? (
                   <><Home size={18} /> Mes annonces récentes</>
                 ) : (
-                  <><Heart size={18} /> Mes favoris récents</>
+                  <><Home size={18} /> Les annonces récentes</>
                 )}
               </div>
-              <Link to={isOwnerOrAgency ? "/mes-annonces" : "/favoris"} className="card-link">
+              <Link to={isOwnerOrAgency ? "/mes-annonces" : "/recherche"} className="card-link">
                 Voir tout →
               </Link>
             </div>
             <div className="properties-grid">
-              {(stats?.recentProperties || []).map((property: any) => (
-                <div className="property-card" key={property.id}>
-                  <div className="property-img-container">
-                    <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} alt={property.title} className="property-img" />
-                    {isOwnerOrAgency && (
-                      <div className={`property-status ${property.status === 'PUBLISHED' ? 'status-online' : property.status === 'PENDING' ? 'status-pending' : 'status-expired'}`}>
-                        {property.status}
+              {isOwnerOrAgency ? (
+                (stats?.recentProperties || []).map((property: any) => (
+              {isOwnerOrAgency ? (
+                (stats?.recentProperties || []).map((property: any) => (
+                  <div className="property-card" key={property.id}>
+                    <div className="property-img-container">
+                      <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} alt={property.title} className="property-img" />
+                      {isOwnerOrAgency && (
+                        <div className={`property-status ${property.status === 'PUBLISHED' ? 'status-online' : property.status === 'PENDING' ? 'status-pending' : 'status-expired'}`}>
+                          {property.status}
+                        </div>
+                      )}
+                      <div className="property-fav">
+                        <Heart size={16} fill={!isOwnerOrAgency ? "#C9A227" : "none"} color={!isOwnerOrAgency ? "#C9A227" : "currentColor"} />
                       </div>
-                    )}
-                    <div className="property-fav">
-                      <Heart size={16} fill={!isOwnerOrAgency ? "#C9A227" : "none"} color={!isOwnerOrAgency ? "#C9A227" : "currentColor"} />
+                    </div>
+                    <div className="property-content">
+                      <div className="property-title">{property.title}</div>
+                      <div className="property-location">
+                        <MapPin size={12} />
+                        {property.city?.name}
+                      </div>
+                      <div className="property-features">
+                        {property.bedrooms > 0 && (
+                          <div className="feature">
+                            <Bed size={14} /> {property.bedrooms} ch
+                          </div>
+                        )}
+                        {property.bathrooms > 0 && (
+                          <div className="feature">
+                            <Bath size={14} /> {property.bathrooms} sdb
+                          </div>
+                        )}
+                        {property.surface > 0 && (
+                          <div className="feature">
+                            <Move size={14} /> {property.surface} m²
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                        <div>
+                          <div className="property-price">{property.price?.toLocaleString()} {property.currency}</div>
+                          <div className={`property-type ${property.transactionType === 'SALE' ? 'property-type-sell' : ''}`}>
+                            {property.transactionType === 'SALE' ? 'À vendre' : 'À louer'}
+                          </div>
+                        </div>
+                        <Link to={`/annonces/${property.id}`} className="btn btn-outline" style={{ padding: '0.25rem' }}>
+                          <Eye size={16} />
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                  <div className="property-content">
-                    <div className="property-title">{property.title}</div>
-                    <div className="property-location">
-                      <MapPin size={12} />
-                      {property.city?.name}
-                    </div>
-                    <div className="property-features">
-                      {property.bedrooms > 0 && (
-                        <div className="feature">
-                          <Bed size={14} /> {property.bedrooms} ch
-                        </div>
-                      )}
-                      {property.bathrooms > 0 && (
-                        <div className="feature">
-                          <Bath size={14} /> {property.bathrooms} sdb
-                        </div>
-                      )}
-                      {property.surface > 0 && (
-                        <div className="feature">
-                          <Move size={14} /> {property.surface} m²
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                      <div>
-                        <div className="property-price">{property.price?.toLocaleString()} {property.currency}</div>
-                        <div className={`property-type ${property.transactionType === 'SALE' ? 'property-type-sell' : ''}`}>
-                          {property.transactionType === 'SALE' ? 'À vendre' : 'À louer'}
-                        </div>
+                ))
+              ) : (
+                (stats?.allRecentProperties || []).map((property: any) => (
+                  <div className="property-card" key={property.id}>
+                    <div className="property-img-container">
+                      <img src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} alt={property.title} className="property-img" />
+                      <div className="property-fav">
+                        <Heart size={16} fill="none" color="currentColor" />
                       </div>
-                      <Link to={`/annonces/${property.id}`} className="btn btn-outline" style={{ padding: '0.25rem' }}>
-                        <Eye size={16} />
-                      </Link>
+                    </div>
+                    <div className="property-content">
+                      <div className="property-title">{property.title}</div>
+                      <div className="property-location">
+                        <MapPin size={12} />
+                        {property.city?.name}
+                      </div>
+                      <div className="property-features">
+                        {property.bedrooms > 0 && (
+                          <div className="feature">
+                            <Bed size={14} /> {property.bedrooms} ch
+                          </div>
+                        )}
+                        {property.bathrooms > 0 && (
+                          <div className="feature">
+                            <Bath size={14} /> {property.bathrooms} sdb
+                          </div>
+                        )}
+                        {property.surface > 0 && (
+                          <div className="feature">
+                            <Move size={14} /> {property.surface} m²
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                        <div>
+                          <div className="property-price">{property.price?.toLocaleString()} {property.currency}</div>
+                          <div className={`property-type ${property.transactionType === 'SALE' ? 'property-type-sell' : ''}`}>
+                            {property.transactionType === 'SALE' ? 'À vendre' : 'À louer'}
+                          </div>
+                        </div>
+                        <Link to={`/annonces/${property.id}`} className="btn btn-outline" style={{ padding: '0.25rem' }}>
+                          <Eye size={16} />
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
           <div className="bottom-widgets">

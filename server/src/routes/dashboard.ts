@@ -11,7 +11,7 @@ router.get('/stats', requireAuth, async (req: any, res) => {
     const role = req.user.role;
 
     if (role === Role.SEEKER) {
-      const [favoritesCount, visitsCount, conversationsCount, recentFavorites, recentVisits] = await Promise.all([
+      const [favoritesCount, visitsCount, conversationsCount, recentFavorites, recentVisits, allRecentProperties] = await Promise.all([
         prisma.favorite.count({ where: { userId } }),
         prisma.visit.count({ where: { requesterId: userId } }),
         prisma.conversationMember.count({ where: { userId } }),
@@ -26,6 +26,12 @@ router.get('/stats', requireAuth, async (req: any, res) => {
           take: 5,
           orderBy: { createdAt: 'desc' },
           include: { property: { include: { city: true } } }
+        }),
+        prisma.property.findMany({
+          where: { status: 'PUBLISHED' },
+          take: 4,
+          orderBy: { createdAt: 'desc' },
+          include: { images: { orderBy: { position: 'asc' }, take: 1 }, city: true }
         })
       ]);
 
@@ -36,6 +42,7 @@ router.get('/stats', requireAuth, async (req: any, res) => {
         visits: visitsCount,
         conversations: conversationsCount,
         recentProperties,
+        allRecentProperties,
         recentActivities: recentVisits.map((v: any) => ({
           type: 'VISIT_REQUEST',
           title: 'Demande de visite',
