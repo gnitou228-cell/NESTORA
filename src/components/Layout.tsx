@@ -1,7 +1,7 @@
 import { 
   LayoutDashboard, Home, PlusCircle, Rocket, CreditCard, MessageSquare, 
   BarChart2, Settings, User as UserIcon, Bell, Crown, Headset,
-  FileText, Heart, Search as SearchIcon, FileQuestion, Users, Activity, LogOut, MapPin
+  FileText, Heart, Search as SearchIcon, FileQuestion, Users, Activity, LogOut, MapPin, Shield
 } from 'lucide-react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useState } from 'react';
@@ -46,6 +46,11 @@ export default function Layout() {
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
       { icon: <UserIcon size={20} />, label: 'Profil', path: '#' },
     ];
+  } else if (role === 'ADMIN') {
+    menuItems = [
+      { icon: <Shield size={20} />, label: 'Tableau de bord Admin', path: '/admin' },
+      { icon: <UserIcon size={20} />, label: 'Mon Profil', path: '#' },
+    ];
   } else {
     menuItems = [
       { icon: <LayoutDashboard size={20} />, label: 'Vue d\'ensemble', path: '/dashboard/agency' },
@@ -74,7 +79,7 @@ export default function Layout() {
 
         <nav className="nav-menu">
           {menuItems.map((item, index) => (
-            item.label === 'Profil' ? (
+            item.label === 'Profil' || item.label === 'Mon Profil' ? (
               <button 
                 key={index} 
                 className={`nav-item ${showProfileModal ? 'active' : ''}`}
@@ -146,7 +151,7 @@ export default function Layout() {
               <img src={user?.profile?.avatar || "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=100&q=80"} alt="User" className="user-avatar" />
               <div className="user-info">
                 <span className="user-name">{user?.profile?.firstName || user?.agency?.name?.split(' ')[0] || 'Utilisateur'}</span>
-                <span className="user-role">{role === 'OWNER' ? 'Propriétaire' : role === 'AGENCY' ? 'Agence' : 'Chercheur'}</span>
+                <span className="user-role">{role === 'ADMIN' ? 'Administrateur' : role === 'OWNER' ? 'Propriétaire' : role === 'AGENCY' ? 'Agence' : 'Chercheur'}</span>
               </div>
             </div>
           </div>
