@@ -399,6 +399,7 @@ export default function AdminDashboard() {
                 <th style={{ padding: '1rem' }}>Type</th>
                 <th style={{ padding: '1rem' }}>Utilisateur / Agence</th>
                 <th style={{ padding: '1rem' }}>Statut</th>
+                <th style={{ padding: '1rem' }}>Documents</th>
                 <th style={{ padding: '1rem' }}>Actions</th>
               </tr>
             </thead>
@@ -411,6 +412,20 @@ export default function AdminDashboard() {
                     <span className={`mini-badge ${v.status === 'VERIFIED' ? 'badge-success' : v.status === 'REJECTED' ? 'badge-danger' : 'badge-warning'}`}>
                       {v.status}
                     </span>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                      {v.user?.profile?.documentUrl && (
+                        <a href={v.user.profile.documentUrl} target="_blank" rel="noopener noreferrer" className="text-primary text-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <BookOpen size={14} /> Voir ID
+                        </a>
+                      )}
+                      {v.user?.profile?.selfieUrl && (
+                        <a href={v.user.profile.selfieUrl} target="_blank" rel="noopener noreferrer" className="text-primary text-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Users size={14} /> Voir Selfie
+                        </a>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <div className="d-flex" style={{ gap: '0.5rem' }}>

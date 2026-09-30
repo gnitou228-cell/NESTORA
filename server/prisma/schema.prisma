@@ -57,6 +57,7 @@ model Profile {
   address        String?
   bio            String?
   documentUrl    String?
+  selfieUrl      String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   city           City?         @relation(fields: [cityId], references: [id])

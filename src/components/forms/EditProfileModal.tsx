@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Camera, Upload } from 'lucide-react';
+import { X, Camera, Upload, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import api from '../../lib/api';
@@ -20,6 +20,7 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
   
   // Agence
   const [documentUrl, setDocumentUrl] = useState(user?.profile?.documentUrl || '');
+  const [selfieUrl, setSelfieUrl] = useState(user?.profile?.selfieUrl || '');
 
   // Propriétaire & Agence
   const needsDocument = role === 'AGENCY' || role === 'OWNER';
@@ -27,10 +28,12 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadingSelfie, setUploadingSelfie] = useState(false);
   const [error, setError] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -75,6 +78,27 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
     }
   };
 
+  const handleSelfieUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}-selfie-${Math.random()}.${fileExt}`;
+    const filePath = `documents/${fileName}`;
+
+    setUploadingSelfie(true);
+    try {
+      const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
+      setSelfieUrl(data.publicUrl);
+    } catch (err: any) {
+      setError("Erreur lors de l'upload du selfie.");
+    } finally {
+      setUploadingSelfie(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -87,7 +111,8 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
         phone,
         avatar,
         bio,
-        documentUrl
+        documentUrl,
+        selfieUrl
       });
 
       if (updateUser && res.data?.user) {
@@ -118,7 +143,8 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
   if (avatar) completionScore += 20; else missingFields.push("Photo de profil");
   if (bio.trim()) completionScore += 10; else missingFields.push("Bio");
   if (needsDocument) {
-    if (documentUrl) completionScore += 20; else missingFields.push("Document légal/ID");
+    if (documentUrl) completionScore += 10; else missingFields.push("Document légal/ID");
+    if (selfieUrl) completionScore += 10; else missingFields.push("Selfie de vérification");
   } else {
     // Si pas de document requis, répartir les 20% restants
     completionScore += 20;
@@ -232,34 +258,73 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
           </div>
 
           {needsDocument && (
-            <div className="form-group mb-3 document-upload-group">
-              <label>
-                {role === 'AGENCY' ? "Document d'entreprise (RCCM, NIF, etc.)" : "Pièce d'identité (Carte, Passeport, Permis)"}
-                <span className="text-light text-sm d-block mt-1">Requis pour garantir votre crédibilité sur la plateforme</span>
-              </label>
-              <div className="document-upload-box" onClick={() => docInputRef.current?.click()}>
-                {uploadingDoc ? (
-                  <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
-                ) : documentUrl ? (
-                  <div className="document-success">
-                    <span className="badge-success">Document uploadé avec succès</span>
-                    <span className="text-sm">Cliquez pour modifier</span>
-                  </div>
-                ) : (
-                  <>
-                    <Upload size={20} color="var(--color-text-light)" />
-                    <span>Ajouter un document (PDF, JPG, PNG)</span>
-                  </>
-                )}
+            <>
+              <div className="form-group mb-3 document-upload-group">
+                <label>
+                  {role === 'AGENCY' ? "Document d'entreprise (RCCM, NIF, etc.)" : "Pièce d'identité (Carte, Passeport, Permis)"}
+                  <span className="text-light text-sm d-block mt-1">Requis pour garantir votre crédibilité sur la plateforme</span>
+                </label>
+                <div className="document-upload-box" onClick={() => docInputRef.current?.click()}>
+                  {uploadingDoc ? (
+                    <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
+                  ) : documentUrl ? (
+                    <div className="document-success">
+                      <span className="badge-success">Document uploadé avec succès</span>
+                      <span className="text-sm">Cliquez pour modifier</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={20} color="var(--color-text-light)" />
+                      <span>Ajouter un document (PDF, JPG, PNG)</span>
+                    </>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={docInputRef}
+                  onChange={handleDocUpload}
+                  accept=".pdf,image/*"
+                  style={{ display: 'none' }}
+                />
               </div>
-              <input 
-                type="file" 
-                ref={docInputRef}
-                onChange={handleDocUpload}
-                accept=".pdf,image/*"
-                style={{ display: 'none' }}
-              />
-            </div>
+
+              <div className="form-group mb-3 document-upload-group">
+                <label>
+                  Selfie avec la pièce d'identité
+                  <span className="text-light text-sm d-block mt-1">Veuillez prendre un selfie clair où l'on voit votre visage et la pièce d'identité.</span>
+                </label>
+                <div className="document-upload-box" onClick={() => selfieInputRef.current?.click()}>
+                  {uploadingSelfie ? (
+                    <span className="loader-sm" style={{ borderColor: 'var(--color-primary)' }}></span>
+                  ) : selfieUrl ? (
+                    <div className="document-success">
+                      <span className="badge-success">Selfie uploadé avec succès</span>
+                      <span className="text-sm">Cliquez pour modifier</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Camera size={20} color="var(--color-text-light)" />
+                      <span>Prendre ou ajouter un selfie (JPG, PNG)</span>
+                    </>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={selfieInputRef}
+                  onChange={handleSelfieUpload}
+                  accept="image/*"
+                  capture="user"
+                  style={{ display: 'none' }}
+                />
+              </div>
+
+              {(documentUrl || selfieUrl) && (
+                <div className="alert alert-info mb-4" style={{ fontSize: '0.85rem' }}>
+                  <ShieldCheck size={16} className="me-2" />
+                  <strong>En cours d'examination :</strong> Une fois vos deux documents (Pièce + Selfie) envoyés, l'administrateur validera manuellement votre identité. Vous recevrez un email de confirmation.
+                </div>
+              )}
+            </>
           )}
 
           <div className="form-group mb-4">

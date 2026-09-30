@@ -215,7 +215,7 @@ router.get('/verifications', async (req, res) => {
     const verifs = await prisma.verification.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
+        user: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true, documentUrl: true, selfieUrl: true } } } },
         agency: { select: { id: true, name: true } },
         property: { select: { id: true, title: true } }
       }
@@ -236,11 +236,15 @@ router.patch('/verifications/:id/status', async (req, res) => {
       return res.status(400).json({ error: 'Statut invalide' });
     }
 
-    const oldVerif = await prisma.verification.findUnique({ where: { id } });
+    const oldVerif = await prisma.verification.findUnique({ where: { id }, include: { user: true } });
     const updatedVerif = await prisma.verification.update({
       where: { id },
       data: { status, reviewedBy: adminId, verifiedAt: status === 'VERIFIED' ? new Date() : null }
     });
+
+    if (oldVerif?.user?.email && status !== oldVerif.status) {
+      console.log(`[EMAIL MOCK] Sending email to ${oldVerif.user.email} -> Your identity verification is now: ${status}`);
+    }
 
     await logAdminAction(adminId, `VERIFICATION_STATUS_UPDATED`, 'Verification', id, { status: oldVerif?.status }, { status: updatedVerif.status });
     res.json(updatedVerif);

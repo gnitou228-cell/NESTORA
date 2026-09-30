@@ -17,6 +17,7 @@ export interface User {
     bio?: string;
     address?: string;
     documentUrl?: string;
+    selfieUrl?: string;
   };
   agency?: {
     name: string;
@@ -73,7 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             avatar: dbUser.profile.avatar,
             bio: dbUser.profile.bio,
             address: dbUser.profile.address,
-            documentUrl: dbUser.profile.documentUrl
+            documentUrl: dbUser.profile.documentUrl,
+            selfieUrl: dbUser.profile.selfieUrl
           } : undefined,
           agency: dbUser.agency ? {
             name: dbUser.agency.name
