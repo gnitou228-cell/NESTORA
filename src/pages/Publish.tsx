@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader } from 'lucide-react';
+import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Search, Trash2, Plus, ArrowLeft, ArrowRight, Loader, Crown, Lock } from 'lucide-react';
 import { LocationPicker } from '../components/LocationPicker';
 
 
@@ -35,6 +35,22 @@ export default function Publish() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Logique de limitation (Mock Premium)
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
+
+  useEffect(() => {
+    const checkPremiumStatus = () => {
+      const premium = localStorage.getItem('nestora_is_premium') === 'true';
+      
+      // Pour la démo, on simule que l'utilisateur a déjà posté 2 annonces
+      // S'il n'est pas premium, il a atteint sa limite
+      if (!premium) {
+        setHasReachedLimit(true);
+      }
+    };
+    checkPremiumStatus();
+  }, []);
 
   // Localisation data
   const [countries, setCountries] = useState<any[]>([]);
@@ -97,6 +113,56 @@ export default function Publish() {
       })
       .catch(console.error);
   }, []);
+
+  // UI Si la limite est atteinte
+  if (hasReachedLimit) {
+    return (
+      <div className="publish-page" style={{ maxWidth: '800px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', padding: '3rem 2rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: '#fef3c7', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Lock size={40} color="#d97706" />
+          </div>
+          
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#92400e', marginBottom: '1rem' }}>
+            Limite de publication atteinte
+          </h1>
+          
+          <p style={{ fontSize: '1.1rem', color: '#b45309', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
+            En tant qu'utilisateur gratuit, vous êtes limité à <strong>2 annonces actives</strong>. 
+            De plus, vos annonces risquent d'être noyées dans les résultats de recherche.
+          </p>
+          
+          <div style={{ background: '#fff', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', textAlign: 'left', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem' }}>Passez au Premium pour :</h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155' }}>
+                <CheckCircle size={18} color="#10b981" /> Publier des annonces en illimité
+              </li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155' }}>
+                <CheckCircle size={18} color="#10b981" /> Apparaître en priorité dans les recherches
+              </li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155' }}>
+                <CheckCircle size={18} color="#10b981" /> Voir qui s'intéresse à vos biens
+              </li>
+            </ul>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <button className="btn btn-outline" onClick={() => navigate('/dashboard')}>
+              Retour au tableau de bord
+            </button>
+            <button 
+              className="btn" 
+              style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px', fontWeight: 600 }}
+              onClick={() => navigate('/tarifs')}
+            >
+              <Crown size={20} /> Découvrir Premium
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (formData.countryId) {

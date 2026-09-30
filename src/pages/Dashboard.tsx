@@ -23,8 +23,10 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
+    setIsPremium(localStorage.getItem('nestora_is_premium') === 'true');
     const fetchStats = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -364,27 +366,41 @@ export default function Dashboard() {
           <div className="subscription-card">
             <div className="subscription-header">
               <div className="subscription-title">
-                <Crown size={20} color="#C9A227" />
+                <Crown size={20} color={isPremium ? "#C9A227" : "#94a3b8"} />
                 Votre abonnement
               </div>
-              <Link to="/abonnement" className="card-link">Détails</Link>
-            </div>
-            <div className="subscription-plan">Pack {role} - Standard</div>
-            <div className="subscription-date">Jusqu'au 25 oct. 2025</div>
-            
-            <div className="progress-bar-container">
-              <div className="progress-bar-bg">
-                <div className="progress-bar-fill" style={{ width: isOwnerOrAgency ? '30%' : '100%' }}></div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="progress-text">
-                  {isOwnerOrAgency ? "3/10 annonces publiées" : "Recherches illimitées"}
-                </span>
-                <span className="progress-text" style={{ color: '#10b981', fontWeight: 600 }}>Actif</span>
-              </div>
+              <Link to="/abonnement" className="card-link">{isPremium ? "Détails" : "Découvrir"}</Link>
             </div>
             
-            <Link to="/abonnement" className="btn btn-outline btn-block" style={{textAlign: 'center'}}>Gérer mon abonnement</Link>
+            {isPremium ? (
+              <>
+                <div className="subscription-plan">Premium {role}</div>
+                <div className="subscription-date">Jusqu'au 25 oct. 2025</div>
+                
+                <div className="progress-bar-container">
+                  <div className="progress-bar-bg">
+                    <div className="progress-bar-fill" style={{ width: isOwnerOrAgency ? '30%' : '100%' }}></div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span className="progress-text">
+                      {isOwnerOrAgency ? "Annonces illimitées" : "Recherches illimitées"}
+                    </span>
+                    <span className="progress-text" style={{ color: '#10b981', fontWeight: 600 }}>Actif</span>
+                  </div>
+                </div>
+                
+                <Link to="/abonnement" className="btn btn-outline btn-block" style={{textAlign: 'center'}}>Gérer mon abonnement</Link>
+              </>
+            ) : (
+              <>
+                <div className="subscription-plan" style={{ color: '#64748b' }}>Plan Gratuit</div>
+                <div className="subscription-date" style={{ color: '#ef4444', fontWeight: 600 }}>Limité à 2 annonces</div>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '1rem 0' }}>
+                  Passez au Premium pour publier en illimité et booster votre visibilité.
+                </p>
+                <Link to="/tarifs" className="btn" style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', color: 'white', textAlign: 'center', display: 'block', padding: '0.75rem', borderRadius: '8px', fontWeight: 600 }}>Passer au Premium</Link>
+              </>
+            )}
           </div>
 
           <div className="action-menu">

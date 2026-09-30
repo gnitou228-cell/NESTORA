@@ -1,10 +1,29 @@
-import { Link } from 'react-router-dom';
-import { Crown, CreditCard, Check, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Crown, CreditCard, Check, AlertCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { invoices } from '../data/mockData';
 
 export default function Subscription() {
   const { role } = useAuth();
+  const navigate = useNavigate();
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    // Check if user has premium in local storage (mock for now)
+    const premium = localStorage.getItem('nestora_is_premium') === 'true';
+    setIsPremium(premium);
+  }, []);
+
+  const handleCancelSubscription = () => {
+    if (window.confirm("Êtes-vous sûr de vouloir annuler votre abonnement Premium ? Vos avantages resteront actifs jusqu'à la fin de la période de facturation en cours.")) {
+      localStorage.setItem('nestora_is_premium', 'false');
+      setIsPremium(false);
+      alert("Votre abonnement a été annulé avec succès.");
+      // Optionnellement, rafraîchir ou rediriger
+      navigate('/dashboard');
+    }
+  };
 
   // If Chercheur, they don't have a global subscription, they pay per request.
   if (role === 'SEEKER') {
@@ -14,6 +33,29 @@ export default function Subscription() {
         <h2>Espace Abonnement</h2>
         <p className="text-light mb-3">En tant que chercheur, vous ne payez qu'à la demande lors de la publication.</p>
         <Link to="/publier" className="btn btn-primary">Publier une demande</Link>
+      </div>
+    );
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="subscription-page">
+        <div className="mb-4">
+          <h1 className="page-title">Mon Abonnement</h1>
+          <p className="page-subtitle text-light">Gérez votre formule, vos quotas et vos factures.</p>
+        </div>
+        <div className="text-center mt-5" style={{ background: '#fff', borderRadius: '16px', padding: '3rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ background: '#f1f5f9', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <XCircle size={32} color="#64748b" />
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>Aucun abonnement actif</h2>
+          <p className="text-light mb-4" style={{ fontSize: '1.1rem' }}>
+            Passez au Premium pour publier vos annonces en illimité et obtenir un maximum de visibilité sur Nestora.
+          </p>
+          <Link to="/tarifs" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '1rem 2rem', fontSize: '1.1rem' }}>
+            <Crown size={20} /> Découvrir les offres Premium
+          </Link>
+        </div>
       </div>
     );
   }
@@ -61,7 +103,7 @@ export default function Subscription() {
 
               <div style={{ textAlign: 'right' }}>
                 <Link to="/tarifs" className="btn btn-primary mb-2" style={{ display: 'block' }}>Passer à la formule supérieure</Link>
-                <button className="btn btn-outline" style={{ display: 'block', width: '100%' }}>Résilier l'abonnement</button>
+                <button className="btn btn-outline" style={{ display: 'block', width: '100%', color: '#ef4444', borderColor: '#fee2e2', background: '#fef2f2' }} onClick={handleCancelSubscription}>Résilier l'abonnement</button>
               </div>
             </div>
           </div>
