@@ -204,7 +204,7 @@ export default function HomePage() {
         <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
           <h2 className="section-title">Vous avez un bien à louer ou à vendre ?</h2>
           <p className="section-subtitle">Publiez votre annonce et donnez-lui la visibilité qu'elle mérite auprès de milliers de chercheurs actifs.</p>
-          <div className="d-flex justify-center gap-2 mt-4 flex-wrap">
+          <div className="d-flex justify-center flex-wrap" style={{ gap: '1.5rem', marginTop: '2rem' }}>
             <Link to="/publier" className="btn btn-primary btn-lg" style={{ background: 'var(--color-accent)', color: 'white' }}>Publier mon bien</Link>
             <Link to="/tarifs" className="btn btn-outline btn-lg" style={{ borderColor: 'white', color: 'white' }}>Découvrir les tarifs</Link>
           </div>
