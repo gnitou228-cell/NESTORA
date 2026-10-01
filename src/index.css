@@ -1601,3 +1601,213 @@ button {
 .boost-plan-right { font-weight: 700; color: #10b981; font-size: 1.1rem; }
 .boost-back-btn { background: none; border: none; color: #64748b; font-weight: 500; display: flex; align-items: center; justify-content: center; width: 100%; gap: 0.5rem; cursor: pointer; padding: 0.5rem; transition: color 0.2s; }
 .boost-back-btn:hover { color: #1e293b; }
+
+/* ========================================================================= */
+/* NESTORA MOBILE-FIRST & RESPONSIVE GLOBAL OPTIMIZATION                     */
+/* ========================================================================= */
+
+/* Generic Helpers */
+.mobile-only { display: none !important; }
+@media (max-width: 768px) {
+  .mobile-only { display: block !important; }
+  .desktop-only { display: none !important; }
+}
+
+/* Base Layout Overrides */
+@media (max-width: 1024px) {
+  /* Dashboard layout turns into a stacked layout without fixed sidebar */
+  .app-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding-bottom: 80px; /* Space for bottom nav */
+    display: none; /* We hide the sidebar on mobile and use a Bottom Nav instead */
+  }
+  .main-content {
+    margin-left: 0;
+    margin-bottom: 80px; /* Space for bottom nav */
+  }
+  .header {
+    padding: 0 1rem;
+    height: 60px;
+  }
+  .page-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  /* Dashboards Grids (Admin, Owner, Agency) */
+  .dashboard-grid, .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .properties-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Modals take full width */
+  .modal-content, .boost-modal-content {
+    width: 95%;
+    max-width: 100%;
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  /* Search page adjustments */
+  .search-bar {
+    width: 100%;
+  }
+}
+
+/* Forms & Inputs */
+@media (max-width: 768px) {
+  input, select, textarea, .form-control {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+    padding: 0.8rem;
+  }
+  .btn, .btn-primary, .btn-secondary, .btn-outline {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
+  /* Forms inside layout */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* ========================================================================= */
+/* MOBILE BOTTOM NAVIGATION (DASHBOARDS)                                     */
+/* ========================================================================= */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-bottom-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 65px;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--color-text-light);
+  flex: 1;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.bottom-nav-item:hover, .bottom-nav-item.active {
+  color: var(--color-primary);
+}
+
+.bottom-nav-item.active {
+  font-weight: 700;
+}
+
+.bottom-nav-icon {
+  margin-bottom: 2px;
+}
+
+@media (max-width: 1024px) {
+  .mobile-bottom-nav {
+    display: block;
+  }
+}
+
+/* Mobile Property Details Sticky Action Bar */
+.mobile-sticky-actions {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  z-index: 999;
+  border-top: 1px solid var(--color-border);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .mobile-sticky-actions {
+    display: flex;
+  }
+  .property-detail-page {
+    padding-bottom: 100px !important;
+  }
+}
+
+/* Tables -> Cards on Mobile */
+@media (max-width: 768px) {
+  .responsive-table {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tbody {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table tr {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .responsive-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .responsive-table td:last-child {
+    border-bottom: none;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+  }
+}

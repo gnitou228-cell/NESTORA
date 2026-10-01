@@ -172,6 +172,26 @@ export default function Layout() {
           onSuccess={() => setShowProfileModal(false)}
         />
       )}
+
+      {/* MOBILE BOTTOM NAVIGATION */}
+      <div className="mobile-bottom-nav">
+        <div className="mobile-bottom-nav-inner">
+          {menuItems.slice(0, 4).map((item, index) => (
+            <Link key={index} to={item.path} className={`bottom-nav-item ${location.pathname === item.path ? 'active' : ''}`}>
+              <div className="bottom-nav-icon">{item.icon}</div>
+              <span>{item.label.split(' ')[0]}</span>
+            </Link>
+          ))}
+          <button 
+            className={`bottom-nav-item ${showProfileModal ? 'active' : ''}`}
+            onClick={() => setShowProfileModal(true)} 
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            <div className="bottom-nav-icon"><UserIcon size={20} /></div>
+            <span>Profil</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

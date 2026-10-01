@@ -1056,6 +1056,29 @@ const PropertyDetail = () => {
           </div>
         </div>
       )}
+
+      {/* MOBILE STICKY ACTION BAR */}
+      <div className="mobile-sticky-actions">
+        <button 
+          className="btn btn-primary" 
+          onClick={handleContactClick}
+          style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <MessageCircle size={18} />
+          <span>Contact</span>
+        </button>
+        <button 
+          className="btn btn-outline" 
+          onClick={toggleFavorite}
+          style={{ 
+            width: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0', flexShrink: 0,
+            color: favorite ? '#ef4444' : 'inherit',
+            borderColor: favorite ? '#ef4444' : 'var(--color-border)'
+          }}
+        >
+          <Heart size={20} fill={favorite ? 'currentColor' : 'none'} />
+        </button>
+      </div>
     </div>
   );
 };
