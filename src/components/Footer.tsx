@@ -66,7 +66,7 @@ export default function Footer() {
               <li><Link to="/nous-contacter">Nous contacter</Link></li>
               <li><Link to="/signaler-une-annonce">Signaler une annonce</Link></li>
               <li><Link to="/securite-et-confiance">Sécurité et confiance</Link></li>
-              <li><Link to="/comment-ca-marche">Comment ça marche</Link></li>
+              <li><Link to="/telecharger">Télécharger l'application</Link></li>
             </ul>
           </div>
 
