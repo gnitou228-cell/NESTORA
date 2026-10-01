@@ -68,7 +68,7 @@ export default function HomePage() {
           }}>
             <div className="search-field-premium">
               <label>Localisation</label>
-              <input type="text" placeholder="Ville, quartier (ex: Ouaga 2000)" className="search-input-premium" value={searchLocation} onChange={(e) => setSearchLocation(e.target.value)} />
+              <input type="text" placeholder="Ex: Ouaga 2000, Cocody..." className="search-input-premium" value={searchLocation} onChange={(e) => setSearchLocation(e.target.value)} />
             </div>
             
             <div className="search-divider"></div>
