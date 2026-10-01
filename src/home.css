@@ -117,13 +117,14 @@
 .search-box-premium {
   background: white;
   border-radius: 999px; /* Pill shape */
+  border: 3px solid var(--color-accent); /* Golden contour as requested */
   padding: 0.75rem 0.75rem 0.75rem 2rem;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
   width: 100%;
   max-width: 900px;
   animation: fadeUp 1.2s ease-out forwards;
   position: relative;
-  margin-top: 1.5rem;
+  margin-top: 3.5rem; /* Increased top margin to give tabs room */
 }
 
 /* On mobile, un-pill the container for stacked layout */
@@ -131,12 +132,13 @@
   .search-box-premium {
     border-radius: 24px;
     padding: 1.5rem;
+    margin-top: 3.5rem;
   }
 }
 
 .search-tabs-premium {
   position: absolute;
-  top: -45px;
+  top: -65px; /* Pushed further up to create a gap between tabs and white box */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
