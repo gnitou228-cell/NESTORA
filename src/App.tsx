@@ -43,12 +43,14 @@ import LeadsPage from './pages/agency/LeadsPage';
 import DemandesChercheursPage from './pages/DemandesChercheursPage';
 import Statistics from './pages/Statistics';
 import { FavoritesProvider } from './context/FavoritesContext';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <AuthProvider>
       <FavoritesProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
