@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Send } from 'lucide-react';
 
 const FacebookIcon = ({ size = 24 }: { size?: number }) => (
@@ -21,6 +21,31 @@ const TiktokIcon = ({ size = 24 }: { size?: number }) => (
 );
 import NestoraLogo from './brand/NestoraLogo';
 import '../index.css';
+
+// Smart link: opens in new tab when inside dashboard, normal navigation otherwise
+function FooterLink({ to, children }: { to: string; children: React.ReactNode }) {
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/dashboard') || 
+    location.pathname.startsWith('/mes-annonces') || 
+    location.pathname.startsWith('/publier') ||
+    location.pathname.startsWith('/boost') ||
+    location.pathname.startsWith('/messages') ||
+    location.pathname.startsWith('/favoris') ||
+    location.pathname.startsWith('/visites') ||
+    location.pathname.startsWith('/statistiques') ||
+    location.pathname.startsWith('/paiements') ||
+    location.pathname.startsWith('/abonnement') ||
+    location.pathname.startsWith('/agents') ||
+    location.pathname.startsWith('/prospects') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/demandes-visites') ||
+    location.pathname.startsWith('/recherches-clients');
+
+  if (isDashboard) {
+    return <a href={to} target="_blank" rel="noopener noreferrer">{children}</a>;
+  }
+  return <Link to={to}>{children}</Link>;
+}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -71,13 +96,13 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Navigation</h4>
             <ul className="footer-links">
-              <li><Link to="/">Accueil</Link></li>
-              <li><Link to="/recherche">Rechercher</Link></li>
-              <li><Link to="/annonces">Annonces</Link></li>
-              <li><Link to="/agences">Agences</Link></li>
-              <li><Link to="/tarifs">Tarifs</Link></li>
-              <li><Link to="/comment-ca-marche">Comment ça marche</Link></li>
-              <li><Link to="/publier">Publier une annonce</Link></li>
+              <li><FooterLink to="/">Accueil</FooterLink></li>
+              <li><FooterLink to="/recherche">Rechercher</FooterLink></li>
+              <li><FooterLink to="/annonces">Annonces</FooterLink></li>
+              <li><FooterLink to="/agences">Agences</FooterLink></li>
+              <li><FooterLink to="/tarifs">Tarifs</FooterLink></li>
+              <li><FooterLink to="/comment-ca-marche">Comment ça marche</FooterLink></li>
+              <li><FooterLink to="/publier">Publier une annonce</FooterLink></li>
             </ul>
           </div>
 
@@ -85,12 +110,12 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Support</h4>
             <ul className="footer-links">
-              <li><Link to="/centre-d-aide">Centre d’aide</Link></li>
-              <li><Link to="/faq">FAQ</Link></li>
-              <li><Link to="/nous-contacter">Nous contacter</Link></li>
-              <li><Link to="/signaler-une-annonce">Signaler une annonce</Link></li>
-              <li><Link to="/securite-et-confiance">Sécurité et confiance</Link></li>
-              <li><Link to="/telecharger">Télécharger l'application</Link></li>
+              <li><FooterLink to="/centre-d-aide">Centre d'aide</FooterLink></li>
+              <li><FooterLink to="/faq">FAQ</FooterLink></li>
+              <li><FooterLink to="/nous-contacter">Nous contacter</FooterLink></li>
+              <li><FooterLink to="/signaler-une-annonce">Signaler une annonce</FooterLink></li>
+              <li><FooterLink to="/securite-et-confiance">Sécurité et confiance</FooterLink></li>
+              <li><FooterLink to="/telecharger">Télécharger l'application</FooterLink></li>
             </ul>
           </div>
 
@@ -98,13 +123,13 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Entreprise</h4>
             <ul className="footer-links">
-              <li><Link to="/a-propos">À propos</Link></li>
-              <li><Link to="/valeurs">Nos valeurs</Link></li>
-              <li><Link to="/partenaire">Devenir partenaire</Link></li>
-              <li><Link to="/conditions-generales">Conditions générales</Link></li>
-              <li><Link to="/confidentialite">Politique de confidentialité</Link></li>
-              <li><Link to="/cookies">Politique relative aux cookies</Link></li>
-              <li><Link to="/mentions-legales">Mentions légales</Link></li>
+              <li><FooterLink to="/a-propos">À propos</FooterLink></li>
+              <li><FooterLink to="/valeurs">Nos valeurs</FooterLink></li>
+              <li><FooterLink to="/partenaire">Devenir partenaire</FooterLink></li>
+              <li><FooterLink to="/conditions-generales">Conditions générales</FooterLink></li>
+              <li><FooterLink to="/confidentialite">Politique de confidentialité</FooterLink></li>
+              <li><FooterLink to="/cookies">Politique relative aux cookies</FooterLink></li>
+              <li><FooterLink to="/mentions-legales">Mentions légales</FooterLink></li>
             </ul>
           </div>
         </div>
@@ -114,11 +139,11 @@ export default function Footer() {
         <div className="footer-bottom-content">
           <p className="copyright">© {currentYear} NESTORA IMMO. Tous droits réservés.</p>
           <div className="footer-legal-links">
-            <Link to="/confidentialite">Confidentialité</Link>
+            <FooterLink to="/confidentialite">Confidentialité</FooterLink>
             <span className="separator">•</span>
-            <Link to="/conditions-generales">Conditions</Link>
+            <FooterLink to="/conditions-generales">Conditions</FooterLink>
             <span className="separator">•</span>
-            <Link to="/cookies">Cookies</Link>
+            <FooterLink to="/cookies">Cookies</FooterLink>
           </div>
         </div>
       </div>
