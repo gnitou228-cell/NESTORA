@@ -256,7 +256,7 @@ export default function Register() {
             <button className="btn btn-primary btn-block btn-lg mt-4" onClick={() => setStep(2)}>
               Continuer
             </button>
-            <div className="text-center mt-3 text-sm">
+            <div className="text-center text-sm" style={{ marginTop: '2rem' }}>
               Déjà un compte ? <Link to="/connexion" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Se connecter</Link>
             </div>
           </div>
