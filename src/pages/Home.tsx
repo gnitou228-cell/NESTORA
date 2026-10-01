@@ -4,7 +4,6 @@ import {
   Search, Home, Building, MapPin, CheckCircle, 
   Bed, Bath, Move, Heart, ChevronDown
 } from 'lucide-react';
-import LocationSelector from '../components/forms/LocationSelector';
 import '../home.css';
 
 export default function HomePage() {
