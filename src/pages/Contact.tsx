@@ -62,16 +62,16 @@ export default function Contact() {
           background-color: #fffbeb !important;
         }
       `}</style>
-      <section className="hero-section" style={{ minHeight: '45vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: '4rem' }}>
+      <section className="hero-section" style={{ minHeight: '50vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 className="hero-title">Nous contacter</h1>
         <p className="hero-subtitle">Une question ? Un problème ? Notre équipe est là pour vous aider.</p>
       </section>
 
-      <div className="contact-container" style={{ maxWidth: '1200px', margin: '-3rem auto 3rem', position: 'relative', zIndex: 2, padding: '0 5%' }}>
+      <div className="contact-container" style={{ maxWidth: '1200px', margin: '3rem auto 4rem', position: 'relative', zIndex: 2, padding: '0 5%' }}>
         <div className="d-flex" style={{ gap: '2rem', flexWrap: 'wrap' }}>
           
           {/* Formulaire */}
-          <div className="card" style={{ flex: 2, minWidth: '300px', padding: '2.5rem', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.08)' }}>
+          <div className="card" style={{ flex: 2, minWidth: '300px', padding: '2.5rem', backgroundColor: '#ffffff', borderRadius: '16px', border: '2px solid var(--color-accent)', boxShadow: '0 20px 40px -10px rgba(201,162,39,0.12)' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Envoyez-nous un message</h2>
             
             {status === 'success' ? (
