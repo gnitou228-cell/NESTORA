@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Send } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 
 const FacebookIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,19 +22,6 @@ const TiktokIcon = ({ size = 24 }: { size?: number }) => (
 
 import NestoraLogo from './brand/NestoraLogo';
 import '../index.css';
-
-// Composant de lien intelligent : ouvre dans un nouvel onglet si l'utilisateur est connecté (dashboard)
-function FooterLink({ to, children }: { to: string; children: React.ReactNode }) {
-  const { user } = useAuth();
-  if (user) {
-    return (
-      <a href={to} target="_blank" rel="noopener noreferrer">
-        {children}
-      </a>
-    );
-  }
-  return <Link to={to}>{children}</Link>;
-}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -62,9 +48,9 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Colonne 1 : NESTORA */}
           <div className="footer-col brand-col">
-            <FooterLink to="/">
+            <Link to="/" className="footer-brand" style={{ display: 'inline-block', marginBottom: '1rem' }}>
               <NestoraLogo size="large" />
-            </FooterLink>
+            </Link>
             <p className="footer-slogan">Trouvez votre prochain chez-vous.</p>
             <p className="footer-about">
               NESTORA IMMO facilite la mise en relation entre personnes à la recherche d'un logement, propriétaires et agences immobilières.
@@ -86,13 +72,13 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Navigation</h4>
             <ul className="footer-links">
-              <li><FooterLink to="/">Accueil</FooterLink></li>
-              <li><FooterLink to="/recherche">Rechercher</FooterLink></li>
-              <li><FooterLink to="/annonces">Annonces</FooterLink></li>
-              <li><FooterLink to="/agences">Agences</FooterLink></li>
-              <li><FooterLink to="/tarifs">Tarifs</FooterLink></li>
-              <li><FooterLink to="/comment-ca-marche">Comment ça marche</FooterLink></li>
-              <li><FooterLink to="/publier">Publier une annonce</FooterLink></li>
+              <li><Link to="/">Accueil</Link></li>
+              <li><Link to="/recherche">Rechercher</Link></li>
+              <li><Link to="/annonces">Annonces</Link></li>
+              <li><Link to="/agences">Agences</Link></li>
+              <li><Link to="/tarifs">Tarifs</Link></li>
+              <li><Link to="/comment-ca-marche">Comment ça marche</Link></li>
+              <li><Link to="/publier">Publier une annonce</Link></li>
             </ul>
           </div>
 
@@ -100,12 +86,12 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Support</h4>
             <ul className="footer-links">
-              <li><FooterLink to="/centre-d-aide">Centre d'aide</FooterLink></li>
-              <li><FooterLink to="/faq">FAQ</FooterLink></li>
-              <li><FooterLink to="/nous-contacter">Nous contacter</FooterLink></li>
-              <li><FooterLink to="/signaler-une-annonce">Signaler une annonce</FooterLink></li>
-              <li><FooterLink to="/securite-et-confiance">Sécurité et confiance</FooterLink></li>
-              <li><FooterLink to="/telecharger">Télécharger l'application</FooterLink></li>
+              <li><Link to="/centre-d-aide">Centre d'aide</Link></li>
+              <li><Link to="/faq">FAQ</Link></li>
+              <li><Link to="/nous-contacter">Nous contacter</Link></li>
+              <li><Link to="/signaler-une-annonce">Signaler une annonce</Link></li>
+              <li><Link to="/securite-et-confiance">Sécurité et confiance</Link></li>
+              <li><Link to="/telecharger">Télécharger l'application</Link></li>
             </ul>
           </div>
 
@@ -113,13 +99,13 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Entreprise</h4>
             <ul className="footer-links">
-              <li><FooterLink to="/a-propos">À propos</FooterLink></li>
-              <li><FooterLink to="/valeurs">Nos valeurs</FooterLink></li>
-              <li><FooterLink to="/partenaire">Devenir partenaire</FooterLink></li>
-              <li><FooterLink to="/conditions-generales">Conditions générales</FooterLink></li>
-              <li><FooterLink to="/confidentialite">Politique de confidentialité</FooterLink></li>
-              <li><FooterLink to="/cookies">Politique relative aux cookies</FooterLink></li>
-              <li><FooterLink to="/mentions-legales">Mentions légales</FooterLink></li>
+              <li><Link to="/a-propos">À propos</Link></li>
+              <li><Link to="/valeurs">Nos valeurs</Link></li>
+              <li><Link to="/partenaire">Devenir partenaire</Link></li>
+              <li><Link to="/conditions-generales">Conditions générales</Link></li>
+              <li><Link to="/confidentialite">Politique de confidentialité</Link></li>
+              <li><Link to="/cookies">Politique relative aux cookies</Link></li>
+              <li><Link to="/mentions-legales">Mentions légales</Link></li>
             </ul>
           </div>
         </div>
@@ -129,11 +115,11 @@ export default function Footer() {
         <div className="footer-bottom-content">
           <p className="copyright">© {currentYear} NESTORA IMMO. Tous droits réservés.</p>
           <div className="footer-legal-links">
-            <FooterLink to="/confidentialite">Confidentialité</FooterLink>
+            <Link to="/confidentialite">Confidentialité</Link>
             <span className="separator">•</span>
-            <FooterLink to="/conditions-generales">Conditions</FooterLink>
+            <Link to="/conditions-generales">Conditions</Link>
             <span className="separator">•</span>
-            <FooterLink to="/cookies">Cookies</FooterLink>
+            <Link to="/cookies">Cookies</Link>
           </div>
         </div>
       </div>
