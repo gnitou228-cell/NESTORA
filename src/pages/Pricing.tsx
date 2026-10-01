@@ -341,12 +341,12 @@ export default function Pricing() {
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Discuter avec les annonceurs</span></li>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#64748b" style={{ flexShrink: 0 }} /> <span style={{ color: '#64748b' }}>Déblocage de numéro VIP (Optionnel)</span></li>
             </ul>
-            <button className="btn btn-outline" style={{ width: '100%', borderColor: '#3b82f6', color: '#3b82f6' }} onClick={() => navigate('/inscription')}>S'inscrire comme chercheur</button>
+            <button className="btn btn-outline" style={{ width: '100%', borderColor: '#3b82f6', color: '#3b82f6' }} onClick={() => navigate('/inscription', { state: { role: 'SEEKER' } })}>S'inscrire comme chercheur</button>
           </div>
 
           {/* Propriétaires */}
           <div style={{ background: '#0B1F3A', borderRadius: '16px', padding: '2rem', border: '2px solid #C9A227', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', transform: 'scale(1.05)', position: 'relative', zIndex: 10 }}>
-            <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: '#C9A227', color: 'white', padding: '0.25rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}>LE PLUS POPULAIRE</div>
+            <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: '#C9A227', color: 'white', padding: '0.25rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', whiteSpace: 'nowrap' }}>LE PLUS POPULAIRE</div>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#C9A227', marginBottom: '0.5rem' }}>Propriétaires</h3>
             <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Pour louer ou vendre rapidement</p>
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '2rem' }}>
@@ -358,7 +358,7 @@ export default function Pricing() {
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span>Apparaître en tête de liste (Premium)</span></li>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span>Voir qui vous met en favori (Premium)</span></li>
             </ul>
-            <button className="btn btn-primary" style={{ width: '100%', background: '#C9A227', color: 'white' }} onClick={() => navigate('/inscription')}>Devenir annonceur</button>
+            <button className="btn btn-primary" style={{ width: '100%', background: '#C9A227', color: 'white' }} onClick={() => navigate('/inscription', { state: { role: 'OWNER' } })}>Devenir annonceur</button>
           </div>
 
           {/* Agences */}
@@ -374,7 +374,7 @@ export default function Pricing() {
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Accès aux leads "Je cherche"</span></li>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Tableau de bord de performance</span></li>
             </ul>
-            <button className="btn btn-outline" style={{ width: '100%', borderColor: '#8b5cf6', color: '#8b5cf6' }} onClick={() => navigate('/inscription')}>Créer un compte Agence</button>
+            <button className="btn btn-outline" style={{ width: '100%', borderColor: '#8b5cf6', color: '#8b5cf6' }} onClick={() => navigate('/inscription', { state: { role: 'AGENCY' } })}>Créer un compte Agence</button>
           </div>
         </div>
       </div>

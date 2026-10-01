@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { User, Crown, Briefcase } from 'lucide-react';
 import { useAuth, type Role } from '../context/AuthContext';
 import NestoraLogo from '../components/brand/NestoraLogo';
@@ -7,10 +7,11 @@ import { supabase } from '../lib/supabase';
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   
   const [step, setStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState<Role>('SEEKER');
+  const [selectedRole, setSelectedRole] = useState<Role>(location.state?.role || 'SEEKER');
   
   const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
     try {
