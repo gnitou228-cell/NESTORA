@@ -292,6 +292,20 @@
   opacity: 0.8;
 }
 
+@media (max-width: 768px) {
+  .trust-badges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
+    justify-items: start;
+    padding: 0 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .trust-badge {
+    font-size: 0.85rem;
+  }
+}
+
 /* Sections Base */
 .section {
   padding: 3rem 5%;
