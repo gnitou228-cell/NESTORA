@@ -317,10 +317,83 @@ export default function Pricing() {
     );
   };
 
+  const renderPublicPricing = () => {
+    return (
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <h1 style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--color-secondary)' }}>Une tarification simple et transparente</h1>
+          <p style={{ fontSize: '1.2rem', color: 'var(--color-text-light)', maxWidth: '600px', margin: '1rem auto' }}>
+            Choisissez le plan qui correspond à vos besoins. Aucun frais caché.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          {/* Chercheurs */}
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '2rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6', marginBottom: '0.5rem' }}>Chercheurs</h3>
+            <p style={{ color: '#64748b', marginBottom: '2rem' }}>Pour trouver votre futur chez-vous</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>
+              Gratuit<span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 400 }}> / Inscription</span>
+            </div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Recherche de biens illimitée</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Publier une demande "Je cherche"</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Discuter avec les annonceurs</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#64748b" style={{ flexShrink: 0 }} /> <span style={{ color: '#64748b' }}>Déblocage de numéro VIP (Optionnel)</span></li>
+            </ul>
+            <button className="btn btn-outline" style={{ width: '100%', borderColor: '#3b82f6', color: '#3b82f6' }} onClick={() => navigate('/inscription')}>S'inscrire comme chercheur</button>
+          </div>
+
+          {/* Propriétaires */}
+          <div style={{ background: '#0B1F3A', borderRadius: '16px', padding: '2rem', border: '2px solid #C9A227', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', transform: 'scale(1.05)', position: 'relative', zIndex: 10 }}>
+            <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: '#C9A227', color: 'white', padding: '0.25rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}>LE PLUS POPULAIRE</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#C9A227', marginBottom: '0.5rem' }}>Propriétaires</h3>
+            <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Pour louer ou vendre rapidement</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '2rem' }}>
+              Freemium<span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 400 }}> / Premium</span>
+            </div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', color: 'white' }}>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span>Publication d'annonces gratuite</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span>Abonnement Premium (dès 5 900F)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span>Apparaître en tête de liste (Premium)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span>Voir qui vous met en favori (Premium)</span></li>
+            </ul>
+            <button className="btn btn-primary" style={{ width: '100%', background: '#C9A227', color: 'white' }} onClick={() => navigate('/inscription')}>Devenir annonceur</button>
+          </div>
+
+          {/* Agences */}
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '2rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6', marginBottom: '0.5rem' }}>Agences</h3>
+            <p style={{ color: '#64748b', marginBottom: '2rem' }}>Pour les professionnels de l'immo</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>
+              Pro<span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 400 }}> / Sur-mesure</span>
+            </div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Profil Agence certifié</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Annonces illimitées (Premium)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Accès aux leads "Je cherche"</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span>Tableau de bord de performance</span></li>
+            </ul>
+            <button className="btn btn-outline" style={{ width: '100%', borderColor: '#8b5cf6', color: '#8b5cf6' }} onClick={() => navigate('/inscription')}>Créer un compte Agence</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
         <Loader className="spin" size={48} color="var(--color-primary)" />
+      </div>
+    );
+  }
+
+  // If user is not logged in, show the public pricing overview
+  if (!user) {
+    return (
+      <div className="pricing-page" style={{ paddingTop: '2rem', background: '#f8fafc' }}>
+        {renderPublicPricing()}
       </div>
     );
   }

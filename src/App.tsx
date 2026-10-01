@@ -56,6 +56,7 @@ function App() {
             <Route path="/comment-ca-marche" element={<HowItWorks />} />
             <Route path="/nous-contacter" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/tarifs" element={<Pricing />} />
             <Route path="/centre-d-aide" element={<HelpCenter />} />
             <Route path="/securite-et-confiance" element={<SecurityTrust />} />
             <Route path="/signaler-une-annonce" element={<ReportListing />} />
@@ -114,7 +115,7 @@ function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="publier" element={<Publish />} />
               <Route path="mes-annonces" element={<MyListings />} />
-              <Route path="/tarifs" element={<Pricing />} />
+              
               <Route path="boost" element={<Boost />} />
               <Route path="paiement" element={<Checkout />} />
               <Route path="abonnement" element={<Subscription />} />
