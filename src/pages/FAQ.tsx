@@ -70,12 +70,12 @@ export default function FAQ() {
 
   return (
     <div className="landing-page bg-secondary" style={{ paddingBottom: '4rem' }}>
-      <section className="hero-section" style={{ minHeight: '40vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <section className="hero-section" style={{ minHeight: '45vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: '3rem' }}>
         <h1 className="hero-title">Foire Aux Questions</h1>
         <p className="hero-subtitle">Trouvez rapidement des réponses à toutes vos questions.</p>
         
-        <div className="search-box" style={{ maxWidth: '600px', margin: '2rem auto 0', padding: '0.5rem', background: 'white', borderRadius: '50px', display: 'flex', alignItems: 'center' }}>
-          <Search color="var(--color-text-light)" style={{ marginLeft: '1rem' }} />
+        <div className="search-box" style={{ maxWidth: '600px', margin: '2rem auto 0', padding: '0.5rem', background: 'white', borderRadius: '50px', display: 'flex', alignItems: 'center', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+          <Search color="var(--color-text-light)" style={{ marginLeft: '1rem', flexShrink: 0 }} />
           <input 
             type="text" 
             placeholder="Rechercher une réponse..." 
@@ -86,7 +86,7 @@ export default function FAQ() {
         </div>
       </section>
 
-      <div style={{ maxWidth: '1000px', margin: '-2rem auto 0', position: 'relative', zIndex: 2, padding: '0 5%', display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ maxWidth: '1000px', margin: '3rem auto 0', position: 'relative', zIndex: 2, padding: '0 5%', display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         
         {/* Catégories (Sidebar) */}
         <div className="card" style={{ flex: 1, minWidth: '250px', padding: '1.5rem', position: 'sticky', top: '90px' }}>
