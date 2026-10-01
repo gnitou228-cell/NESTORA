@@ -329,7 +329,7 @@ export default function Pricing() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', alignItems: 'stretch' }}>
           {/* Chercheurs */}
-          <div style={{ background: '#fff', borderRadius: '16px', padding: '2.5rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '2.5rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <h3 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#3b82f6', marginBottom: '0.5rem' }}>Chercheurs</h3>
             <p style={{ color: '#64748b', marginBottom: '2rem' }}>Pour trouver votre futur chez-vous</p>
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>
@@ -337,20 +337,20 @@ export default function Pricing() {
             </div>
             
             <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Inclus dans la version gratuite :</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Recherche de biens illimitée</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Création d'alertes personnalisées</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Messagerie interne sécurisée</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Publier une demande "Je cherche"</span></li>
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.5rem 0' }}></div>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Déblocage de numéros (Optionnel)</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Accès prioritaire aux nouvelles offres</span></li>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 2rem auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left', width: 'fit-content' }}>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Recherche de biens illimitée</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Création d'alertes personnalisées</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Messagerie interne sécurisée</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Publier une demande "Je cherche"</span></li>
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.5rem 0', width: '100%' }}></div>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Déblocage de numéros (Optionnel)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Accès prioritaire aux nouvelles offres</span></li>
             </ul>
             <button className="btn btn-outline" style={{ width: '100%', borderColor: '#3b82f6', color: '#3b82f6', marginTop: 'auto' }} onClick={() => navigate('/inscription', { state: { role: 'SEEKER' } })}>S'inscrire comme chercheur</button>
           </div>
 
           {/* Propriétaires */}
-          <div style={{ background: '#0B1F3A', borderRadius: '16px', padding: '2.5rem 2rem', border: '2px solid #C9A227', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          <div style={{ background: '#0B1F3A', borderRadius: '16px', padding: '2.5rem 2rem', border: '2px solid #C9A227', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
             <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: '#C9A227', color: 'white', padding: '0.25rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', whiteSpace: 'nowrap' }}>LE PLUS POPULAIRE</div>
             <h3 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#C9A227', marginBottom: '0.5rem' }}>Propriétaires</h3>
             <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Pour louer ou vendre rapidement</p>
@@ -359,21 +359,21 @@ export default function Pricing() {
             </div>
             
             <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#C9A227', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Inclus dans la version gratuite :</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', color: 'white' }}>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Profil propriétaire vérifié</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Publication d'annonces basiques</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Réception des messages locataires</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Outil de gestion des visites</span></li>
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.5rem 0' }}></div>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Apparaître en tête de recherche (Premium)</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Voir qui vous met en favori (Premium)</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Statistiques détaillées (Premium)</span></li>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 2rem auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left', width: 'fit-content', color: 'white' }}>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Profil propriétaire vérifié</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Publication d'annonces basiques</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Réception des messages locataires</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Outil de gestion des visites</span></li>
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.5rem 0', width: '100%' }}></div>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#64748b" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Apparaître en tête de recherche (Premium)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#64748b" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Voir qui vous met en favori (Premium)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#64748b" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Statistiques détaillées (Premium)</span></li>
             </ul>
             <button className="btn btn-primary" style={{ width: '100%', background: '#C9A227', color: 'white', marginTop: 'auto' }} onClick={() => navigate('/inscription', { state: { role: 'OWNER' } })}>Devenir annonceur</button>
           </div>
 
           {/* Agences */}
-          <div style={{ background: '#fff', borderRadius: '16px', padding: '2.5rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '2.5rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <h3 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#8b5cf6', marginBottom: '0.5rem' }}>Agences</h3>
             <p style={{ color: '#64748b', marginBottom: '2rem' }}>Pour les professionnels de l'immo</p>
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>
@@ -381,15 +381,15 @@ export default function Pricing() {
             </div>
             
             <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Inclus dans la version gratuite :</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Profil Agence Vitrine Certifié</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Gestion de multiples agents</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Publication d'annonces basiques</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Tableau de bord de performance</span></li>
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.5rem 0' }}></div>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Boosts groupés d'annonces (Premium)</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>Accès prioritaire aux Leads (Premium)</span></li>
-              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0, marginTop: '2px' }} /> <span style={{ color: '#94a3b8' }}>API / Export de données (Premium)</span></li>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 2rem auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left', width: 'fit-content' }}>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Profil Agence Vitrine Certifié</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Gestion de multiples agents</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Publication d'annonces basiques</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Tableau de bord de performance</span></li>
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.5rem 0', width: '100%' }}></div>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Boosts groupés d'annonces (Premium)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>Accès prioritaire aux Leads (Premium)</span></li>
+              <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Lock size={18} color="#94a3b8" style={{ flexShrink: 0 }} /> <span style={{ color: '#94a3b8' }}>API / Export de données (Premium)</span></li>
             </ul>
             <button className="btn btn-outline" style={{ width: '100%', borderColor: '#8b5cf6', color: '#8b5cf6', marginTop: 'auto' }} onClick={() => navigate('/inscription', { state: { role: 'AGENCY' } })}>Créer un compte Agence</button>
           </div>
