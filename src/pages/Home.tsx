@@ -147,7 +147,7 @@ export default function HomePage() {
               <div className="seeker-quote">
                 « Je recherche un appartement 2 chambres à Ouagadougou (Zone du Bois ou ZAD) avec un budget max de 150 000 FCFA. »
               </div>
-              <div className="d-flex align-center gap-2">
+              <div className="d-flex align-center" style={{ gap: '1rem' }}>
                 <div className="testimonial-avatar" style={{ background: '#0B1F3A', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>S</div>
                 <div>
                   <div className="testimonial-name">Sarah O.</div>
@@ -312,7 +312,7 @@ export default function HomePage() {
       {/* Final CTA */}
       <section className="section section-dark text-center" style={{ padding: '8rem 5%' }}>
         <h2 className="section-title" style={{ fontSize: '3rem', marginBottom: '2rem' }}>Votre prochain chez-vous commence ici.</h2>
-        <div className="d-flex justify-center gap-2 flex-wrap">
+        <div className="d-flex justify-center flex-wrap" style={{ gap: '1.5rem' }}>
           <Link to="/recherche" className="btn btn-primary btn-lg" style={{ background: 'var(--color-accent)' }}>Rechercher un logement</Link>
           <Link to="/publier" className="btn btn-outline btn-lg" style={{ borderColor: 'white', color: 'white' }}>Publier une annonce</Link>
         </div>
