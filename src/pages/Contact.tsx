@@ -217,11 +217,24 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="card" style={{ padding: '2rem' }}>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Horaires d'ouverture</h3>
-              <p style={{ color: 'var(--color-text-light)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <CheckCircle size={18} color="var(--color-success)" /> {contactConfig.hours}
-              </p>
+            <div className="card" style={{ padding: '2rem', border: '2px solid var(--color-accent)', borderRadius: '16px', backgroundColor: '#ffffff', boxShadow: '0 8px 20px rgba(201,162,39,0.1)' }}>
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '1.25rem', color: 'var(--color-primary)', fontWeight: 700 }}>Horaires d'ouverture</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-light)', whiteSpace: 'nowrap' }}>
+                    <CheckCircle size={16} color="var(--color-success)" />
+                    Lundi – Vendredi
+                  </span>
+                  <span style={{ fontWeight: 600, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>8h00 – 18h00</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-light)', whiteSpace: 'nowrap' }}>
+                    <CheckCircle size={16} color="var(--color-success)" />
+                    Samedi
+                  </span>
+                  <span style={{ fontWeight: 600, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>10h00 – 15h30</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
