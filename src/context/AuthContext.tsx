@@ -57,14 +57,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Récupérer le profil complet depuis le backend
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      
-      if (res.ok) {
-        const { user: dbUser } = await res.json();
+      let dbUser = null;
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
         
+        if (res.ok) {
+          const json = await res.json();
+          dbUser = json.user;
+        }
+      } catch (e) {
+        console.warn("Backend inaccessible, fallback to Supabase session", e);
+      }
+
+      if (dbUser) {
         const userData: User = {
           id: dbUser.id,
           email: dbUser.email,
@@ -93,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         setRole(userData.role);
       } else {
-        // Fallback en cas d'erreur de l'API
+        // Fallback en cas d'erreur de l'API (ex: Backend non déployé)
         const fallbackRole = session.user.user_metadata?.role || 'SEEKER';
         setUser({
           id: session.user.id,
@@ -109,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setRole(fallbackRole as Role);
       }
     } catch (err) {
-      console.error('Session check failed', err);
+      console.error('Session check completely failed', err);
       setUser(null);
       setRole(null);
     } finally {
