@@ -12,6 +12,7 @@ import MyListings from './pages/MyListings';
 import Invoices from './pages/Invoices';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import LoginPhone from './pages/LoginPhone';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -72,6 +73,7 @@ function App() {
 
           <Route path="/inscription" element={<Register />} />
           <Route path="/connexion" element={<Login />} />
+          <Route path="/login-phone" element={<LoginPhone />} />
           <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
           
           <Route element={<ProtectedRoute />}>
