@@ -200,11 +200,7 @@ const SeekerPublishForm = () => {
 export default function Publish() {
   const { role, user } = useAuth();
   const navigate = useNavigate();
-  
-  // SEEKER check
-  if (role === 'SEEKER') {
-    return <SeekerPublishForm />;
-  }
+  const isSeekerMode = role === 'SEEKER';
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -287,6 +283,11 @@ export default function Publish() {
       })
       .catch(console.error);
   }, []);
+
+  // UI Si c'est un chercheur
+  if (isSeekerMode) {
+    return <SeekerPublishForm />;
+  }
 
   // UI Si la limite est atteinte
   if (hasReachedLimit) {
