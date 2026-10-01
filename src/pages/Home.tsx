@@ -49,31 +49,39 @@ export default function HomePage() {
         <h1 className="hero-title">Trouvez votre prochain chez-vous.</h1>
         <p className="hero-subtitle">Recherchez, comparez et trouvez le logement qui correspond vraiment à votre vie.</p>
         
-        <div className="search-box">
-          <div className="search-tabs">
-            <button className={`search-tab ${searchType === 'louer' ? 'active' : ''}`} onClick={() => setSearchType('louer')}>À louer</button>
-            <button className={`search-tab ${searchType === 'vendre' ? 'active' : ''}`} onClick={() => setSearchType('vendre')}>À vendre</button>
+        <div className="search-box-premium">
+          <div className="search-tabs-premium">
+            <button className={`search-tab-premium ${searchType === 'louer' ? 'active' : ''}`} onClick={() => setSearchType('louer')}>À louer</button>
+            <button className={`search-tab-premium ${searchType === 'vendre' ? 'active' : ''}`} onClick={() => setSearchType('vendre')}>À vendre</button>
           </div>
           
-          <form className="search-form" onSubmit={(e) => { e.preventDefault(); navigate('/recherche'); }}>
-            <div className="search-field">
+          <form className="search-form-premium" onSubmit={(e) => { e.preventDefault(); navigate('/recherche'); }}>
+            <div className="search-field-premium">
+              <label>Localisation</label>
+              <input type="text" placeholder="Ville, quartier (ex: Ouaga 2000)" className="search-input-premium" />
+            </div>
+            
+            <div className="search-divider"></div>
+            
+            <div className="search-field-premium">
               <label>Type de bien</label>
-              <select>
+              <select className="search-input-premium">
                 <option>Tous les types</option>
                 <option>Appartement</option>
                 <option>Maison</option>
                 <option>Villa</option>
               </select>
             </div>
-            <div className="search-field" style={{ flex: 2 }}>
-              <LocationSelector layout="inline" onLocationChange={() => {}} />
-            </div>
-            <div className="search-field">
+
+            <div className="search-divider"></div>
+
+            <div className="search-field-premium">
               <label>Budget max.</label>
-              <input type="number" placeholder="Ex: 150000" />
+              <input type="number" placeholder="Ex: 150000" className="search-input-premium" />
             </div>
-            <button type="submit" className="search-btn">
-              <Search size={20} /> Rechercher
+
+            <button type="submit" className="search-btn-premium">
+              <Search size={24} /> <span>Rechercher</span>
             </button>
           </form>
         </div>
