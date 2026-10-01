@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Send } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const FacebookIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -19,30 +20,19 @@ const TiktokIcon = ({ size = 24 }: { size?: number }) => (
     <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.23-1.13 4.49-3.02 5.92-1.92 1.45-4.49 1.83-6.73 1.1-2.26-.74-4.2-2.48-4.9-4.73-.72-2.31-.22-4.93 1.25-6.85 1.5-1.96 3.99-2.93 6.43-2.61.02 1.4.01 2.8.01 4.2-1.15-.22-2.39-.12-3.44.42-1.07.55-1.89 1.53-2.22 2.69-.32 1.13-.1 2.37.56 3.32.65.94 1.7 1.55 2.83 1.7 1.15.15 2.33-.24 3.19-.97.87-.75 1.4-1.83 1.46-2.98.05-5.63.03-11.26.04-16.89z" />
   </svg>
 );
+
 import NestoraLogo from './brand/NestoraLogo';
 import '../index.css';
 
-// Smart link: opens in new tab when inside dashboard, normal navigation otherwise
+// Composant de lien intelligent : ouvre dans un nouvel onglet si l'utilisateur est connecté (dashboard)
 function FooterLink({ to, children }: { to: string; children: React.ReactNode }) {
-  const location = useLocation();
-  const isDashboard = location.pathname.startsWith('/dashboard') || 
-    location.pathname.startsWith('/mes-annonces') || 
-    location.pathname.startsWith('/publier') ||
-    location.pathname.startsWith('/boost') ||
-    location.pathname.startsWith('/messages') ||
-    location.pathname.startsWith('/favoris') ||
-    location.pathname.startsWith('/visites') ||
-    location.pathname.startsWith('/statistiques') ||
-    location.pathname.startsWith('/paiements') ||
-    location.pathname.startsWith('/abonnement') ||
-    location.pathname.startsWith('/agents') ||
-    location.pathname.startsWith('/prospects') ||
-    location.pathname.startsWith('/admin') ||
-    location.pathname.startsWith('/demandes-visites') ||
-    location.pathname.startsWith('/recherches-clients');
-
-  if (isDashboard) {
-    return <a href={to} target="_blank" rel="noopener noreferrer">{children}</a>;
+  const { user } = useAuth();
+  if (user) {
+    return (
+      <a href={to} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    );
   }
   return <Link to={to}>{children}</Link>;
 }
@@ -72,12 +62,12 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Colonne 1 : NESTORA */}
           <div className="footer-col brand-col">
-            <Link to="/" className="footer-brand" style={{ display: 'inline-block', marginBottom: '1rem' }}>
+            <FooterLink to="/">
               <NestoraLogo size="large" />
-            </Link>
+            </FooterLink>
             <p className="footer-slogan">Trouvez votre prochain chez-vous.</p>
             <p className="footer-about">
-              NESTORA IMMO facilite la mise en relation entre personnes à la recherche d’un logement, propriétaires et agences immobilières.
+              NESTORA IMMO facilite la mise en relation entre personnes à la recherche d'un logement, propriétaires et agences immobilières.
             </p>
             <div className="footer-socials" style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
               <a href="https://web.facebook.com/profile.php?id=61590474261365" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook" style={{ color: '#1877F2', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
