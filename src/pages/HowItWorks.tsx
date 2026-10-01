@@ -6,8 +6,87 @@ export default function HowItWorks() {
   return (
     <div className="landing-page">
       <section className="hero-section" style={{ minHeight: '40vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <h1 className="hero-title">Comment fonctionne NESTORA ?</h1>
-        <p className="hero-subtitle">Un guide étape par étape pour trouver, louer ou vendre en toute simplicité.</p>
+        <h1 className="hero-title">Le concept NESTORA</h1>
+        <p className="hero-subtitle">Une plateforme bilatérale où l'offre et la demande se rencontrent naturellement.</p>
+      </section>
+
+      {/* Diagramme de mise en relation */}
+      <section className="section" style={{ backgroundColor: '#fff', paddingTop: '4rem', paddingBottom: '4rem' }}>
+        <div className="container">
+          <div style={{
+            background: 'linear-gradient(135deg, #0B1F3A 0%, #1a365d 100%)',
+            borderRadius: '24px',
+            padding: '3rem',
+            color: 'white',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Background elements */}
+            <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(201,162,39,0.1) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%' }}></div>
+            <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%' }}></div>
+            
+            <h2 className="text-center mb-5" style={{ fontSize: '2rem', fontWeight: 700, position: 'relative', zIndex: 1 }}>Le Cœur de NESTORA</h2>
+            
+            <div className="row align-items-center position-relative" style={{ zIndex: 1 }}>
+              
+              {/* Côté Chercheur */}
+              <div className="col-md-4 text-center mb-4 mb-md-0">
+                <div style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '2rem', height: '100%', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <div style={{ width: '64px', height: '64px', background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                    <Search size={32} color="#0B1F3A" />
+                  </div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: '#fff' }}>CHERCHEUR</h3>
+                  <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>Publie une demande détaillée</p>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                    "Je cherche un appartement 3 pièces à Kégué..."
+                  </div>
+                </div>
+              </div>
+
+              {/* Centre (Mise en relation) */}
+              <div className="col-md-4 text-center d-flex flex-column align-items-center justify-content-center mb-4 mb-md-0" style={{ minHeight: '200px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', width: '100%' }}>
+                  <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, #C9A227)', flex: 1 }}></div>
+                  <div style={{ 
+                    width: '80px', height: '80px', 
+                    background: '#C9A227', 
+                    borderRadius: '50%', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 0 20px rgba(201, 162, 39, 0.4)',
+                    border: '4px solid rgba(255,255,255,0.2)'
+                  }}>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 8L21 12M21 12L17 16M21 12H3M7 16L3 12M3 12L7 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div style={{ height: '2px', background: 'linear-gradient(270deg, transparent, #C9A227)', flex: 1 }}></div>
+                </div>
+                <h3 className="mt-4" style={{ fontSize: '1.3rem', fontWeight: 700, color: '#C9A227', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                  Mise en relation
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                  Les deux côtés trouvent ce qui correspond parfaitement.
+                </p>
+              </div>
+
+              {/* Côté Propriétaire */}
+              <div className="col-md-4 text-center">
+                <div style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '2rem', height: '100%', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <div style={{ width: '64px', height: '64px', background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                    <Home size={32} color="#0B1F3A" />
+                  </div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: '#fff' }}>PROPRIÉTAIRE / AGENCE</h3>
+                  <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>Publie un bien disponible</p>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                    "Je propose une villa avec piscine à louer..."
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Pour les chercheurs */}
