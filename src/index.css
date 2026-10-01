@@ -1811,3 +1811,4 @@ button {
     font-size: 0.85rem;
   }
 }
+@media (max-width: 768px) { .desktop-only-divider, .desktop-only-icon, .desktop-only-select, .user-name, .user-role { display: none !important; } .header-actions { gap: 0.5rem; } }

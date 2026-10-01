@@ -130,17 +130,17 @@ export default function Layout() {
 
       <div className="main-content">
         <header className="header">
-          <div className="search-bar" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '0.5rem 1rem', width: '500px' }}>
-            <SearchIcon size={18} color="#94a3b8" />
+          <div className="search-bar" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '0.5rem 1rem', maxWidth: '500px', flex: 1, minWidth: '0' }}>
+            <SearchIcon size={18} color="#94a3b8" style={{ minWidth: '18px' }} />
             <input 
               type="text" 
               className="search-input" 
-              placeholder="Rechercher un bien, une ville, un quartier..." 
-              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '0 0.5rem' }}
+              placeholder="Rechercher..." 
+              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '0 0.5rem', minWidth: '0' }}
             />
-            <div style={{ height: '24px', width: '1px', backgroundColor: '#cbd5e1', margin: '0 0.5rem' }}></div>
-            <MapPin size={18} color="#94a3b8" />
-            <select style={{ border: 'none', background: 'transparent', outline: 'none', color: '#64748b', fontWeight: 500, cursor: 'pointer', paddingLeft: '0.25rem' }}>
+            <div className="desktop-only-divider" style={{ height: '24px', width: '1px', backgroundColor: '#cbd5e1', margin: '0 0.5rem' }}></div>
+            <MapPin size={18} color="#94a3b8" className="desktop-only-icon" style={{ minWidth: '18px' }} />
+            <select className="desktop-only-select" style={{ border: 'none', background: 'transparent', outline: 'none', color: '#64748b', fontWeight: 500, cursor: 'pointer', paddingLeft: '0.25rem', maxWidth: '120px' }}>
               <option>Toutes les villes</option>
             </select>
           </div>
