@@ -9,6 +9,9 @@ import '../home.css';
 export default function HomePage() {
   const navigate = useNavigate();
   const [searchType, setSearchType] = useState('louer');
+  const [searchLocation, setSearchLocation] = useState('');
+  const [searchPropertyType, setSearchPropertyType] = useState('');
+  const [searchBudget, setSearchBudget] = useState('');
   
   // Fake FAQ state
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -54,21 +57,32 @@ export default function HomePage() {
             <button className={`search-tab-premium ${searchType === 'vendre' ? 'active' : ''}`} onClick={() => setSearchType('vendre')}>À vendre</button>
           </div>
           
-          <form className="search-form-premium" onSubmit={(e) => { e.preventDefault(); navigate('/recherche'); }}>
+          <form className="search-form-premium" onSubmit={(e) => { 
+            e.preventDefault(); 
+            const params = new URLSearchParams();
+            params.set('transactionType', searchType === 'louer' ? 'RENT' : 'SALE');
+            if (searchLocation) params.set('q', searchLocation);
+            if (searchPropertyType) params.set('propertyType', searchPropertyType);
+            if (searchBudget) params.set('maxPrice', searchBudget);
+            navigate(`/recherche?${params.toString()}`); 
+          }}>
             <div className="search-field-premium">
               <label>Localisation</label>
-              <input type="text" placeholder="Ville, quartier (ex: Ouaga 2000)" className="search-input-premium" />
+              <input type="text" placeholder="Ville, quartier (ex: Ouaga 2000)" className="search-input-premium" value={searchLocation} onChange={(e) => setSearchLocation(e.target.value)} />
             </div>
             
             <div className="search-divider"></div>
             
             <div className="search-field-premium">
               <label>Type de bien</label>
-              <select className="search-input-premium">
-                <option>Tous les types</option>
-                <option>Appartement</option>
-                <option>Maison</option>
-                <option>Villa</option>
+              <select className="search-input-premium" value={searchPropertyType} onChange={(e) => setSearchPropertyType(e.target.value)}>
+                <option value="">Tous les types</option>
+                <option value="APARTMENT">Appartement</option>
+                <option value="HOUSE">Maison</option>
+                <option value="VILLA">Villa</option>
+                <option value="STUDIO">Studio</option>
+                <option value="LAND">Terrain</option>
+                <option value="OFFICE">Bureau</option>
               </select>
             </div>
 
@@ -76,7 +90,7 @@ export default function HomePage() {
 
             <div className="search-field-premium">
               <label>Budget max.</label>
-              <input type="number" placeholder="Ex: 150000" className="search-input-premium" />
+              <input type="number" placeholder="Ex: 150000" className="search-input-premium" value={searchBudget} onChange={(e) => setSearchBudget(e.target.value)} />
             </div>
 
             <button type="submit" className="search-btn-premium">
