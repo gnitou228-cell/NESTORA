@@ -35,11 +35,25 @@ export default function NestoraLogo({ className = '', style, size = 'medium', va
     : { width, height, objectFit: 'contain' };
 
   return (
-    <img
-      src="/brand/logo.jpg"
-      alt="NESTORA Logo"
-      className={`nestora-logo ${className}`}
-      style={{ ...objectFitStyles, borderRadius: '4px', ...style }}
-    />
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', ...style }}>
+      <img
+        src="/brand/logo.jpg"
+        alt="NESTORA IMMO Logo"
+        className={`nestora-logo ${className}`}
+        style={{ ...objectFitStyles, borderRadius: '4px' }}
+      />
+      {variant === 'full' && (
+        <span style={{ 
+          fontSize: size === 'small' ? '1rem' : size === 'large' ? '1.8rem' : size === 'xlarge' ? '2.5rem' : '1.3rem', 
+          fontWeight: 800, 
+          color: '#C9A227',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
+          lineHeight: 1
+        }}>
+          IMMO
+        </span>
+      )}
+    </div>
   );
 }

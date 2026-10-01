@@ -33,7 +33,7 @@ export default function Footer() {
             </Link>
             <p className="footer-slogan">Trouvez votre prochain chez-vous.</p>
             <p className="footer-about">
-              NESTORA facilite la mise en relation entre personnes à la recherche d’un logement, propriétaires et agences immobilières.
+              NESTORA IMMO facilite la mise en relation entre personnes à la recherche d’un logement, propriétaires et agences immobilières.
             </p>
             <div className="footer-socials">
               <a href="#" className="social-link" aria-label="Facebook">F</a>
@@ -88,7 +88,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="footer-bottom-content">
-          <p className="copyright">© {currentYear} NESTORA. Tous droits réservés.</p>
+          <p className="copyright">© {currentYear} NESTORA IMMO. Tous droits réservés.</p>
           <div className="footer-legal-links">
             <Link to="/confidentialite">Confidentialité</Link>
             <span className="separator">•</span>
