@@ -10,7 +10,7 @@ export default function ValuesPage() {
         <p className="hero-subtitle">Ce qui nous anime chaque jour pour transformer l'immobilier.</p>
       </section>
 
-      <section className="section bg-secondary" style={{ marginTop: '-3rem', position: 'relative', zIndex: 2 }}>
+      <section className="section bg-secondary" style={{ paddingTop: '4rem', paddingBottom: '4rem', position: 'relative', zIndex: 2 }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
           
           <div className="card" style={{ padding: '3rem', textAlign: 'center', transition: 'transform 0.3s' }}>

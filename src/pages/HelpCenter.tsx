@@ -32,7 +32,7 @@ export default function HelpCenter() {
         </div>
       </section>
 
-      <section className="section" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '-4rem', position: 'relative', zIndex: 2 }}>
+      <section className="section" style={{ maxWidth: '1200px', margin: '3rem auto 0', position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {HELP_CATEGORIES.map((cat) => (
             <Link to={`/faq?category=${cat.id}`} key={cat.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', padding: '2rem' }}>
