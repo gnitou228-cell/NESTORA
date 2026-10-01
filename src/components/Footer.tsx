@@ -55,13 +55,13 @@ export default function Footer() {
               NESTORA IMMO facilite la mise en relation entre personnes à la recherche d’un logement, propriétaires et agences immobilières.
             </p>
             <div className="footer-socials" style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-              <a href="https://web.facebook.com/profile.php?id=61590474261365" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook" style={{ color: 'rgba(255, 255, 255, 0.6)', transition: 'color 0.2s' }}>
+              <a href="https://web.facebook.com/profile.php?id=61590474261365" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook" style={{ color: '#1877F2', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                 <FacebookIcon size={24} />
               </a>
-              <a href="https://www.tiktok.com/@nestoraimmo" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="TikTok" style={{ color: 'rgba(255, 255, 255, 0.6)', transition: 'color 0.2s' }}>
+              <a href="https://www.tiktok.com/@nestoraimmo" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="TikTok" style={{ color: '#FFFFFF', filter: 'drop-shadow(1px 1px 0px #ff0050) drop-shadow(-1px -1px 0px #00f2fe)', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                 <TiktokIcon size={24} />
               </a>
-              <a href="https://youtube.com/@jeffmaxwell-t2l?si=WhBtRDtyrCOZFPy6" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="YouTube" style={{ color: 'rgba(255, 255, 255, 0.6)', transition: 'color 0.2s' }}>
+              <a href="https://youtube.com/@jeffmaxwell-t2l?si=WhBtRDtyrCOZFPy6" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="YouTube" style={{ color: '#FF0000', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                 <YoutubeIcon size={26} />
               </a>
             </div>
