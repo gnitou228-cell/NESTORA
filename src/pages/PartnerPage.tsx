@@ -15,7 +15,7 @@ export default function PartnerPage() {
         </p>
       </section>
 
-      <section className="section bg-secondary" style={{ marginTop: '-4rem', position: 'relative', zIndex: 2 }}>
+      <section className="section bg-secondary" style={{ paddingTop: '4rem', paddingBottom: '4rem', position: 'relative', zIndex: 2 }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: '300px' }}>
             <h2 className="section-title" style={{ textAlign: 'left', marginBottom: '1.5rem' }}>Pourquoi nous rejoindre ?</h2>
