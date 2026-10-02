@@ -87,53 +87,57 @@ export default function LeadsPage() {
       </div>
 
       {/* Search and Filters */}
-      <div className="card p-3 mb-4" style={{ backgroundColor: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
-        <div className="row g-3 align-items-center">
-          <div className="col-md-6">
-            <div className="d-flex align-items-center" style={{ background: '#f8fafc', borderRadius: '10px', padding: '0.6rem 1rem', border: '1px solid #e2e8f0' }}>
-              <Search size={18} color="#94a3b8" />
-              <input 
-                type="text" 
-                placeholder="Rechercher par nom, email, téléphone ou bien..." 
-                style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', marginLeft: '0.65rem', fontSize: '0.9rem' }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
+      <div className="leads-filter-card mb-4">
+        <div className="leads-search-box mb-3">
+          <Search size={18} className="leads-search-icon" />
+          <input 
+            type="text" 
+            className="leads-search-input"
+            placeholder="Rechercher par nom, email, téléphone..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button 
+              type="button" 
+              onClick={() => setSearchTerm('')}
+              className="leads-search-clear"
+              title="Effacer"
+            >
+              ×
+            </button>
+          )}
+        </div>
 
-          <div className="col-md-6">
-            <div className="d-flex align-items-center gap-2 overflow-auto" style={{ whiteSpace: 'nowrap' }}>
-              <Filter size={16} color="#64748b" style={{ flexShrink: 0 }} />
-              <button 
-                onClick={() => setStatusFilter('ALL')}
-                className={`btn ${statusFilter === 'ALL' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem', borderRadius: '20px' }}
-              >
-                Tous ({leads.length})
-              </button>
-              <button 
-                onClick={() => setStatusFilter('En attente')}
-                className={`btn ${statusFilter === 'En attente' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem', borderRadius: '20px' }}
-              >
-                En attente
-              </button>
-              <button 
-                onClick={() => setStatusFilter('Visite planifiée')}
-                className={`btn ${statusFilter === 'Visite planifiée' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem', borderRadius: '20px' }}
-              >
-                Visites planifiées
-              </button>
-              <button 
-                onClick={() => setStatusFilter('Conclu')}
-                className={`btn ${statusFilter === 'Conclu' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem', borderRadius: '20px' }}
-              >
-                Conclus
-              </button>
-            </div>
+        <div className="leads-chips-container">
+          <div className="leads-chips-scroll">
+            <span className="leads-filter-label">
+              <Filter size={14} /> Filtres :
+            </span>
+            <button 
+              onClick={() => setStatusFilter('ALL')}
+              className={`leads-chip ${statusFilter === 'ALL' ? 'active' : ''}`}
+            >
+              Tous ({leads.length})
+            </button>
+            <button 
+              onClick={() => setStatusFilter('En attente')}
+              className={`leads-chip ${statusFilter === 'En attente' ? 'active' : ''}`}
+            >
+              En attente
+            </button>
+            <button 
+              onClick={() => setStatusFilter('Visite planifiée')}
+              className={`leads-chip ${statusFilter === 'Visite planifiée' ? 'active' : ''}`}
+            >
+              Visites planifiées
+            </button>
+            <button 
+              onClick={() => setStatusFilter('Conclu')}
+              className={`leads-chip ${statusFilter === 'Conclu' ? 'active' : ''}`}
+            >
+              Conclus
+            </button>
           </div>
         </div>
       </div>
@@ -294,6 +298,109 @@ export default function LeadsPage() {
           })}
         </div>
       )}
+      {/* Inline Styles */}
+      <style>{`
+        .leads-filter-card {
+          background-color: #ffffff;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          padding: 1.25rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .leads-search-box {
+          position: relative;
+          display: flex;
+          align-items: center;
+          background: #f8fafc;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 0 1rem;
+          transition: all 0.2s ease;
+        }
+        .leads-search-box:focus-within {
+          background: #ffffff;
+          border-color: #C9A227;
+          box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+        }
+        .leads-search-icon {
+          color: #94a3b8;
+          flex-shrink: 0;
+        }
+        .leads-search-input {
+          border: none;
+          background: transparent;
+          width: 100%;
+          height: 46px;
+          outline: none;
+          margin-left: 0.65rem;
+          font-size: 0.92rem;
+          color: #0f172a;
+          font-family: inherit;
+        }
+        .leads-search-clear {
+          border: none;
+          background: transparent;
+          color: #94a3b8;
+          font-size: 1.25rem;
+          cursor: pointer;
+          padding: 0 0.25rem;
+          line-height: 1;
+        }
+        .leads-chips-container {
+          overflow-x: auto;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+          margin: 0 -0.5rem;
+          padding: 0 0.5rem;
+        }
+        .leads-chips-container::-webkit-scrollbar {
+          display: none;
+        }
+        .leads-chips-scroll {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          white-space: nowrap;
+          padding: 2px 0;
+        }
+        .leads-filter-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          margin-right: 0.25rem;
+          flex-shrink: 0;
+        }
+        .leads-chip {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.45rem 1rem;
+          font-size: 0.84rem;
+          font-weight: 600;
+          border-radius: 999px;
+          border: 1.5px solid #e2e8f0;
+          background: #f8fafc;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+        .leads-chip:hover {
+          border-color: #cbd5e1;
+          color: #0B1F3A;
+        }
+        .leads-chip.active {
+          background: #C9A227;
+          border-color: #C9A227;
+          color: #ffffff;
+          font-weight: 700;
+          box-shadow: 0 2px 6px rgba(201, 162, 39, 0.25);
+        }
+      `}</style>
     </div>
   );
 }

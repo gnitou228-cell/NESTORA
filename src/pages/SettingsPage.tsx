@@ -303,19 +303,23 @@ export default function SettingsPage() {
                     bottom: 0,
                     right: 0,
                     backgroundColor: '#0B1F3A',
-                    color: '#fff',
-                    border: '2px solid #fff',
+                    color: '#C9A227',
+                    border: '2.5px solid #ffffff',
                     borderRadius: '50%',
-                    width: '30px',
-                    height: '30px',
+                    width: '32px',
+                    height: '32px',
+                    minWidth: '32px',
+                    minHeight: '32px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    padding: 0,
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
                   }}
                   title="Changer la photo"
                 >
-                  <Camera size={14} />
+                  <Camera size={15} />
                 </button>
                 <input 
                   type="file" 
@@ -710,42 +714,50 @@ export default function SettingsPage() {
       <style>{`
         .settings-tabs-nav {
           display: flex;
-          gap: 0.5rem;
-          border-bottom: 2px solid #e2e8f0;
+          gap: 0.35rem;
+          background: #f1f5f9;
+          padding: 5px;
+          border-radius: 14px;
           overflow-x: auto;
           white-space: nowrap;
-          padding-bottom: 2px;
+          scrollbar-width: none;
           -webkit-overflow-scrolling: touch;
+          margin-bottom: 1.5rem;
+        }
+        .settings-tabs-nav::-webkit-scrollbar {
+          display: none;
         }
         .settings-tab-btn {
           display: inline-flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.25rem;
-          background: none;
+          justify-content: center;
+          gap: 0.45rem;
+          padding: 0.65rem 1.15rem;
+          background: transparent;
           border: none;
-          border-bottom: 3px solid transparent;
+          border-radius: 10px;
           color: #64748b;
           font-weight: 600;
-          font-size: 0.95rem;
+          font-size: 0.88rem;
           cursor: pointer;
-          transition: all 0.2s;
-          margin-bottom: -2px;
-          border-radius: 8px 8px 0 0;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+          margin-bottom: 0;
         }
         .settings-tab-btn:hover {
           color: #0B1F3A;
-          background-color: #f8fafc;
+          background-color: rgba(255,255,255,0.6);
         }
         .settings-tab-btn.active {
           color: #0B1F3A;
-          border-bottom-color: #C9A227;
-          background-color: #fff;
+          background-color: #ffffff;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          font-weight: 700;
         }
         @media (max-width: 640px) {
           .settings-tab-btn {
-            padding: 0.6rem 0.85rem;
-            font-size: 0.85rem;
+            padding: 0.6rem 0.95rem;
+            font-size: 0.84rem;
           }
         }
       `}</style>

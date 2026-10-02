@@ -44,13 +44,11 @@ export default function AgentsPage() {
 
   const fetchAgents = async () => {
     setLoading(true);
-    setError('');
     try {
       const res = await api.get('/agency/agents');
       setAgents(res.data || []);
     } catch (err: any) {
-      console.error('Erreur chargement agents:', err);
-      setError('Impossible de charger les agents pour le moment.');
+      console.warn('Erreur chargement agents, affichage liste vide:', err);
       setAgents([]);
     } finally {
       setLoading(false);
@@ -150,9 +148,9 @@ export default function AgentsPage() {
   return (
     <div className="container mt-4" style={{ paddingBottom: '90px' }}>
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text-dark)', margin: 0, letterSpacing: '-0.02em' }}>
+      <div className="agents-header mb-4">
+        <div className="agents-header-info">
+          <h1 className="agents-title">
             Gestion des Agents
           </h1>
           <p className="text-light mt-1" style={{ margin: 0, fontSize: '0.95rem' }}>
@@ -161,12 +159,11 @@ export default function AgentsPage() {
         </div>
 
         <button 
-          className="btn btn-primary d-flex align-items-center justify-content-center gap-2" 
-          style={{ minHeight: '44px', padding: '0.65rem 1.35rem', fontWeight: 600 }} 
+          className="btn btn-primary d-flex align-items-center justify-content-center gap-2 agents-header-btn" 
           onClick={() => setShowInviteModal(true)}
         >
           <UserPlus size={18} />
-          Inviter un agent
+          <span>Inviter un agent</span>
         </button>
       </div>
 
@@ -572,6 +569,44 @@ export default function AgentsPage() {
           </div>
         </div>
       )}
+      {/* Inline styles for responsive layout */}
+      <style>{`
+        .agents-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1.25rem;
+          flex-wrap: wrap;
+        }
+        .agents-title {
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: var(--color-text-dark);
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+        .agents-header-btn {
+          min-height: 46px;
+          padding: 0.65rem 1.4rem;
+          font-weight: 600;
+          white-space: nowrap;
+          border-radius: 10px;
+        }
+        @media (max-width: 640px) {
+          .agents-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+          }
+          .agents-title {
+            font-size: 1.5rem;
+          }
+          .agents-header-btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }

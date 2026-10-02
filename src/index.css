@@ -50,6 +50,101 @@ button {
   font-family: inherit;
 }
 
+/* Forms & Grid Utilities */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+.form-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.4rem;
+}
+.form-control {
+  width: 100%;
+  height: 48px;
+  padding: 0.65rem 1rem;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #0f172a;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+.form-control:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #C9A227;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+}
+textarea.form-control {
+  height: auto;
+  min-height: 96px;
+  padding: 0.75rem 1rem;
+}
+select.form-control {
+  cursor: pointer;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+.g-2 {
+  margin-left: -0.25rem;
+  margin-right: -0.25rem;
+}
+.g-2 > [class*="col"] {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+.g-3 {
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+.g-3 > [class*="col"] {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.col-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.col-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.col-md-6 {
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.col-md-4 {
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+@media (min-width: 768px) {
+  .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+}
+
 /* Layout */
 .app-layout {
   display: flex;

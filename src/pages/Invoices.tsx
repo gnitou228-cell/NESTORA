@@ -86,9 +86,9 @@ export default function Invoices() {
   return (
     <div className="invoices-page container mt-4" style={{ paddingBottom: '90px', maxWidth: '1080px' }}>
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <div className="invoices-header mb-4">
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text-dark)', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 className="invoices-title">
             Paiements & Factures
           </h1>
           <p className="text-light mt-1" style={{ margin: 0, fontSize: '0.95rem' }}>
@@ -96,12 +96,12 @@ export default function Invoices() {
           </p>
         </div>
 
-        <div className="d-flex gap-2">
-          <Link to="/tarifs" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 600 }}>
-            <Sparkles size={16} /> Offres Premium
+        <div className="invoices-header-actions">
+          <Link to="/tarifs" className="btn btn-outline invoices-btn">
+            <Sparkles size={16} /> <span>Offres Premium</span>
           </Link>
-          <Link to="/boost" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 600 }}>
-            <CreditCard size={16} /> Booster un bien
+          <Link to="/boost" className="btn btn-primary invoices-btn">
+            <CreditCard size={16} /> <span>Booster un bien</span>
           </Link>
         </div>
       </div>
@@ -314,6 +314,60 @@ export default function Invoices() {
           </div>
         </div>
       )}
+      {/* Responsive Styles */}
+      <style>{`
+        .invoices-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1.25rem;
+          flex-wrap: wrap;
+        }
+        .invoices-title {
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: var(--color-text-dark);
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+        .invoices-header-actions {
+          display: flex;
+          gap: 0.65rem;
+          align-items: center;
+        }
+        .invoices-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          font-size: 0.88rem;
+          font-weight: 600;
+          padding: 0.65rem 1.15rem;
+          border-radius: 10px;
+          white-space: nowrap;
+        }
+        @media (max-width: 640px) {
+          .invoices-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+          }
+          .invoices-title {
+            font-size: 1.5rem;
+          }
+          .invoices-header-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+            width: 100%;
+          }
+          .invoices-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.65rem 0.5rem;
+            font-size: 0.82rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }

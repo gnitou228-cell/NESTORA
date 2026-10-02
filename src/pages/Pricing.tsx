@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader, Zap, ShieldCheck, Heart, Search, Lock, Phone, Rocket, Check } from 'lucide-react';
+import { Loader, Zap, ShieldCheck, Heart, Search, Lock, Phone, Rocket, Check, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 
@@ -83,9 +83,14 @@ export default function Pricing() {
     return (
       <div className="premium-hero-wrapper">
         <div className="premium-hero-header">
+          <div className="premium-pill-tag">
+            <Sparkles size={14} />
+            <span>{userRole === 'AGENCY' ? 'Partenaire Agence' : 'Partenaire Propriétaire'}</span>
+          </div>
+
           <h1 className="premium-hero-title">
-            <span className="premium-hero-greeting">{firstName},</span><br/>
-            ton futur {userRole === 'AGENCY' ? 'client' : 'locataire/acheteur'} t&apos;attend. <span className="premium-accent-text">Ne le rate pas.</span>
+            <span className="premium-hero-name">{firstName},</span> ton futur {userRole === 'AGENCY' ? 'client' : 'locataire'} t&apos;attend.
+            <span className="premium-accent-text">Ne le rate pas.</span>
           </h1>
           <p className="premium-hero-subtitle">
             Sans Premium, ton annonce reste noyée. <strong>Avec Premium, tu apparais en premier, tu vois qui s&apos;intéresse à toi, et tu réponds sans limite.</strong>
@@ -555,27 +560,48 @@ export default function Pricing() {
           text-align: center;
           margin-bottom: 2rem;
         }
+        .premium-pill-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          background: #fef3c7;
+          color: #92400e;
+          border: 1px solid #fde68a;
+          padding: 0.35rem 0.95rem;
+          border-radius: 999px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          margin-bottom: 1.15rem;
+        }
         .premium-hero-title {
-          font-size: clamp(1.4rem, 5vw, 2.2rem);
+          font-size: clamp(1.4rem, 5vw, 2.15rem);
           font-weight: 800;
           color: #0B1F3A;
           line-height: 1.3;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.85rem;
+          max-width: 650px;
+          margin-left: auto;
+          margin-right: auto;
+          font-family: inherit;
         }
-        .premium-hero-greeting {
-          font-family: Georgia, serif;
+        .premium-hero-name {
           color: #0B1F3A;
-          font-style: italic;
+          font-weight: 800;
+          font-family: inherit;
         }
         .premium-accent-text {
           color: #d97706;
+          display: block;
+          margin-top: 0.25rem;
+          font-family: inherit;
         }
         .premium-hero-subtitle {
           font-size: clamp(0.9rem, 3.2vw, 1.05rem);
           color: #475569;
           max-width: 680px;
           margin: 0 auto 1.5rem;
-          line-height: 1.5;
+          line-height: 1.55;
         }
 
         /* Stats Bar */
@@ -598,7 +624,7 @@ export default function Pricing() {
           color: #d97706;
           font-weight: 800;
           margin: 0;
-          font-family: Georgia, serif;
+          font-family: inherit;
         }
         .premium-stat-label {
           font-size: clamp(0.72rem, 2.5vw, 0.82rem);
