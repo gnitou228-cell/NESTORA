@@ -165,16 +165,6 @@ export default function Layout() {
 
       <div className="main-content">
         <header className="header">
-          {/* Mobile hamburger menu toggle */}
-          <button 
-            className="mobile-only" 
-            onClick={() => setMobileSidebarOpen(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', padding: '6px', marginRight: '0.5rem' }}
-            aria-label="Ouvrir le menu"
-          >
-            <Menu size={24} />
-          </button>
-
           <div className="search-bar" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '0.5rem 0.75rem', maxWidth: '500px', flex: 1, minWidth: '0' }}>
             <SearchIcon size={18} color="#94a3b8" style={{ minWidth: '18px' }} />
             <input 
