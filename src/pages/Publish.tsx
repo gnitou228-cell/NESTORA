@@ -200,27 +200,12 @@ const SeekerPublishForm = () => {
 export default function Publish() {
   const { role, user } = useAuth();
   const navigate = useNavigate();
-  const isSeekerMode = role === 'SEEKER';
-
+  
+  // --- ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL RETURN ---
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Logique de limitation (Mock Premium)
   const [hasReachedLimit, setHasReachedLimit] = useState(false);
-
-  useEffect(() => {
-    const checkPremiumStatus = () => {
-      const premium = localStorage.getItem('nestora_is_premium') === 'true';
-      
-      // Pour la démo, on simule que l'utilisateur a déjà posté 2 annonces
-      // S'il n'est pas premium, il a atteint sa limite
-      if (!premium) {
-        setHasReachedLimit(true);
-      }
-    };
-    checkPremiumStatus();
-  }, []);
 
   // Localisation data
   const [countries, setCountries] = useState<any[]>([]);
@@ -252,27 +237,12 @@ export default function Publish() {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 
-  const transactionTypes = [
-    { value: 'RENT', label: 'Location' },
-    { value: 'SALE', label: 'Vente' }
-  ];
-
-  const propertyTypes = [
-    { value: 'HOUSE', label: 'Maison' },
-    { value: 'APARTMENT', label: 'Appartement' },
-    { value: 'VILLA', label: 'Villa' },
-    { value: 'STUDIO', label: 'Studio' },
-    { value: 'LAND', label: 'Terrain' },
-    { value: 'OFFICE', label: 'Bureau' },
-    { value: 'SHOP', label: 'Local commercial' },
-    { value: 'OTHER', label: 'Autre' }
-  ];
-
-  const availableAmenities = [
-    'Parking', 'Garage', 'Jardin', 'Piscine', 'Terrasse', 'Balcon',
-    'Climatisation', 'Meublé', 'Cuisine équipée', 'Sécurité', 'Eau',
-    'Électricité', 'Groupe électrogène', 'Internet', 'Ascenseur', 'Gardien', 'Accès véhicule'
-  ];
+  useEffect(() => {
+    const premium = localStorage.getItem('nestora_is_premium') === 'true';
+    if (!premium) {
+      setHasReachedLimit(true);
+    }
+  }, []);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/countries`)
@@ -284,8 +254,46 @@ export default function Publish() {
       .catch(console.error);
   }, []);
 
-  // UI Si c'est un chercheur
-  if (isSeekerMode) {
+  useEffect(() => {
+    if (formData.countryId) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/regions?countryId=${formData.countryId}`)
+        .then(res => res.json())
+        .then(data => {
+          setRegions(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, regionId: data[0].id }));
+          else setFormData(prev => ({ ...prev, regionId: '' }));
+        });
+    }
+  }, [formData.countryId]);
+
+  useEffect(() => {
+    if (formData.regionId) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/cities?regionId=${formData.regionId}`)
+        .then(res => res.json())
+        .then(data => {
+          setCities(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, cityId: data[0].id }));
+          else setFormData(prev => ({ ...prev, cityId: '' }));
+        });
+    }
+  }, [formData.regionId]);
+
+  useEffect(() => {
+    if (formData.cityId) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/neighborhoods?cityId=${formData.cityId}`)
+        .then(res => res.json())
+        .then(data => {
+          setNeighborhoods(data);
+          if (data.length > 0) setFormData(prev => ({ ...prev, neighborhoodId: data[0].id }));
+          else setFormData(prev => ({ ...prev, neighborhoodId: '' }));
+        });
+    }
+  }, [formData.cityId]);
+
+  // --- CONDITIONAL RETURNS AFTER ALL HOOKS ---
+  
+  // SEEKER check
+  if (role === 'SEEKER') {
     return <SeekerPublishForm />;
   }
 
@@ -339,41 +347,27 @@ export default function Publish() {
     );
   }
 
-  useEffect(() => {
-    if (formData.countryId) {
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/regions?countryId=${formData.countryId}`)
-        .then(res => res.json())
-        .then(data => {
-          setRegions(data);
-          if (data.length > 0) setFormData(prev => ({ ...prev, regionId: data[0].id }));
-          else setFormData(prev => ({ ...prev, regionId: '' }));
-        });
-    }
-  }, [formData.countryId]);
+  const transactionTypes = [
+    { value: 'RENT', label: 'Location' },
+    { value: 'SALE', label: 'Vente' }
+  ];
 
-  useEffect(() => {
-    if (formData.regionId) {
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/cities?regionId=${formData.regionId}`)
-        .then(res => res.json())
-        .then(data => {
-          setCities(data);
-          if (data.length > 0) setFormData(prev => ({ ...prev, cityId: data[0].id }));
-          else setFormData(prev => ({ ...prev, cityId: '' }));
-        });
-    }
-  }, [formData.regionId]);
+  const propertyTypes = [
+    { value: 'HOUSE', label: 'Maison' },
+    { value: 'APARTMENT', label: 'Appartement' },
+    { value: 'VILLA', label: 'Villa' },
+    { value: 'STUDIO', label: 'Studio' },
+    { value: 'LAND', label: 'Terrain' },
+    { value: 'OFFICE', label: 'Bureau' },
+    { value: 'SHOP', label: 'Local commercial' },
+    { value: 'OTHER', label: 'Autre' }
+  ];
 
-  useEffect(() => {
-    if (formData.cityId) {
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/neighborhoods?cityId=${formData.cityId}`)
-        .then(res => res.json())
-        .then(data => {
-          setNeighborhoods(data);
-          if (data.length > 0) setFormData(prev => ({ ...prev, neighborhoodId: data[0].id }));
-          else setFormData(prev => ({ ...prev, neighborhoodId: '' }));
-        });
-    }
-  }, [formData.cityId]);
+  const availableAmenities = [
+    'Parking', 'Garage', 'Jardin', 'Piscine', 'Terrasse', 'Balcon',
+    'Climatisation', 'Meublé', 'Cuisine équipée', 'Sécurité', 'Eau',
+    'Électricité', 'Groupe électrogène', 'Internet', 'Ascenseur', 'Gardien', 'Accès véhicule'
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
