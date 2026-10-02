@@ -122,11 +122,11 @@ export default function MyListings() {
                 <div className="card" style={{ border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', padding: '1.5rem', borderRadius: '12px' }}>
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600, color: '#0f172a' }}>{req.type} : {req.propertyType}</h3>
+                      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600, color: '#0f172a' }}>{req.title}</h3>
                       <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Publié le {req.date}</span>
                     </div>
-                    <span className="badge bg-success" style={{ color: 'white', padding: '0.4rem 0.8rem', borderRadius: '2rem' }}>
-                      Actif
+                    <span className={`badge ${req.status === 'PUBLISHED' ? 'bg-success' : 'bg-warning'}`} style={{ color: 'white', padding: '0.4rem 0.8rem', borderRadius: '2rem' }}>
+                      {req.status === 'PUBLISHED' ? 'En ligne' : req.status}
                     </span>
                   </div>
                   <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '1rem', whiteSpace: 'pre-wrap' }}>
@@ -137,6 +137,16 @@ export default function MyListings() {
                     <div><strong>Budget:</strong> {req.budget}</div>
                   </div>
                   <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                    <button 
+                      className="btn btn-primary d-flex align-items-center" 
+                      style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        setSelectedPropertyToBoost(req.id);
+                        setIsBoostModalOpen(true);
+                      }}
+                    >
+                      <Rocket size={14} /> Booster
+                    </button>
                     <button onClick={() => handleDelete(req.id)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', borderColor: '#ef4444' }}>
                       <Trash2 size={16} /> Supprimer
                     </button>
@@ -189,9 +199,9 @@ export default function MyListings() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left', backgroundColor: '#f8fafc' }}>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>{role === 'SEEKER' ? 'Demande' : 'Annonce'}</th>
+                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Annonce</th>
                   <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Statut</th>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>{role === 'SEEKER' ? 'Budget Max' : 'Prix'}</th>
+                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Prix</th>
                   <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Actions</th>
                 </tr>
               </thead>
@@ -200,23 +210,17 @@ export default function MyListings() {
                   <tr key={property.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                     <td style={{ padding: '1rem' }}>
                       <div className="d-flex" style={{ gap: '1rem', alignItems: 'center' }}>
-                        {role !== 'SEEKER' ? (
-                          <img 
-                            src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
-                            alt={property.title} 
-                            style={{ width: '80px', height: '60px', borderRadius: '4px', objectFit: 'cover', backgroundColor: '#eee' }} 
-                          />
-                        ) : (
-                          <div style={{ width: '80px', height: '60px', borderRadius: '4px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Search size={24} color="#94a3b8" />
-                          </div>
-                        )}
+                        <img 
+                          src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
+                          alt={property.title} 
+                          style={{ width: '80px', height: '60px', borderRadius: '4px', objectFit: 'cover', backgroundColor: '#eee' }} 
+                        />
                         <div>
                           <div style={{ fontWeight: 600, maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {property.title}
                           </div>
                           <div className="text-light" style={{ fontSize: '0.85rem' }}>
-                            {role === 'SEEKER' ? property.location : `${property.city?.name} • ${property.propertyType}`}
+                            {property.city?.name} • {property.propertyType}
                           </div>
                         </div>
                       </div>
@@ -227,11 +231,11 @@ export default function MyListings() {
                       </div>
                     </td>
                     <td style={{ padding: '1rem', fontWeight: 600 }}>
-                      {role === 'SEEKER' ? property.budget : `${property.price} ${property.currency || 'FCFA'}`}
+                      {property.price} {property.currency}
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <div className="d-flex" style={{ gap: '0.5rem' }}>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title={role === 'SEEKER' ? 'Voir la demande' : "Voir l'annonce"}>
+                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title="Voir l'annonce">
                           <Globe size={16} />
                         </button>
                         <button 
@@ -245,7 +249,7 @@ export default function MyListings() {
                           <Rocket size={14} />
                           Booster
                         </button>
-                        <button onClick={() => alert("La modification sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
+                        <button onClick={() => alert("La modification d'annonce sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
                           <Edit size={16} />
                         </button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#ef4444', borderColor: '#fee2e2' }} title="Supprimer" onClick={() => handleDelete(property.id)}>
