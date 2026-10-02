@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Camera, Upload, ShieldCheck, Mail, Calendar } from 'lucide-react';
+import { X, Camera, Upload, ShieldCheck, Mail, Calendar, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import api from '../../lib/api';
@@ -10,7 +10,7 @@ interface EditProfileModalProps {
 }
 
 export default function EditProfileModal({ onClose, onSuccess }: EditProfileModalProps) {
-  const { user, role, updateUser } = useAuth();
+  const { user, role, updateUser, logout } = useAuth();
   
   const [firstName, setFirstName] = useState(user?.profile?.firstName || '');
   const [lastName, setLastName] = useState(user?.profile?.lastName || '');
@@ -455,10 +455,26 @@ export default function EditProfileModal({ onClose, onSuccess }: EditProfileModa
 
           <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
             <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>
-              Annuler
+               Annuler
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading || uploadingAvatar || uploadingDoc || uploadingDocBack || uploadingSelfie}>
-              {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+               {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            </button>
+          </div>
+
+          {/* Section Déconnexion */}
+          <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>Session active</div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Connecté ({user?.phone || user?.email || 'Utilisateur'})</div>
+            </div>
+            <button 
+              type="button" 
+              onClick={() => { onClose(); logout(); }} 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.55rem 1.1rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem' }}
+            >
+              <LogOut size={16} />
+              <span>Se déconnecter</span>
             </button>
           </div>
         </form>

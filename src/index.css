@@ -1615,20 +1615,41 @@ button {
 
 /* Base Layout Overrides */
 @media (max-width: 1024px) {
-  /* Dashboard layout turns into a stacked layout without fixed sidebar */
+  /* Dashboard layout turns into a stacked layout with slide-out sidebar */
   .app-layout {
     flex-direction: column;
   }
   .sidebar {
-    position: relative;
-    width: 100%;
-    height: auto;
-    padding-bottom: 80px; /* Space for bottom nav */
-    display: none; /* We hide the sidebar on mobile and use a Bottom Nav instead */
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100vh;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2rem;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+    overflow-y: auto;
+  }
+  .sidebar.mobile-open {
+    left: 0;
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(11, 31, 58, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1190;
+    animation: fadeIn 0.2s ease;
   }
   .main-content {
     margin-left: 0;
-    margin-bottom: 80px; /* Space for bottom nav */
+    margin-bottom: 75px; /* Space for bottom nav */
   }
   .header {
     padding: 0 1rem;

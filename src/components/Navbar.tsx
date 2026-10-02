@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import NestoraLogo from './brand/NestoraLogo';
 import { useAuth } from '../context/AuthContext';
 import '../home.css';
@@ -8,7 +8,7 @@ import '../home.css';
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,14 +36,24 @@ export default function Navbar() {
 
         <div className="nav-actions">
           {user ? (
-            <Link to="/dashboard" className="nav-login" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <img 
-                src={user.profile?.avatar || `https://ui-avatars.com/api/?name=${user.profile?.firstName || 'User'}`} 
-                alt="Avatar" 
-                style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-border)' }} 
-              />
-              <span style={{ fontWeight: 600 }}>Mon espace</span>
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Link to="/dashboard" className="nav-login" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <img 
+                  src={user.profile?.avatar || `https://ui-avatars.com/api/?name=${user.profile?.firstName || 'User'}`} 
+                  alt="Avatar" 
+                  style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-border)' }} 
+                />
+                <span style={{ fontWeight: 600 }}>Mon espace</span>
+              </Link>
+              <button 
+                onClick={logout} 
+                className="desktop-only"
+                title="Se déconnecter"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#dc2626', display: 'flex', alignItems: 'center' }}
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
           ) : (
             <Link to="/connexion" className="nav-login">Connexion</Link>
           )}
@@ -65,7 +75,27 @@ export default function Navbar() {
         <Link to="/tarifs" onClick={() => setMobileMenuOpen(false)}>Tarifs</Link>
         <hr className="divider" />
         {user ? (
-          <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>Mon espace</Link>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem 0' }}>
+            <Link 
+              to="/dashboard" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, color: 'var(--color-primary)' }}
+            >
+              <img 
+                src={user.profile?.avatar || `https://ui-avatars.com/api/?name=${user.profile?.firstName || 'User'}`} 
+                alt="Avatar" 
+                style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} 
+              />
+              <span>Mon espace ({user.profile?.firstName || 'Mon Compte'})</span>
+            </Link>
+            <button 
+              onClick={() => { logout(); setMobileMenuOpen(false); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#dc2626', fontWeight: 600, padding: '0.6rem 0', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', fontFamily: 'inherit' }}
+            >
+              <LogOut size={18} />
+              <span>Se déconnecter</span>
+            </button>
+          </div>
         ) : (
           <>
             <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
