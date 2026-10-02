@@ -4,7 +4,6 @@ import {
   AlertCircle, Save, LogOut, Phone, Mail, Building, Globe, MapPin
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
 import api from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -105,30 +104,44 @@ export default function SettingsPage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+
+    // File size check (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('', "La photo ne doit pas dépasser 5 Mo.");
+      return;
+    }
+
+    // Type check
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      showToast('', "Format non supporté. Utilisez JPG, PNG ou WEBP.");
+      return;
+    }
 
     setUploadingAvatar(true);
     setErrorMessage('');
     try {
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
-      if (uploadError) throw uploadError;
+      // Convert to base64 and send directly to backend profile API
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      setAvatar(data.publicUrl);
-
-      // Auto update in backend
-      const res = await api.put('/auth/profile', { avatar: data.publicUrl });
+      // Send base64 URL as avatar to the profile endpoint
+      const res = await api.put('/auth/profile', { avatar: base64 });
       if (res.data?.user) {
         updateUser(res.data.user);
+        setAvatar(base64);
       }
-      showToast('Photo de profil mise à jour !');
+      showToast('Photo de profil mise à jour avec succès !');
     } catch (err: any) {
-      console.error(err);
-      showToast('', "Erreur lors du téléchargement de la photo de profil.");
+      console.error('Avatar upload error:', err);
+      showToast('', "Impossible de mettre à jour la photo. Veuillez réessayer.");
     } finally {
       setUploadingAvatar(false);
+      // Reset input so same file can be re-selected
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
     }
   };
 

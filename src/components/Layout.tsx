@@ -246,12 +246,32 @@ export default function Layout() {
               }}
               title="Mon compte"
             >
-              <img 
-                src={user?.profile?.avatar || "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=100&q=80"} 
-                alt="User" 
-                className="user-avatar" 
-                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #e2e8f0' }}
-              />
+              {user?.profile?.avatar ? (
+                <img 
+                  src={user.profile.avatar} 
+                  alt="Photo de profil" 
+                  className="user-avatar" 
+                  style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #C9A227' }}
+                />
+              ) : (
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  backgroundColor: '#0B1F3A',
+                  color: '#C9A227',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1rem',
+                  fontWeight: 800,
+                  border: '2px solid #C9A227',
+                  flexShrink: 0,
+                  fontFamily: 'inherit',
+                }}>
+                  {(user?.profile?.firstName?.[0] || user?.agency?.name?.[0] || 'U').toUpperCase()}
+                </div>
+              )}
               <div className="user-info">
                 <span className="user-name">{user?.profile?.firstName || user?.agency?.name?.split(' ')[0] || 'Utilisateur'}</span>
                 <span className="user-role">{role === 'ADMIN' ? 'Administrateur' : role === 'OWNER' ? 'Propriétaire' : role === 'AGENCY' ? 'Agence' : 'Chercheur'}</span>
