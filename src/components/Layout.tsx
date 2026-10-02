@@ -164,9 +164,9 @@ export default function Layout() {
       </aside>
 
       <div className="main-content">
-        <header className="header">
-          <div className="search-bar" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '0.5rem 0.75rem', maxWidth: '500px', flex: 1, minWidth: '0' }}>
-            <SearchIcon size={18} color="#94a3b8" style={{ minWidth: '18px' }} />
+        <header className="header" style={{ gap: '1rem' }}>
+          <div className="search-bar" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '0.45rem 0.75rem', maxWidth: '480px', flex: 1, minWidth: '0' }}>
+            <SearchIcon size={18} color="#94a3b8" style={{ minWidth: '18px', flexShrink: 0 }} />
             <input 
               type="text" 
               className="search-input" 
@@ -174,95 +174,143 @@ export default function Layout() {
               style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '0 0.5rem', minWidth: '0', fontSize: '0.9rem' }}
             />
             <div className="desktop-only-divider" style={{ height: '24px', width: '1px', backgroundColor: '#cbd5e1', margin: '0 0.5rem' }}></div>
-            <MapPin size={18} color="#94a3b8" className="desktop-only-icon" style={{ minWidth: '18px' }} />
+            <MapPin size={18} color="#94a3b8" className="desktop-only-icon" style={{ minWidth: '18px', flexShrink: 0 }} />
             <select className="desktop-only-select" style={{ border: 'none', background: 'transparent', outline: 'none', color: '#64748b', fontWeight: 500, cursor: 'pointer', paddingLeft: '0.25rem', maxWidth: '120px' }}>
               <option>Toutes les villes</option>
             </select>
           </div>
 
-          <div className="header-actions" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="header-action-icon">
-              <Bell size={22} />
-              <div className="notification-badge">5</div>
-            </div>
+          <div className="header-actions" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+            <button 
+              type="button"
+              className="header-action-icon"
+              aria-label="Notifications"
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#475569',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Bell size={19} />
+              <div 
+                className="notification-badge"
+                style={{
+                  position: 'absolute',
+                  top: '-3px',
+                  right: '-3px',
+                  backgroundColor: 'var(--color-danger, #ef4444)',
+                  color: '#fff',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #fff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                }}
+              >
+                5
+              </div>
+            </button>
 
             {/* User profile dropdown trigger */}
             <div 
               className="user-profile" 
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-              style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '4px 6px', borderRadius: '8px' }}
+              style={{ 
+                cursor: 'pointer', 
+                userSelect: 'none', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.4rem', 
+                padding: '3px 6px', 
+                borderRadius: '10px',
+                backgroundColor: userDropdownOpen ? '#f1f5f9' : 'transparent',
+                transition: 'background-color 0.2s ease',
+                flexShrink: 0
+              }}
+              title="Mon compte"
             >
               <img 
                 src={user?.profile?.avatar || "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=100&q=80"} 
                 alt="User" 
                 className="user-avatar" 
-                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #e2e8f0' }}
               />
               <div className="user-info">
                 <span className="user-name">{user?.profile?.firstName || user?.agency?.name?.split(' ')[0] || 'Utilisateur'}</span>
                 <span className="user-role">{role === 'ADMIN' ? 'Administrateur' : role === 'OWNER' ? 'Propriétaire' : role === 'AGENCY' ? 'Agence' : 'Chercheur'}</span>
               </div>
-              <ChevronDown size={16} color="#64748b" style={{ transform: userDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              <ChevronDown size={16} color="#64748b" style={{ transform: userDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
             </div>
-
-            {/* Quick logout button on mobile header */}
-            <button 
-              className="mobile-only" 
-              onClick={logout}
-              title="Se déconnecter"
-              style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '6px', color: '#dc2626', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              aria-label="Se déconnecter"
-            >
-              <LogOut size={18} />
-            </button>
 
             {/* User Dropdown Menu */}
             {userDropdownOpen && (
-              <div 
-                className="user-dropdown-menu"
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 8px)',
-                  right: 0,
-                  backgroundColor: '#fff',
-                  borderRadius: '12px',
-                  boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
-                  border: '1px solid var(--color-border)',
-                  minWidth: '220px',
-                  padding: '0.5rem',
-                  zIndex: 100,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px'
-                }}
-              >
-                <div style={{ padding: '0.75rem', borderBottom: '1px solid var(--color-border)', marginBottom: '4px' }}>
-                  <div style={{ fontWeight: 600, color: 'var(--color-primary)', fontSize: '0.95rem' }}>
-                    {user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName || ''}` : user?.agency?.name || 'Mon Compte'}
+              <>
+                <div 
+                  className="dropdown-backdrop" 
+                  onClick={() => setUserDropdownOpen(false)}
+                  style={{ position: 'fixed', inset: 0, zIndex: 99 }}
+                />
+                <div 
+                  className="user-dropdown-menu"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    right: 0,
+                    backgroundColor: '#fff',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                    border: '1px solid var(--color-border)',
+                    minWidth: '220px',
+                    padding: '0.5rem',
+                    zIndex: 100,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}
+                >
+                  <div style={{ padding: '0.75rem', borderBottom: '1px solid var(--color-border)', marginBottom: '4px' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--color-primary)', fontSize: '0.95rem' }}>
+                      {user?.profile?.firstName ? `${user.profile.firstName} ${user.profile.lastName || ''}` : user?.agency?.name || 'Mon Compte'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                      {user?.phone || user?.email || (role === 'ADMIN' ? 'Admin' : role === 'OWNER' ? 'Propriétaire' : role === 'AGENCY' ? 'Agence' : 'Chercheur')}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
-                    {user?.phone || user?.email || (role === 'ADMIN' ? 'Admin' : role === 'OWNER' ? 'Propriétaire' : role === 'AGENCY' ? 'Agence' : 'Chercheur')}
-                  </div>
+
+                  <button 
+                    onClick={() => { setShowProfileModal(true); setUserDropdownOpen(false); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--color-text-dark)', width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <UserIcon size={18} color="#64748b" />
+                    <span>Mon Profil</span>
+                  </button>
+
+                  <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '4px 0' }} />
+
+                  <button 
+                    onClick={() => { setUserDropdownOpen(false); logout(); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.9rem', color: '#dc2626', width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    <LogOut size={18} color="#dc2626" />
+                    <span>Déconnexion</span>
+                  </button>
                 </div>
-
-                <button 
-                  onClick={() => { setShowProfileModal(true); setUserDropdownOpen(false); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--color-text-dark)', width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <UserIcon size={18} color="#64748b" />
-                  <span>Mon Profil</span>
-                </button>
-
-                <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '4px 0' }} />
-
-                <button 
-                  onClick={() => { setUserDropdownOpen(false); logout(); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.9rem', color: '#dc2626', width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  <LogOut size={18} color="#dc2626" />
-                  <span>Déconnexion</span>
-                </button>
-              </div>
+              </>
             )}
           </div>
         </header>
