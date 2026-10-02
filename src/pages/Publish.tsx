@@ -29,14 +29,13 @@ const SeekerPublishForm = () => {
   const [showCustomNeighborhood, setShowCustomNeighborhood] = useState(false);
   const [customNeighborhoodName, setCustomNeighborhoodName] = useState('');
 
-
   const propertyTypes = [
-    { value: 'HOUSE', label: 'Maison / Villa' },
-    { value: 'APARTMENT', label: 'Appartement' },
-    { value: 'STUDIO', label: 'Studio' },
-    { value: 'ROOM', label: 'Chambre' },
-    { value: 'LAND', label: 'Terrain' },
-    { value: 'OFFICE', label: 'Bureau / Commerce' }
+    { value: 'HOUSE', label: 'Maison / Villa', icon: '🏡' },
+    { value: 'APARTMENT', label: 'Appartement', icon: '🏢' },
+    { value: 'STUDIO', label: 'Studio', icon: '🏠' },
+    { value: 'ROOM', label: 'Chambre', icon: '🛏️' },
+    { value: 'LAND', label: 'Terrain', icon: '🌿' },
+    { value: 'OFFICE', label: 'Bureau / Commerce', icon: '💼' }
   ];
 
   useEffect(() => {
@@ -104,7 +103,7 @@ const SeekerPublishForm = () => {
       });
       if (!res.ok) throw new Error('Erreur lors de la publication');
       setSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 3000);
+      setTimeout(() => navigate('/mes-annonces'), 3000);
     } catch (err) {
       console.error(err);
       alert("Une erreur s'est produite lors de la publication de la demande.");
@@ -113,123 +112,337 @@ const SeekerPublishForm = () => {
     }
   };
 
+  const fieldStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.85rem 1rem',
+    borderRadius: '10px',
+    border: '1.5px solid #e2e8f0',
+    fontSize: '0.95rem',
+    color: '#1e293b',
+    background: '#f8fafc',
+    outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    appearance: 'none' as any,
+    WebkitAppearance: 'none' as any,
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    color: '#475569',
+    marginBottom: '0.5rem',
+    letterSpacing: '0.02em',
+    textTransform: 'uppercase' as any,
+  };
+
+  const sectionCardStyle: React.CSSProperties = {
+    background: '#fff',
+    borderRadius: '16px',
+    border: '1px solid #e8edf3',
+    padding: '1.75rem',
+    marginBottom: '1.25rem',
+    boxShadow: '0 2px 8px rgba(11,31,58,0.06)',
+  };
+
+  const sectionTitleStyle: React.CSSProperties = {
+    fontSize: '1rem',
+    fontWeight: 700,
+    color: '#0B1F3A',
+    marginBottom: '1.25rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    paddingBottom: '0.875rem',
+    borderBottom: '1px solid #f1f5f9',
+  };
+
+  const selectWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+  };
+
+  const chevronStyle: React.CSSProperties = {
+    position: 'absolute',
+    right: '14px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    pointerEvents: 'none',
+    color: '#94a3b8',
+  };
+
   if (success) {
     return (
-      <div style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
-        <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto 1rem' }} />
-        <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '1rem', color: '#0f172a' }}>Demande publiée avec succès !</h2>
-        <p className="text-light text-lg">Votre recherche a été partagée. Les propriétaires et agences de cette zone vous contacteront s'ils ont un bien correspondant à vos critères.</p>
+      <div style={{ maxWidth: '560px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <CheckCircle size={48} color="#10b981" />
+        </div>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0B1F3A' }}>Demande publiée avec succès !</h2>
+        <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+          Votre recherche a été partagée. Les propriétaires et agences de cette zone vous contacteront dès qu'un bien correspond à vos critères.
+        </p>
+        <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', background: '#10b981', borderRadius: '2px', animation: 'progressBar 3s linear forwards' }} />
+        </div>
+        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem' }}>Redirection dans 3 secondes...</p>
       </div>
     );
   }
 
   return (
-    <div className="publish-page" style={{ maxWidth: '800px', margin: '2rem auto', padding: '2rem' }}>
-      <h1 className="page-title mb-1">Que recherchez-vous ?</h1>
-      <p className="text-light mb-4 text-lg">Décrivez le bien idéal. Les annonces correspondantes viendront à vous.</p>
-      
-      <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-        
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e293b', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <FileText size={20} color="#C9A227" /> Critères principaux
-        </h3>
-        
-        <div className="row mb-4">
-          <div className="col-md-6 mb-3 mb-md-0">
-            <label className="form-label">Type de bien souhaité <span className="text-danger">*</span></label>
-            <select className="form-control" style={{ background: '#f8fafc', padding: '0.75rem' }} value={formData.propertyType} onChange={e => setFormData({...formData, propertyType: e.target.value})} required>
+    <div style={{ maxWidth: '780px', margin: '0 auto', padding: '1.5rem' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '0.4rem', lineHeight: 1.3 }}>
+          Publier une demande
+        </h1>
+        <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>
+          Décrivez le bien que vous recherchez. Les propriétaires et agences vous contacteront directement.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* Section 1: Critères principaux */}
+        <div style={sectionCardStyle}>
+          <div style={sectionTitleStyle}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #FDF3DC, #FAEABE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <FileText size={16} color="#C9A227" />
+            </div>
+            Critères principaux
+          </div>
+
+          {/* Property type pills */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={labelStyle}>Type de bien souhaité <span style={{ color: '#ef4444', textTransform: 'none' }}>*</span></label>
+            <div style={{ display: 'flex', flexWrap: 'wrap' as any, gap: '0.6rem' }}>
               {propertyTypes.map(pt => (
-                <option key={pt.value} value={pt.value}>{pt.label}</option>
+                <button
+                  key={pt.value}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, propertyType: pt.value })}
+                  style={{
+                    padding: '0.6rem 1rem',
+                    borderRadius: '50px',
+                    border: formData.propertyType === pt.value ? '2px solid #C9A227' : '1.5px solid #e2e8f0',
+                    background: formData.propertyType === pt.value ? 'linear-gradient(135deg, #FDF3DC, #FAEABE)' : '#f8fafc',
+                    color: formData.propertyType === pt.value ? '#92720F' : '#64748b',
+                    fontWeight: formData.propertyType === pt.value ? 700 : 500,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <span>{pt.icon}</span> {pt.label}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
-          <div className="col-md-6">
-            <label className="form-label">Budget maximum (FCFA) <span className="text-danger">*</span></label>
-            <input type="number" className="form-control" style={{ background: '#f8fafc', padding: '0.75rem' }} value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})} placeholder="Ex: 50000" required />
+
+          {/* Budget */}
+          <div>
+            <label style={labelStyle}>Budget maximum <span style={{ color: '#ef4444', textTransform: 'none' }}>*</span></label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="number"
+                value={formData.budget}
+                onChange={e => setFormData({ ...formData, budget: e.target.value })}
+                placeholder="Ex : 250 000"
+                required
+                style={{ ...fieldStyle, paddingRight: '5rem' }}
+                onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
+              />
+              <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.05em' }}>FCFA</span>
+            </div>
           </div>
         </div>
 
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e293b', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <MapPin size={20} color="#C9A227" /> Localisation souhaitée
-        </h3>
+        {/* Section 2: Localisation */}
+        <div style={sectionCardStyle}>
+          <div style={sectionTitleStyle}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #FDF3DC, #FAEABE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MapPin size={16} color="#C9A227" />
+            </div>
+            Localisation souhaitée
+          </div>
 
-        <div className="row mb-4">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Pays</label>
-            <select className="form-control" style={{ background: '#f8fafc', padding: '0.75rem' }} value={formData.countryId} onChange={e => setFormData({...formData, countryId: e.target.value})}>
-              {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Région</label>
-            <select className="form-control" style={{ background: '#f8fafc', padding: '0.75rem' }} value={formData.regionId} onChange={e => setFormData({...formData, regionId: e.target.value})}>
-              <option value="">Sélectionner</option>
-              {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Ville</label>
-            <select className="form-control mb-2" style={{ background: '#f8fafc', padding: '0.75rem' }} value={showCustomCity ? 'autre' : formData.cityId} onChange={e => {
-              if (e.target.value === 'autre') {
-                setShowCustomCity(true);
-                setFormData({...formData, cityId: ''});
-              } else {
-                setShowCustomCity(false);
-                setFormData({...formData, cityId: e.target.value});
-              }
-            }}>
-              <option value="">Sélectionner</option>
-              {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              <option value="autre">Autre (Préciser)</option>
-            </select>
-            {showCustomCity && (
-              <input type="text" className="form-control mt-2" style={{ background: '#fff', padding: '0.75rem', borderColor: '#C9A227' }} placeholder="Entrez le nom de la ville" value={customCityName} onChange={e => setCustomCityName(e.target.value)} required />
-            )}
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Quartier</label>
-            <select className="form-control mb-2" style={{ background: '#f8fafc', padding: '0.75rem' }} value={showCustomNeighborhood ? 'autre' : formData.neighborhoodId} onChange={e => {
-              if (e.target.value === 'autre') {
-                setShowCustomNeighborhood(true);
-                setFormData({...formData, neighborhoodId: ''});
-              } else {
-                setShowCustomNeighborhood(false);
-                setFormData({...formData, neighborhoodId: e.target.value});
-              }
-            }}>
-              <option value="">Sélectionner</option>
-              {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
-              <option value="autre">Autre (Préciser)</option>
-            </select>
-            {showCustomNeighborhood && (
-              <input type="text" className="form-control mt-2" style={{ background: '#fff', padding: '0.75rem', borderColor: '#C9A227' }} placeholder="Entrez le nom du quartier" value={customNeighborhoodName} onChange={e => setCustomNeighborhoodName(e.target.value)} required />
-            )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            {/* Pays */}
+            <div>
+              <label style={labelStyle}>Pays</label>
+              <div style={selectWrapperStyle}>
+                <select
+                  value={formData.countryId}
+                  onChange={e => setFormData({ ...formData, countryId: e.target.value })}
+                  style={fieldStyle}
+                  onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
+                >
+                  {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <svg style={chevronStyle} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            </div>
+
+            {/* Région */}
+            <div>
+              <label style={labelStyle}>Région</label>
+              <div style={selectWrapperStyle}>
+                <select
+                  value={formData.regionId}
+                  onChange={e => setFormData({ ...formData, regionId: e.target.value })}
+                  style={fieldStyle}
+                  onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
+                >
+                  <option value="">— Sélectionner —</option>
+                  {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+                <svg style={chevronStyle} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            </div>
+
+            {/* Ville */}
+            <div>
+              <label style={labelStyle}>Ville</label>
+              <div style={selectWrapperStyle}>
+                <select
+                  value={showCustomCity ? 'autre' : formData.cityId}
+                  onChange={e => {
+                    if (e.target.value === 'autre') { setShowCustomCity(true); setFormData({ ...formData, cityId: '' }); }
+                    else { setShowCustomCity(false); setFormData({ ...formData, cityId: e.target.value }); }
+                  }}
+                  style={fieldStyle}
+                  onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
+                >
+                  <option value="">— Sélectionner —</option>
+                  {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="autre">✏️ Autre ville (préciser)</option>
+                </select>
+                <svg style={chevronStyle} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </div>
+              {showCustomCity && (
+                <input
+                  type="text"
+                  placeholder="Nom de la ville"
+                  value={customCityName}
+                  onChange={e => setCustomCityName(e.target.value)}
+                  required
+                  style={{ ...fieldStyle, marginTop: '0.5rem', borderColor: '#C9A227', background: '#FFFDF5' }}
+                  onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = 'none'; }}
+                />
+              )}
+            </div>
+
+            {/* Quartier */}
+            <div>
+              <label style={labelStyle}>Quartier</label>
+              <div style={selectWrapperStyle}>
+                <select
+                  value={showCustomNeighborhood ? 'autre' : formData.neighborhoodId}
+                  onChange={e => {
+                    if (e.target.value === 'autre') { setShowCustomNeighborhood(true); setFormData({ ...formData, neighborhoodId: '' }); }
+                    else { setShowCustomNeighborhood(false); setFormData({ ...formData, neighborhoodId: e.target.value }); }
+                  }}
+                  style={fieldStyle}
+                  onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
+                >
+                  <option value="">— Sélectionner —</option>
+                  {neighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                  <option value="autre">✏️ Autre quartier (préciser)</option>
+                </select>
+                <svg style={chevronStyle} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </div>
+              {showCustomNeighborhood && (
+                <input
+                  type="text"
+                  placeholder="Nom du quartier"
+                  value={customNeighborhoodName}
+                  onChange={e => setCustomNeighborhoodName(e.target.value)}
+                  required
+                  style={{ ...fieldStyle, marginTop: '0.5rem', borderColor: '#C9A227', background: '#FFFDF5' }}
+                  onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = 'none'; }}
+                />
+              )}
+            </div>
           </div>
         </div>
 
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e293b', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Info size={20} color="#C9A227" /> Description détaillée
-        </h3>
-        <div className="mb-4">
-          <label className="form-label">Parlez-nous de vos exigences (Commodités, sécurité, durée, etc.) <span className="text-danger">*</span></label>
-          <textarea 
-            className="form-control" 
-            style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px' }}
-            rows={5} 
-            value={formData.description} 
-            onChange={e => setFormData({...formData, description: e.target.value})}
-            placeholder="Ex: Je cherche une chambre avec cuisine interne, carrelée, dans une zone sécurisée, pas trop loin de la route principale..."
-            required
-          ></textarea>
+        {/* Section 3: Description */}
+        <div style={sectionCardStyle}>
+          <div style={sectionTitleStyle}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #FDF3DC, #FAEABE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Info size={16} color="#C9A227" />
+            </div>
+            Description détaillée
+          </div>
+
+          <div>
+            <label style={labelStyle}>
+              Vos exigences <span style={{ color: '#ef4444', textTransform: 'none' }}>*</span>
+              <span style={{ fontWeight: 400, textTransform: 'none', color: '#94a3b8', marginLeft: '0.3rem' }}>(commodités, sécurité, durée, etc.)</span>
+            </label>
+            <textarea
+              rows={5}
+              value={formData.description}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Ex : Je recherche un appartement 2 pièces avec cuisine équipée, dans un quartier calme et sécurisé, à proximité d'une école primaire..."
+              required
+              style={{ ...fieldStyle, resize: 'vertical' as any, fontFamily: 'inherit', lineHeight: 1.6 }}
+              onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
+              onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
+            />
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.4rem' }}>
+              💡 Plus votre description est précise, plus vous recevrez de propositions pertinentes.
+            </p>
+          </div>
         </div>
 
-        <button type="submit" className="btn btn-primary w-100" style={{ padding: '1rem', fontSize: '1.1rem', borderRadius: '8px', fontWeight: 600, background: 'var(--color-primary)' }} disabled={loading}>
-          {loading ? <Loader className="spin" size={24} /> : 'Soumettre ma demande de logement'}
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '1rem 2rem',
+            borderRadius: '12px',
+            border: 'none',
+            background: loading ? '#e2e8f0' : 'linear-gradient(135deg, #C9A227, #E8C044)',
+            color: loading ? '#94a3b8' : '#0B1F3A',
+            fontWeight: 700,
+            fontSize: '1rem',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            boxShadow: loading ? 'none' : '0 4px 14px rgba(201,162,39,0.35)',
+            transition: 'all 0.2s',
+            letterSpacing: '0.01em',
+          }}
+        >
+          {loading ? (
+            <><Loader className="spin" size={20} /> Publication en cours...</>
+          ) : (
+            <><CheckCircle size={20} /> Publier ma demande</>
+          )}
         </button>
       </form>
     </div>
   );
 };
+
+
+
+
+
+
 
 export default function Publish() {
   const { role, user } = useAuth();
