@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Trash2, Plus, ArrowLeft, ArrowRight, Loader, Crown, Lock } from 'lucide-react';
+import { FileText, MapPin, Info, Image as ImageIcon, CheckCircle, Trash2, Plus, ArrowLeft, ArrowRight, Loader, Crown, Sparkles } from 'lucide-react';
 import { LocationPicker } from '../components/LocationPicker';
 const SeekerPublishForm = () => {
   const navigate = useNavigate();
@@ -551,49 +551,188 @@ export default function Publish() {
   // UI Si la limite est atteinte
   if (hasReachedLimit) {
     return (
-      <div className="publish-page" style={{ maxWidth: '800px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
-        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', padding: '3rem 2rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-          <div style={{ background: '#fef3c7', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-            <Lock size={40} color="#d97706" />
+      <div className="publish-page container" style={{ maxWidth: '640px', margin: '2rem auto 5rem', padding: '0 1rem' }}>
+        <div className="limit-card">
+          <div className="limit-icon-wrapper">
+            <Crown size={32} color="#C9A227" />
+          </div>
+
+          <div className="limit-badge">
+            <Sparkles size={13} />
+            <span>Offre Partenaire Conseillée</span>
           </div>
           
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#92400e', marginBottom: '1rem' }}>
+          <h1 className="limit-title">
             Limite de publication atteinte
           </h1>
           
-          <p style={{ fontSize: '1.1rem', color: '#b45309', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
-            En tant qu'utilisateur gratuit, vous êtes limité à <strong>2 annonces actives</strong>. 
-            De plus, vos annonces risquent d'être noyées dans les résultats de recherche.
+          <p className="limit-subtitle">
+            En tant qu&apos;utilisateur gratuit, vous avez atteint votre quota de <strong>2 annonces actives</strong>.
+            Passez au statut Premium pour développer votre portefeuille sans restriction.
           </p>
           
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', textAlign: 'left', border: '1px solid #e2e8f0' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem' }}>Passez au Premium pour :</h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155' }}>
-                <CheckCircle size={18} color="#10b981" /> Publier des annonces en illimité
+          <div className="limit-benefits-card">
+            <h3 className="limit-benefits-title">Passez au Premium pour :</h3>
+            <ul className="limit-benefits-list">
+              <li>
+                <div className="benefit-check"><CheckCircle size={17} color="#16a34a" /></div>
+                <span>Publier des annonces en illimité</span>
               </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155' }}>
-                <CheckCircle size={18} color="#10b981" /> Apparaître en priorité dans les recherches
+              <li>
+                <div className="benefit-check"><CheckCircle size={17} color="#16a34a" /></div>
+                <span>Apparaître en priorité dans les recherches</span>
               </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155' }}>
-                <CheckCircle size={18} color="#10b981" /> Voir qui s'intéresse à vos biens
+              <li>
+                <div className="benefit-check"><CheckCircle size={17} color="#16a34a" /></div>
+                <span>Voir qui s&apos;intéresse à vos biens</span>
               </li>
             </ul>
           </div>
           
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button className="btn btn-outline" onClick={() => navigate('/dashboard')}>
-              Retour au tableau de bord
-            </button>
+          <div className="limit-actions">
             <button 
-              className="btn" 
-              style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px', fontWeight: 600 }}
+              className="btn btn-primary limit-btn-primary" 
               onClick={() => navigate('/tarifs')}
             >
-              <Crown size={20} /> Découvrir Premium
+              <Crown size={18} />
+              <span>Découvrir Premium</span>
+            </button>
+            <button 
+              className="btn btn-outline limit-btn-secondary" 
+              onClick={() => navigate('/dashboard')}
+            >
+              <ArrowLeft size={16} />
+              <span>Retour au tableau de bord</span>
             </button>
           </div>
         </div>
+
+        <style>{`
+          .limit-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            padding: 2.25rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(11, 31, 58, 0.06);
+          }
+          .limit-icon-wrapper {
+            background: #0B1F3A;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 4px 14px rgba(11, 31, 58, 0.25);
+          }
+          .limit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+          }
+          .limit-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #0B1F3A;
+            margin-bottom: 0.65rem;
+            letter-spacing: -0.02em;
+          }
+          .limit-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.55;
+            max-width: 480px;
+            margin: 0 auto 1.75rem;
+          }
+          .limit-benefits-card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+          }
+          .limit-benefits-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0B1F3A;
+            margin-bottom: 0.85rem;
+          }
+          .limit-benefits-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+          .limit-benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            color: #334155;
+            font-size: 0.92rem;
+            line-height: 1.45;
+          }
+          .benefit-check {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+          }
+          .limit-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+          }
+          .limit-btn-primary {
+            width: 100%;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 12px;
+          }
+          .limit-btn-secondary {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            border-color: #cbd5e1;
+            border-radius: 12px;
+          }
+          @media (min-width: 641px) {
+            .limit-actions {
+              flex-direction: row-reverse;
+            }
+            .limit-btn-primary {
+              flex: 1.2;
+            }
+            .limit-btn-secondary {
+              flex: 1;
+            }
+          }
+        `}</style>
       </div>
     );
   }
