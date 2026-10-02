@@ -66,8 +66,28 @@ export default function ForgotPassword() {
           </form>
         )}
 
-        <div className="text-center mt-4 text-sm">
-          <Link to="/connexion" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>← Retour à la connexion</Link>
+        <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+          <Link 
+            to="/connexion" 
+            className="btn btn-outline"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              width: '100%', 
+              minHeight: '46px', 
+              fontWeight: 600, 
+              fontSize: '0.95rem',
+              color: 'var(--color-primary, #0B1F3A)', 
+              borderColor: '#cbd5e1',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              background: '#f8fafc',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ← Retour à la connexion
+          </Link>
         </div>
       </div>
       <style>{`

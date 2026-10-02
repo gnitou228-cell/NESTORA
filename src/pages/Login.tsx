@@ -107,10 +107,12 @@ export default function Login() {
             <input type="email" name="email" className="form-control" required onChange={handleChange} placeholder="nom@exemple.com" />
           </div>
 
-          <div className="form-group mb-2">
-            <div className="d-flex justify-between" style={{ alignItems: 'center' }}>
-              <label>Mot de passe</label>
-              <Link to="/mot-de-passe-oublie" className="text-sm text-light" style={{ color: 'var(--color-primary)' }}>Mot de passe oublié ?</Link>
+          <div className="form-group mb-3">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <label style={{ margin: 0, fontWeight: 500, fontSize: '0.9rem', color: 'var(--color-text-dark)' }}>Mot de passe</label>
+              <Link to="/mot-de-passe-oublie" style={{ fontSize: '0.85rem', color: 'var(--color-gold, #C9A227)', fontWeight: 600, textDecoration: 'none' }}>
+                Mot de passe oublié ?
+              </Link>
             </div>
             <input type="password" name="password" className="form-control" required onChange={handleChange} placeholder="••••••••" />
           </div>
@@ -138,8 +140,32 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="text-center mt-4 text-sm">
-          Nouveau sur Nestora ? <Link to="/inscription" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Créer un compte</Link>
+        {/* Section Nouveau compte / Inscription tactile */}
+        <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: 500 }}>
+            Vous n'avez pas encore de compte ?
+          </p>
+          <Link 
+            to="/inscription" 
+            className="btn btn-outline" 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              width: '100%', 
+              minHeight: '46px', 
+              fontWeight: 600, 
+              fontSize: '0.95rem',
+              color: 'var(--color-primary, #0B1F3A)', 
+              borderColor: 'var(--color-primary, #0B1F3A)',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              background: '#f8fafc',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            Créer un compte
+          </Link>
         </div>
       </div>
       <style>{`

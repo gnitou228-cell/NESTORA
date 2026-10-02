@@ -275,8 +275,31 @@ export default function Register() {
             <button className="btn btn-primary btn-block btn-lg mt-4" onClick={() => setStep(2)}>
               Continuer
             </button>
-            <div className="text-center text-sm" style={{ marginTop: '2rem' }}>
-              Déjà un compte ? <Link to="/connexion" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Se connecter</Link>
+            <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+              <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: 500 }}>
+                Vous avez déjà un compte ?
+              </p>
+              <Link 
+                to="/connexion" 
+                className="btn btn-outline" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  width: '100%', 
+                  minHeight: '46px', 
+                  fontWeight: 600, 
+                  fontSize: '0.95rem',
+                  color: 'var(--color-primary, #0B1F3A)', 
+                  borderColor: 'var(--color-primary, #0B1F3A)',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  background: '#f8fafc',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Se connecter
+              </Link>
             </div>
           </div>
         )}
