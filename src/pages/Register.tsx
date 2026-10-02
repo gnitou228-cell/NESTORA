@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { User, Crown, Briefcase } from 'lucide-react';
 import { useAuth, type Role } from '../context/AuthContext';
@@ -56,6 +56,25 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
+
+  const [countries, setCountries] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/countries`)
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+        if (data.length > 0) {
+          const togo = data.find((c: any) => c.code === 'TG');
+          if (togo) {
+            setFormData(prev => ({ ...prev, phoneCode: togo.phoneCode, whatsappCode: togo.phoneCode }));
+          } else {
+            setFormData(prev => ({ ...prev, phoneCode: data[0].phoneCode, whatsappCode: data[0].phoneCode }));
+          }
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
@@ -298,15 +317,12 @@ export default function Register() {
               <div className="form-group mb-3" style={{ flex: 1 }}>
                 <label>Téléphone *</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <select name="phoneCode" className="form-control" style={{ width: '90px', padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.phoneCode}>
-                    <option value="+228">🇹🇬 +228</option>
-                    <option value="+225">🇨🇮 +225</option>
-                    <option value="+229">🇧🇯 +229</option>
-                    <option value="+226">🇧🇫 +226</option>
-                    <option value="+221">🇸🇳 +221</option>
-                    <option value="+237">🇨🇲 +237</option>
-                    <option value="+33">🇫🇷 +33</option>
-                    <option value="+1">🇺🇸 +1</option>
+                  <select name="phoneCode" className="form-control" style={{ width: '120px', padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.phoneCode}>
+                    {countries.length > 0 ? countries.map(c => (
+                      <option key={`phone-${c.id}`} value={c.phoneCode}>{c.name} ({c.phoneCode})</option>
+                    )) : (
+                      <option value="+228">🇹🇬 +228</option>
+                    )}
                   </select>
                   <input type="tel" name="phone" className="form-control" required onChange={handleChange} value={formData.phone} placeholder="Ex: 90000000" />
                 </div>
@@ -317,15 +333,12 @@ export default function Register() {
               <div className="form-group mb-3">
                 <label>WhatsApp (Optionnel)</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <select name="whatsappCode" className="form-control" style={{ width: '90px', padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.whatsappCode}>
-                    <option value="+228">🇹🇬 +228</option>
-                    <option value="+225">🇨🇮 +225</option>
-                    <option value="+229">🇧🇯 +229</option>
-                    <option value="+226">🇧🇫 +226</option>
-                    <option value="+221">🇸🇳 +221</option>
-                    <option value="+237">🇨🇲 +237</option>
-                    <option value="+33">🇫🇷 +33</option>
-                    <option value="+1">🇺🇸 +1</option>
+                  <select name="whatsappCode" className="form-control" style={{ width: '120px', padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.whatsappCode}>
+                    {countries.length > 0 ? countries.map(c => (
+                      <option key={`wa-${c.id}`} value={c.phoneCode}>{c.name} ({c.phoneCode})</option>
+                    )) : (
+                      <option value="+228">🇹🇬 +228</option>
+                    )}
                   </select>
                   <input type="tel" name="whatsapp" className="form-control" onChange={handleChange} value={formData.whatsapp} placeholder="Ex: 90000000" />
                 </div>
