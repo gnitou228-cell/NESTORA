@@ -189,9 +189,9 @@ export default function MyListings() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left', backgroundColor: '#f8fafc' }}>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Annonce</th>
+                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>{role === 'SEEKER' ? 'Demande' : 'Annonce'}</th>
                   <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Statut</th>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Prix</th>
+                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>{role === 'SEEKER' ? 'Budget Max' : 'Prix'}</th>
                   <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Actions</th>
                 </tr>
               </thead>
@@ -200,17 +200,23 @@ export default function MyListings() {
                   <tr key={property.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                     <td style={{ padding: '1rem' }}>
                       <div className="d-flex" style={{ gap: '1rem', alignItems: 'center' }}>
-                        <img 
-                          src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
-                          alt={property.title} 
-                          style={{ width: '80px', height: '60px', borderRadius: '4px', objectFit: 'cover', backgroundColor: '#eee' }} 
-                        />
+                        {role !== 'SEEKER' ? (
+                          <img 
+                            src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
+                            alt={property.title} 
+                            style={{ width: '80px', height: '60px', borderRadius: '4px', objectFit: 'cover', backgroundColor: '#eee' }} 
+                          />
+                        ) : (
+                          <div style={{ width: '80px', height: '60px', borderRadius: '4px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Search size={24} color="#94a3b8" />
+                          </div>
+                        )}
                         <div>
                           <div style={{ fontWeight: 600, maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {property.title}
                           </div>
                           <div className="text-light" style={{ fontSize: '0.85rem' }}>
-                            {property.city?.name} • {property.propertyType}
+                            {role === 'SEEKER' ? property.location : `${property.city?.name} • ${property.propertyType}`}
                           </div>
                         </div>
                       </div>
@@ -221,11 +227,11 @@ export default function MyListings() {
                       </div>
                     </td>
                     <td style={{ padding: '1rem', fontWeight: 600 }}>
-                      {property.price} {property.currency}
+                      {role === 'SEEKER' ? property.budget : `${property.price} ${property.currency || 'FCFA'}`}
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <div className="d-flex" style={{ gap: '0.5rem' }}>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title="Voir l'annonce">
+                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title={role === 'SEEKER' ? 'Voir la demande' : "Voir l'annonce"}>
                           <Globe size={16} />
                         </button>
                         <button 
@@ -239,7 +245,7 @@ export default function MyListings() {
                           <Rocket size={14} />
                           Booster
                         </button>
-                        <button onClick={() => alert("La modification d'annonce sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
+                        <button onClick={() => alert("La modification sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
                           <Edit size={16} />
                         </button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#ef4444', borderColor: '#fee2e2' }} title="Supprimer" onClick={() => handleDelete(property.id)}>

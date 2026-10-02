@@ -54,8 +54,24 @@ router.get('/', async (req, res) => {
 // Create a new request (authenticated)
 router.post('/', requireAuth, async (req: any, res) => {
   try {
-    const { propertyType, budget, countryId, regionId, cityId, neighborhoodId, description } = req.body;
+    const { propertyType, budget, countryId, regionId, cityId, neighborhoodId, description, customCityName, customNeighborhoodName } = req.body;
     
+    let finalCityId = cityId;
+    if (customCityName && regionId) {
+      const newCity = await prisma.city.create({
+        data: { name: customCityName, regionId }
+      });
+      finalCityId = newCity.id;
+    }
+
+    let finalNeighborhoodId = neighborhoodId;
+    if (customNeighborhoodName && finalCityId) {
+      const newNeigh = await prisma.neighborhood.create({
+        data: { name: customNeighborhoodName, cityId: finalCityId }
+      });
+      finalNeighborhoodId = newNeigh.id;
+    }
+
     // We assume default RENT if not provided, but usually seekers could want SALE too. Defaulting to RENT for now based on form.
     const newRequest = await prisma.housingRequest.create({
       data: {
@@ -66,8 +82,8 @@ router.post('/', requireAuth, async (req: any, res) => {
         propertyType: propertyType as PropertyType,
         countryId,
         regionId: regionId || undefined,
-        cityId: cityId || undefined,
-        neighborhoodId: neighborhoodId || undefined,
+        cityId: finalCityId || undefined,
+        neighborhoodId: finalNeighborhoodId || undefined,
         maxPrice: budget ? parseFloat(budget) : null,
         status: 'PUBLISHED',
         publishedAt: new Date()
@@ -97,6 +113,8 @@ router.get('/my', requireAuth, async (req: any, res) => {
 
     const formatted = requests.map((req: any) => ({
       id: req.id,
+      title: req.title,
+      status: req.status,
       type: req.transactionType === 'RENT' ? 'Location' : 'Achat',
       propertyType: req.propertyType,
       location: [req.neighborhood?.name, req.city?.name].filter(Boolean).join(', ') || 'Zone non spécifiée',
