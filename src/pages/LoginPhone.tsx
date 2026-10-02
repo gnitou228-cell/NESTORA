@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NestoraLogo from '../components/brand/NestoraLogo';
@@ -15,13 +15,30 @@ export default function LoginPhone() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const [countries, setCountries] = useState<any[]>([]);
+  const [phoneCode, setPhoneCode] = useState('+228');
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/countries`)
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+        if (data.length > 0) {
+          const togo = data.find((c: any) => c.code === 'TG');
+          if (togo) setPhoneCode(togo.phoneCode);
+          else setPhoneCode(data[0].phoneCode);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
-    // Convert to international format if not already (basic logic)
-    const formattedPhone = phone.startsWith('+') ? phone : `+228${phone.replace(/^0+/, '')}`;
+    // Convert to international format if not already
+    const formattedPhone = phone.startsWith('+') ? phone : `${phoneCode}${phone.replace(/^0+/, '')}`;
 
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -47,7 +64,7 @@ export default function LoginPhone() {
     setLoading(true);
     setError('');
 
-    const formattedPhone = phone.startsWith('+') ? phone : `+228${phone.replace(/^0+/, '')}`;
+    const formattedPhone = phone.startsWith('+') ? phone : `${phoneCode}${phone.replace(/^0+/, '')}`;
 
     try {
       const { data, error } = await supabase.auth.verifyOtp({
@@ -90,8 +107,16 @@ export default function LoginPhone() {
             <div className="form-group mb-3">
               <label>Numéro de téléphone</label>
               <div className="d-flex gap-2">
-                <select className="form-control" style={{ width: '100px', backgroundColor: '#f1f5f9' }} disabled>
-                  <option>🇹🇬 +228</option>
+                <select 
+                  className="form-control" 
+                  style={{ width: '120px', backgroundColor: '#f1f5f9' }} 
+                  value={phoneCode}
+                  onChange={(e) => setPhoneCode(e.target.value)}
+                >
+                  {countries.map(c => (
+                    <option key={c.id} value={c.phoneCode}>{c.name} ({c.phoneCode})</option>
+                  ))}
+                  {countries.length === 0 && <option value="+228">🇹🇬 +228</option>}
                 </select>
                 <input 
                   type="tel" 
