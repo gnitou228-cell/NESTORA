@@ -298,6 +298,42 @@ const PropertyDetail = () => {
     setShowContactModal(true);
   };
 
+  const handleMessageClick = async () => {
+    if (!user) {
+      navigate('/connexion');
+      return;
+    }
+    if (property?.ownerId === user.id) {
+      alert('Vous ne pouvez pas vous envoyer un message à vous-même.');
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) return;
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ propertyId: property?.id })
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        navigate(`/messages`);
+      } else {
+        alert(data.error || 'Erreur lors de la création de la conversation');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur réseau');
+    }
+  };
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -647,9 +683,18 @@ const PropertyDetail = () => {
                 <button 
                   className="btn btn-primary btn-block btn-advertiser-primary" 
                   onClick={handleContactClick}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}
+                >
+                  <Phone size={20} />
+                  <span>Contacter (Voir Numéro)</span>
+                </button>
+                <button 
+                  className="btn btn-outline btn-block btn-advertiser-secondary" 
+                  onClick={handleMessageClick}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}
                 >
                   <MessageCircle size={20} />
-                  <span>{property.agency ? "Contacter l'agence" : "Contacter le propriétaire"}</span>
+                  <span>Envoyer un message</span>
                 </button>
                 <button 
                   className="btn btn-outline btn-block btn-advertiser-secondary" 
@@ -664,6 +709,7 @@ const PropertyDetail = () => {
                     }
                     setShowVisitModal(true);
                   }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                   <Calendar size={20} />
                   <span>Demander une visite</span>

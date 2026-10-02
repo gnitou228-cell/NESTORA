@@ -37,7 +37,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
     const userId = req.user.id;
     const { type, planId, propertyId, provider } = req.body;
 
-    if (!['SUBSCRIPTION', 'BOOST'].includes(type)) {
+    if (!['SUBSCRIPTION', 'BOOST', 'PRIORITY_REQUEST'].includes(type)) {
       return res.status(400).json({ error: 'Type de paiement invalide' });
     }
     
@@ -48,7 +48,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
     let plan;
     if (type === 'SUBSCRIPTION') {
       plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
-    } else {
+    } else if (type === 'BOOST') {
       plan = await prisma.boostPlan.findUnique({ where: { id: planId } });
       if (!propertyId) return res.status(400).json({ error: 'propertyId est requis pour un boost' });
       
@@ -63,6 +63,14 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
         }
         if (!isAuthorized) return res.status(403).json({ error: 'Vous ne pouvez pas booster cette annonce' });
       }
+    } else if (type === 'PRIORITY_REQUEST') {
+      const PRIORITY_PRICES = {
+        PRIORITY_7D: { price: 1000, name: 'Priorité 7 jours', active: true, currency: 'FCFA' },
+        PRIORITY_15D: { price: 1500, name: 'Priorité 15 jours', active: true, currency: 'FCFA' },
+        PRIORITY_30D: { price: 2500, name: 'Priorité 30 jours', active: true, currency: 'FCFA' },
+      };
+      plan = PRIORITY_PRICES[planId as keyof typeof PRIORITY_PRICES];
+      if (!propertyId) return res.status(400).json({ error: 'L\'ID de la demande (propertyId) est requis' });
     }
 
     if (!plan || !plan.active) {
@@ -95,7 +103,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
             price_data: {
               currency: currency.toLowerCase(),
               product_data: {
-                name: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : `Boost - ${plan.name}`,
+                name: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : type === 'BOOST' ? `Boost - ${plan.name}` : `Demande Prioritaire - ${plan.name}`,
               },
               unit_amount: Math.round(amount * 100), // Stripe expects amounts in cents (if EUR/USD, or CFA depending on Stripe support, but let's assume it's correctly mapped)
             },
@@ -129,7 +137,7 @@ router.post('/checkout', requireAuth, async (req: any, res) => {
       const payload = {
         amount: amount.toFixed(2), // SasPay expects a string like "5000.00"
         currency: currency === 'FCFA' ? 'XOF' : currency,
-        description: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : `Boost - ${plan.name}`,
+        description: type === 'SUBSCRIPTION' ? `Abonnement - ${plan.name}` : type === 'BOOST' ? `Boost - ${plan.name}` : `Demande Prioritaire - ${plan.name}`,
         country: countryCode, 
         customer_email: customerDetails?.email || req.user?.email || 'client@nestora.com',
         customer_name: (customerDetails?.firstName || customerDetails?.lastName) 
@@ -246,6 +254,17 @@ router.post('/webhook/stripe', requireAuth, async (req, res) => {
             }
           });
         }
+      } else if (payment.type === 'PRIORITY_REQUEST') {
+        const PRIORITY_DURATIONS = { PRIORITY_7D: 7, PRIORITY_15D: 15, PRIORITY_30D: 30 };
+        const duration = PRIORITY_DURATIONS[meta.planId as keyof typeof PRIORITY_DURATIONS];
+        if (duration && meta.propertyId) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + duration);
+          await prisma.housingRequest.update({
+            where: { id: meta.propertyId },
+            data: { isPriority: true, priorityEndDate: endDate, priorityPaymentId: payment.id }
+          });
+        }
       }
     } else {
       await prisma.payment.update({
@@ -348,6 +367,17 @@ router.post('/webhook/saaspay', async (req, res) => {
               status: 'ACTIVE',
               endDate
             }
+          });
+        }
+      } else if (payment.type === 'PRIORITY_REQUEST') {
+        const PRIORITY_DURATIONS = { PRIORITY_7D: 7, PRIORITY_15D: 15, PRIORITY_30D: 30 };
+        const duration = PRIORITY_DURATIONS[meta.planId as keyof typeof PRIORITY_DURATIONS];
+        if (duration && meta.propertyId) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + duration);
+          await prisma.housingRequest.update({
+            where: { id: meta.propertyId },
+            data: { isPriority: true, priorityEndDate: endDate, priorityPaymentId: payment.id }
           });
         }
       }

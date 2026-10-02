@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader, Zap, ShieldCheck, Heart, Search, Lock, Phone, Rocket, Check, Sparkles } from 'lucide-react';
+import { Loader, ShieldCheck, Heart, Search, Lock, Phone, Rocket, Check, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 
 const PREMIUM_UI_DATA = [
-  { duration: 15, name: 'Premium 15 Jours', refPrice: 4900, discount: '-20%', boosts: 1, monthlyEq: '7 800 FCFA/mois', isPopular: false },
-  { duration: 30, name: 'Premium 1 Mois', refPrice: 9900, discount: '-40%', boosts: 3, monthlyEq: '5 900 FCFA/mois', isPopular: true },
-  { duration: 90, name: 'Premium 3 Mois', refPrice: 14700, discount: '-33%', boosts: 3, monthlyEq: '3 300 FCFA/mois', isPopular: false },
-  { duration: 180, name: 'Premium 6 Mois', refPrice: 29400, discount: '-49%', boosts: 6, monthlyEq: '2 483 FCFA/mois', isPopular: false }
+  { duration: 30, name: 'Premium 1 Mois', discount: '', boosts: 3, monthlyEq: '3 000 FCFA/mois', isPopular: true }
 ];
 
 export default function Pricing() {
@@ -28,7 +25,7 @@ export default function Pricing() {
 
   const [plans, setPlans] = useState<any>({ seeker: [], owner: [], agency: [] });
   const [loading, setLoading] = useState(true);
-  const [selectedDuration, setSelectedDuration] = useState<number>(30);
+  const [selectedPremiumPlanId, setSelectedPremiumPlanId] = useState<string>('');
   const [selectedSeekerPlanId, setSelectedSeekerPlanId] = useState<string>('');
   const [publicTab, setPublicTab] = useState<'OWNER' | 'SEEKER' | 'AGENCY'>('OWNER');
 
@@ -47,6 +44,11 @@ export default function Pricing() {
           const pop = seekerList.find((p: any) => p.popular) || seekerList[0];
           setSelectedSeekerPlanId(pop?.id || '');
         }
+        
+        const activeList = userRole === 'OWNER' ? subscriptionPlans.filter((p: any) => p.targetRole === 'OWNER') : subscriptionPlans.filter((p: any) => p.targetRole === 'AGENCY');
+        if (activeList.length > 0) {
+          setSelectedPremiumPlanId(activeList[0].id);
+        }
       } catch (error) {
         console.error('Erreur chargement des plans', error);
       } finally {
@@ -62,11 +64,11 @@ export default function Pricing() {
 
   const handlePremiumCheckout = () => {
     const activePlans = userRole === 'OWNER' ? plans.owner : plans.agency;
-    const dbPlan = activePlans.find((p: any) => p.duration === selectedDuration);
+    const dbPlan = activePlans.find((p: any) => p.id === selectedPremiumPlanId);
     if (dbPlan) {
       handleSelectPlan(dbPlan, 'Abonnement Premium');
     } else {
-      alert("Ce plan n'est pas disponible pour le moment.");
+      alert("Veuillez sélectionner un forfait.");
     }
   };
 
@@ -197,53 +199,43 @@ export default function Pricing() {
     );
   };
 
-  const renderPremiumUI = (uiDataArray: any[], activePlans: any[]) => {
-    const displayCards = uiDataArray.map(uiData => {
-      const dbPlan = activePlans.find((p: any) => p.duration === uiData.duration);
-      return { ...uiData, dbPlan };
-    }).filter(card => card.dbPlan);
-
-    if (displayCards.length === 0) {
+  const renderPremiumUI = (_ignored: any, activePlans: any[]) => {
+    if (!activePlans || activePlans.length === 0) {
       return <div className="text-center p-4">Aucun plan premium disponible actuellement.</div>;
     }
 
     return (
       <div className="premium-subscription-container">
         <div className="text-center mb-4">
-          <h2 className="premium-section-heading">Choisis ta durée</h2>
-          <p className="premium-section-subheading">Plus c&apos;est long, plus tu économises</p>
+          <h2 className="premium-section-heading">Choisis ton plan</h2>
+          <p className="premium-section-subheading">Développe ton activité avec le plan adapté</p>
         </div>
 
         <div className="premium-cards-stack">
-          {displayCards.map((card) => {
-            const isSelected = selectedDuration === card.duration;
+          {activePlans.map((card: any) => {
+            const isSelected = selectedPremiumPlanId === card.id;
             return (
               <div
-                key={card.duration}
+                key={card.id}
                 className={`premium-card ${isSelected ? 'selected' : ''}`}
-                onClick={() => setSelectedDuration(card.duration)}
+                onClick={() => setSelectedPremiumPlanId(card.id)}
               >
                 <div className="premium-card-left">
                   <div className={`premium-radio ${isSelected ? 'checked' : ''}`}></div>
                   <div className="premium-card-info">
                     <div className="premium-card-title-row">
                       <span className="premium-card-title">{card.name}</span>
-                      {card.isPopular && <span className="premium-badge-popular">POPULAIRE</span>}
-                      <span className="premium-badge-discount">{card.discount}</span>
                     </div>
-                    <div className="premium-card-monthly">{card.monthlyEq}</div>
+                    <div className="premium-card-monthly">{card.duration} jours</div>
                   </div>
                 </div>
 
                 <div className="premium-card-right">
-                  <div className="premium-badge-boost">
-                    <Zap size={12} fill="currentColor" /> +{card.boosts} boost{card.boosts > 1 ? 's' : ''}
-                  </div>
                   <div className="premium-price-container">
-                    <div className="premium-price-old">{card.refPrice} FCFA</div>
+                    <div className="premium-price-old" style={{ display: 'none' }}></div>
                     <div className="premium-price-current">
-                      <span className="price-number">{card.dbPlan.price}</span>
-                      <span className="price-currency">FCFA</span>
+                      <span className="price-number">{card.price}</span>
+                      <span className="price-currency">{card.currency || 'FCFA'}</span>
                     </div>
                   </div>
                 </div>
@@ -408,7 +400,7 @@ export default function Pricing() {
           {/* Chercheurs */}
           <div className={`public-pricing-card ${publicTab !== 'SEEKER' ? 'mobile-hidden' : ''}`}>
             <h3 className="pricing-card-role text-blue">Chercheurs</h3>
-            <p className="pricing-card-target">Pour trouver votre futur chez-vous</p>
+            <p className="pricing-card-target">Tout ce qu'il faut pour trouver gratuitement</p>
             <div className="pricing-card-price">
               Gratuit<span className="pricing-card-period"> / à vie</span>
             </div>
@@ -431,7 +423,7 @@ export default function Pricing() {
           <div className={`public-pricing-card card-featured ${publicTab !== 'OWNER' ? 'mobile-hidden' : ''}`}>
             <div className="pricing-popular-pill">LE PLUS POPULAIRE</div>
             <h3 className="pricing-card-role text-gold">Propriétaires</h3>
-            <p className="pricing-card-target text-slate">Pour louer ou vendre rapidement</p>
+            <p className="pricing-card-target text-slate">Publiez gratuitement. Développez votre visibilité quand vous le souhaitez.</p>
             <div className="pricing-card-price text-white">
               Freemium<span className="pricing-card-period text-slate"> / dès 3 900 FCFA</span>
             </div>
@@ -454,9 +446,9 @@ export default function Pricing() {
           {/* Agences */}
           <div className={`public-pricing-card ${publicTab !== 'AGENCY' ? 'mobile-hidden' : ''}`}>
             <h3 className="pricing-card-role text-purple">Agences</h3>
-            <p className="pricing-card-target">Pour les professionnels de l&apos;immo</p>
+            <p className="pricing-card-target">Starter / Pro / Business</p>
             <div className="pricing-card-price">
-              Pro<span className="pricing-card-period"> / Sur-mesure</span>
+              Dès<span className="pricing-card-period"> 7 500 FCFA / mois</span>
             </div>
             <div className="pricing-features-heading">Inclus dans la version gratuite :</div>
             <ul className="pricing-features-list">

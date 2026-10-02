@@ -232,29 +232,37 @@ model PropertyImage {
 }
 
 model HousingRequest {
-  id              String           @id @default(uuid())
-  seekerId        String
-  title           String
-  description     String
-  transactionType TransactionType
-  propertyType    PropertyType
-  countryId       String
-  regionId        String
-  cityId          String
-  neighborhoodId  String?
-  minPrice        Float?
-  maxPrice        Float?
-  bedrooms        Int?
-  status          HousingReqStatus @default(DRAFT)
-  publishedAt     DateTime?
-  expiresAt       DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  city            City             @relation(fields: [cityId], references: [id])
-  country         Country          @relation(fields: [countryId], references: [id])
-  neighborhood    Neighborhood?    @relation(fields: [neighborhoodId], references: [id])
-  region          Region           @relation(fields: [regionId], references: [id])
-  seeker          User             @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  id                String           @id @default(uuid())
+  seekerId          String
+  title             String
+  description       String
+  transactionType   TransactionType
+  propertyType      PropertyType
+  countryId         String
+  regionId          String
+  cityId            String
+  neighborhoodId    String?
+  minPrice          Float?
+  maxPrice          Float?
+  bedrooms          Int?
+  surface           Float?
+  status            HousingReqStatus @default(DRAFT)
+  publishedAt       DateTime?
+  expiresAt         DateTime?
+  isPriority        Boolean          @default(false)
+  priorityEndDate   DateTime?
+  priorityPaymentId String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  city              City             @relation(fields: [cityId], references: [id])
+  country           Country          @relation(fields: [countryId], references: [id])
+  neighborhood      Neighborhood?    @relation(fields: [neighborhoodId], references: [id])
+  region            Region           @relation(fields: [regionId], references: [id])
+  seeker            User             @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  @@index([isPriority])
+  @@index([cityId])
+  @@index([status])
 }
 
 model Favorite {
@@ -316,15 +324,20 @@ model Visit {
 
 model SubscriptionPlan {
   id            String         @id @default(uuid())
+  code          String         @unique
   name          String
   targetRole    Role
   duration      Int
   price         Float
-  currency      String
+  currency      String         @default("FCFA")
   features      String?
+  limits        String?
   popular       Boolean        @default(false)
   active        Boolean        @default(true)
   subscriptions Subscription[]
+
+  @@index([targetRole])
+  @@index([active])
 }
 
 model Subscription {
@@ -344,13 +357,15 @@ model Subscription {
 }
 
 model BoostPlan {
-  id       String  @id @default(uuid())
-  name     String
-  duration Int
-  price    Float
-  currency String
-  active   Boolean @default(true)
-  boosts   Boost[]
+  id             String  @id @default(uuid())
+  code           String  @unique
+  name           String
+  duration       Int
+  price          Float
+  currency       String  @default("FCFA")
+  visibilityDays Int     @default(0)
+  active         Boolean @default(true)
+  boosts         Boost[]
 }
 
 model Boost {
@@ -552,6 +567,7 @@ enum SubscriptionStatus {
 }
 
 enum BoostStatus {
+  PENDING
   ACTIVE
   EXPIRED
   CANCELLED
@@ -561,6 +577,7 @@ enum PaymentType {
   LISTING
   SUBSCRIPTION
   BOOST
+  PRIORITY_REQUEST
 }
 
 enum PaymentStatus {
@@ -585,8 +602,12 @@ enum NotificationType {
   PROPERTY_EXPIRING
   PROPERTY_EXPIRED
   BOOST_ACTIVATED
+  BOOST_EXPIRING
   BOOST_ENDED
+  SUBSCRIPTION_ACTIVATED
   SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_EXPIRED
+  HOUSING_REQUEST_PRIORITY
   NEW_MESSAGE
   NEW_VISIT_REQUEST
 }
