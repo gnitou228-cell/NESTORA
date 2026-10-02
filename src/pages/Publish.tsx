@@ -43,7 +43,6 @@ const SeekerPublishForm = () => {
       .then(res => res.json())
       .then(data => {
         setCountries(data);
-        if (data.length > 0) setFormData(prev => ({ ...prev, countryId: data[0].id }));
       })
       .catch(console.error);
   }, []);
@@ -54,33 +53,37 @@ const SeekerPublishForm = () => {
         .then(res => res.json())
         .then(data => {
           setRegions(data);
-          if (data.length > 0) setFormData(prev => ({ ...prev, regionId: data[0].id }));
-          else setFormData(prev => ({ ...prev, regionId: '' }));
         });
     }
   }, [formData.countryId]);
 
   useEffect(() => {
     if (formData.regionId) {
+      setCities([]);
+      setNeighborhoods([]);
+      setFormData(prev => ({ ...prev, cityId: '', neighborhoodId: '' }));
       fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/cities?regionId=${formData.regionId}`)
         .then(res => res.json())
         .then(data => {
           setCities(data);
-          if (data.length > 0) setFormData(prev => ({ ...prev, cityId: data[0].id }));
-          else setFormData(prev => ({ ...prev, cityId: '' }));
         });
+    } else {
+      setCities([]);
+      setNeighborhoods([]);
     }
   }, [formData.regionId]);
 
   useEffect(() => {
     if (formData.cityId) {
+      setNeighborhoods([]);
+      setFormData(prev => ({ ...prev, neighborhoodId: '' }));
       fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/locations/neighborhoods?cityId=${formData.cityId}`)
         .then(res => res.json())
         .then(data => {
           setNeighborhoods(data);
-          if (data.length > 0) setFormData(prev => ({ ...prev, neighborhoodId: data[0].id }));
-          else setFormData(prev => ({ ...prev, neighborhoodId: '' }));
         });
+    } else {
+      setNeighborhoods([]);
     }
   }, [formData.cityId]);
 
@@ -280,6 +283,7 @@ const SeekerPublishForm = () => {
                   onFocus={e => { e.target.style.borderColor = '#C9A227'; e.target.style.boxShadow = '0 0 0 3px rgba(201,162,39,0.12)'; }}
                   onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
                 >
+                  <option value="">— Choisir un pays —</option>
                   {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
                 <svg style={chevronStyle} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
