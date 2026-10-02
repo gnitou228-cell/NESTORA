@@ -313,7 +313,7 @@ export default function Pricing() {
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>
               Gratuit<span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 400 }}> / a vie</span>
             </div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Inclus dans la version gratuite :</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px', whiteSpace: 'nowrap' }}>Inclus dans la version gratuite :</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 2rem auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left', width: 'fit-content' }}>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Recherche de biens illimitee</span></li>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Creation d&apos;alertes personnalisees</span></li>
@@ -336,7 +336,7 @@ export default function Pricing() {
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '2rem' }}>
               Freemium<span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 400 }}> / Premium</span>
             </div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#C9A227', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Inclus dans la version gratuite :</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#C9A227', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px', whiteSpace: 'nowrap' }}>Inclus dans la version gratuite :</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 2rem auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left', width: 'fit-content', color: 'white' }}>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Profil proprietaire verifie</span></li>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#C9A227" style={{ flexShrink: 0 }} /> <span style={{ color: '#f8fafc' }}>Publication d&apos;annonces basiques</span></li>
@@ -359,7 +359,7 @@ export default function Pricing() {
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>
               Pro<span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 400 }}> / Sur-mesure</span>
             </div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Inclus dans la version gratuite :</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px', whiteSpace: 'nowrap' }}>Inclus dans la version gratuite :</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 2rem auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left', width: 'fit-content' }}>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Profil Agence Vitrine Certifie</span></li>
               <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><Check size={20} color="#10b981" style={{ flexShrink: 0 }} /> <span style={{ color: '#334155' }}>Gestion de multiples agents</span></li>
