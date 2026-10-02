@@ -102,27 +102,28 @@ export default function DemandesChercheursPage() {
                 "{req.description}"
               </p>
 
-              <div className="row mb-4">
-                <div className="col-md-4">
-                  <div className="d-flex align-items-center gap-2" style={{ color: '#475569', fontSize: '0.9rem' }}>
-                    <MapPin size={16} color="#64748b" /> <strong>Zone :</strong> {req.location}
+              <div className="row g-2 mb-3">
+                <div className="col-12 col-sm-4">
+                  <div className="d-flex align-items-center gap-2" style={{ color: '#475569', fontSize: '0.88rem' }}>
+                    <MapPin size={16} color="#64748b" /> <span><strong>Zone :</strong> {req.location}</span>
                   </div>
                 </div>
-                <div className="col-md-4">
-                  <div className="d-flex align-items-center gap-2" style={{ color: '#475569', fontSize: '0.9rem' }}>
-                    <DollarSign size={16} color="#64748b" /> <strong>Budget :</strong> {req.budget}
+                <div className="col-12 col-sm-4">
+                  <div className="d-flex align-items-center gap-2" style={{ color: '#475569', fontSize: '0.88rem' }}>
+                    <DollarSign size={16} color="#64748b" /> <span><strong>Budget :</strong> {req.budget}</span>
                   </div>
                 </div>
-                <div className="col-md-4">
-                  <div className="d-flex align-items-center gap-2" style={{ color: '#475569', fontSize: '0.9rem' }}>
-                    <BedDouble size={16} color="#64748b" /> <strong>Chambres :</strong> {req.bedrooms}
+                <div className="col-12 col-sm-4">
+                  <div className="d-flex align-items-center gap-2" style={{ color: '#475569', fontSize: '0.88rem' }}>
+                    <BedDouble size={16} color="#64748b" /> <span><strong>Chambres :</strong> {req.bedrooms}</span>
                   </div>
                 </div>
               </div>
 
               <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
                 <button 
-                  className={`btn d-flex align-items-center gap-2 ${isPremium ? 'btn-success' : 'btn-primary'}`}
+                  className={`btn d-flex align-items-center justify-content-center gap-2 ${isPremium ? 'btn-success' : 'btn-primary'}`}
+                  style={{ minHeight: '44px', padding: '0.65rem 1.25rem', width: '100%', maxWidth: '340px', fontSize: '0.9rem', fontWeight: 600 }}
                   onClick={() => setSelectedLead(req)}
                 >
                   {isPremium ? <Unlock size={16} /> : <Lock size={16} />} 

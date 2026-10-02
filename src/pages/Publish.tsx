@@ -1045,9 +1045,9 @@ export default function Publish() {
 
       </div>
 
-      <div className="publish-footer mt-4" style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0' }}>
+      <div className="publish-footer mt-4" style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0', gap: '0.75rem' }}>
         {step > 1 ? (
-          <button className="btn btn-outline" onClick={handlePrev} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-outline" onClick={handlePrev} disabled={loading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', minHeight: '46px', padding: '0.6rem 1.25rem', fontWeight: 600 }}>
             <ArrowLeft size={18} /> Précédent
           </button>
         ) : (
@@ -1055,12 +1055,12 @@ export default function Publish() {
         )}
 
         {step < 5 ? (
-          <button className="btn btn-primary" onClick={handleNext} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-primary" onClick={handleNext} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', minHeight: '46px', padding: '0.6rem 1.5rem', fontWeight: 600 }}>
             Suivant <ArrowRight size={18} />
           </button>
         ) : (
-          <button className="btn btn-primary btn-lg" onClick={handleSubmit} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {loading ? <><Loader size={18} className="spin" /> Publication en cours...</> : <><CheckCircle size={18} /> Publier maintenant</>}
+          <button className="btn btn-primary btn-lg" onClick={handleSubmit} disabled={loading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', minHeight: '46px', padding: '0.6rem 1.5rem', fontWeight: 600 }}>
+            {loading ? <><Loader size={18} className="spin" /> Publication...</> : <><CheckCircle size={18} /> Publier maintenant</>}
           </button>
         )}
       </div>
@@ -1111,8 +1111,39 @@ export default function Publish() {
           margin-bottom: 1.5rem;
         }
         @media (max-width: 768px) {
-          .progress-label { display: none; }
-          .progress-line { margin-bottom: 0; }
+          .publish-page {
+            padding: 0 0.5rem !important;
+            margin: 1rem auto !important;
+          }
+          .publish-progress {
+            padding: 0.75rem 0.5rem !important;
+            margin-bottom: 1.25rem !important;
+            border-radius: 10px;
+          }
+          .step-circle {
+            width: 26px !important;
+            height: 26px !important;
+            font-size: 0.78rem !important;
+          }
+          .step-label {
+            display: none !important;
+          }
+          .progress-line {
+            margin: 0 0.25rem !important;
+            margin-bottom: 0 !important;
+          }
+          .publish-content {
+            padding: 1rem 0.875rem !important;
+            border-radius: 12px !important;
+          }
+          .radio-card {
+            padding: 0.75rem !important;
+            font-size: 0.88rem !important;
+          }
+          .radio-group-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+          }
         }
         
         .radio-card {

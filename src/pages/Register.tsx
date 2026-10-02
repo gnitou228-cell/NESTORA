@@ -298,7 +298,7 @@ export default function Register() {
               </div>
             )}
 
-            <div className="d-flex" style={{ gap: '1rem' }}>
+            <div className="d-flex form-row-responsive" style={{ gap: '1rem' }}>
               <div className="form-group mb-3" style={{ flex: 1 }}>
                 <label>Prénom *</label>
                 <input type="text" name="firstName" className="form-control" required onChange={handleChange} value={formData.firstName} />
@@ -309,7 +309,7 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="d-flex" style={{ gap: '1rem' }}>
+            <div className="d-flex form-row-responsive" style={{ gap: '1rem' }}>
               <div className="form-group mb-3" style={{ flex: 1 }}>
                 <label>Email *</label>
                 <input type="email" name="email" className="form-control" required onChange={handleChange} value={formData.email} />
@@ -317,14 +317,14 @@ export default function Register() {
               <div className="form-group mb-3" style={{ flex: 1 }}>
                 <label>Téléphone *</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <select name="phoneCode" className="form-control" style={{ width: '120px', padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.phoneCode}>
+                  <select name="phoneCode" className="form-control" style={{ width: '110px', minWidth: '95px', flexShrink: 0, padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.phoneCode}>
                     {countries.length > 0 ? countries.map(c => (
                       <option key={`phone-${c.id}`} value={c.phoneCode}>{c.name} ({c.phoneCode})</option>
                     )) : (
                       <option value="+228">🇹🇬 +228</option>
                     )}
                   </select>
-                  <input type="tel" name="phone" className="form-control" required onChange={handleChange} value={formData.phone} placeholder="Ex: 90000000" />
+                  <input type="tel" name="phone" className="form-control" required onChange={handleChange} value={formData.phone} placeholder="Ex: 90000000" style={{ flex: 1, minWidth: 0 }} />
                 </div>
               </div>
             </div>
@@ -333,19 +333,19 @@ export default function Register() {
               <div className="form-group mb-3">
                 <label>WhatsApp (Optionnel)</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <select name="whatsappCode" className="form-control" style={{ width: '120px', padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.whatsappCode}>
+                  <select name="whatsappCode" className="form-control" style={{ width: '110px', minWidth: '95px', flexShrink: 0, padding: '0.75rem 0.25rem' }} onChange={handleChange} value={formData.whatsappCode}>
                     {countries.length > 0 ? countries.map(c => (
                       <option key={`wa-${c.id}`} value={c.phoneCode}>{c.name} ({c.phoneCode})</option>
                     )) : (
                       <option value="+228">🇹🇬 +228</option>
                     )}
                   </select>
-                  <input type="tel" name="whatsapp" className="form-control" onChange={handleChange} value={formData.whatsapp} placeholder="Ex: 90000000" />
+                  <input type="tel" name="whatsapp" className="form-control" onChange={handleChange} value={formData.whatsapp} placeholder="Ex: 90000000" style={{ flex: 1, minWidth: 0 }} />
                 </div>
               </div>
             )}
 
-            <div className="d-flex" style={{ gap: '1rem' }}>
+            <div className="d-flex form-row-responsive" style={{ gap: '1rem' }}>
               <div className="form-group mb-3" style={{ flex: 1 }}>
                 <label>Mot de passe *</label>
                 <input type="password" name="password" className="form-control" required onChange={handleChange} value={formData.password} minLength={6} />
@@ -413,6 +413,12 @@ export default function Register() {
         .form-control:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(11, 31, 58, 0.1); }
         .form-group label { font-weight: 500; font-size: 0.9rem; color: var(--color-text-dark); }
         .d-flex { display: flex; }
+        @media (max-width: 640px) {
+          .form-row-responsive {
+            flex-direction: column !important;
+            gap: 0 !important;
+          }
+        }
       `}</style>
     </div>
   );

@@ -14,19 +14,20 @@ export default function AgentsPage() {
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--color-text-dark)', margin: 0 }}>Gestion des Agents</h1>
-          <p className="text-light mt-1">Gérez les membres de votre agence et suivez leurs performances.</p>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--color-text-dark)', margin: 0 }}>Gestion des Agents</h1>
+          <p className="text-light mt-1" style={{ margin: 0 }}>Gérez les membres de votre agence et suivez leurs performances.</p>
         </div>
-        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={() => setShowInviteModal(true)}>
+        <button className="btn btn-primary d-flex align-items-center justify-content-center gap-2" style={{ minHeight: '44px', padding: '0.6rem 1.25rem' }} onClick={() => setShowInviteModal(true)}>
           <UserPlus size={18} />
           Inviter un agent
         </button>
       </div>
 
       <div className="card p-0">
-        <div className="table-responsive">
+        {/* Desktop View: Full Table */}
+        <div className="desktop-only table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: '#f8fafc', textAlign: 'left' }}>
@@ -87,6 +88,79 @@ export default function AgentsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: High-Touch Cards */}
+        <div className="mobile-only" style={{ padding: '0.875rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+            {agents.map((agent) => (
+              <div 
+                key={agent.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#0B1F3A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C9A227', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                      {agent.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>{agent.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{agent.role}</div>
+                    </div>
+                  </div>
+                  {agent.status === 'Actif' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#d1fae5', color: '#059669', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                      <CheckCircle2 size={12} /> Actif
+                    </span>
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#fef3c7', color: '#d97706', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                      <Clock size={12} /> En attente
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem' }}>
+                  <a href={`mailto:${agent.email}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', textDecoration: 'none' }}>
+                    <Mail size={14} color="#64748b" /> {agent.email}
+                  </a>
+                  <a href={`tel:${agent.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', textDecoration: 'none' }}>
+                    <Phone size={14} color="#64748b" /> {agent.phone}
+                  </a>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0', paddingTop: '0.4rem', marginTop: '0.2rem', color: '#64748b', fontSize: '0.8rem' }}>
+                    <span>Biens gérés: <strong style={{ color: '#0f172a' }}>{agent.properties}</strong></span>
+                    <span>Depuis: {new Date(agent.joinedAt).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ flex: 1, minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: '#3b82f6', borderColor: '#bfdbfe', fontSize: '0.88rem' }}
+                    onClick={() => alert(`Modifier l'agent ${agent.name}`)}
+                  >
+                    <Edit2 size={16} /> Modifier
+                  </button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ minHeight: '44px', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: '#ef4444', borderColor: '#fecaca', fontSize: '0.88rem' }}
+                    onClick={() => {
+                      if (window.confirm(`Supprimer l'agent ${agent.name} ?`)) {
+                        alert('Agent supprimé.');
+                      }
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

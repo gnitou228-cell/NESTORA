@@ -55,42 +55,43 @@ const FavoritesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-nestora-ivory">
-        <Loader className="w-12 h-12 text-nestora-gold animate-spin" />
+      <div className="py-12 flex items-center justify-center">
+        <Loader className="w-10 h-10 text-nestora-gold animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-nestora-ivory">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-8">
+    <div className="favorites-page" style={{ padding: '1rem 0 3rem 0' }}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-end mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-nestora-navy mb-2">Mes favoris</h1>
-            <p className="text-gray-600">
+            <h1 className="page-title mb-1">Mes favoris</h1>
+            <p className="text-gray-600" style={{ fontSize: '0.9rem' }}>
               {properties.length} {properties.length > 1 ? 'biens enregistrés' : 'bien enregistré'}
             </p>
           </div>
         </div>
 
         {properties.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+          <div className="bg-white rounded-xl shadow-sm p-8 sm:p-12 text-center" style={{ border: '1px solid #e2e8f0' }}>
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Heart className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-semibold text-nestora-navy mb-2">Vous n'avez encore aucun favori</h2>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            <p className="text-gray-600 mb-6 max-w-md mx-auto" style={{ fontSize: '0.95rem' }}>
               Enregistrez les biens qui vous intéressent pour les retrouver facilement et organiser vos visites.
             </p>
             <Link 
               to="/recherche" 
-              className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-white bg-nestora-navy hover:bg-nestora-navy/90 transition-colors"
+              className="btn btn-primary inline-flex items-center justify-center px-6"
+              style={{ minHeight: '46px' }}
             >
               Explorer les annonces
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {properties.map((property) => (
               <div key={property.id} className="relative">
                 <PropertyCard property={property} />
@@ -100,7 +101,8 @@ const FavoritesPage = () => {
                     e.stopPropagation();
                     handleRemove(property.id);
                   }}
-                  className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md text-red-500 hover:scale-110 transition-transform"
+                  className="absolute top-3 right-3 z-10 bg-white rounded-full shadow-md text-red-500 hover:scale-110 transition-transform"
+                  style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   aria-label="Retirer des favoris"
                 >
                   <Heart className="w-5 h-5 fill-current" />

@@ -316,11 +316,11 @@ export default function SearchPage() {
       <div className="search-page-container" style={{ position: 'relative' }}>
         {/* BOUTON MOBILE FILTRES & VUES */}
         <div className="search-mobile-btn" style={{ width: '100%', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-          <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={() => setShowMobileFilters(true)}>
+          <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', minHeight: '44px', fontWeight: 600, fontSize: '0.9rem' }} onClick={() => setShowMobileFilters(true)}>
             <Filter size={18} />
             Filtres ({activeFiltersCount})
           </button>
-          <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}>
+          <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', minHeight: '44px', fontWeight: 600, fontSize: '0.9rem' }} onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}>
             {viewMode === 'list' ? <><MapIcon size={18} /> Carte</> : <><ListIcon size={18} /> Liste</>}
           </button>
         </div>
@@ -463,7 +463,7 @@ export default function SearchPage() {
           </div>
 
           {showMobileFilters && (
-            <button className="btn btn-primary btn-block" style={{ marginTop: '1rem' }} onClick={() => setShowMobileFilters(false)}>
+            <button className="btn btn-primary btn-block" style={{ marginTop: '1.25rem', minHeight: '48px', fontSize: '1rem', fontWeight: 600 }} onClick={() => setShowMobileFilters(false)}>
               Appliquer les filtres
             </button>
           )}
@@ -471,23 +471,23 @@ export default function SearchPage() {
 
         {/* RESULTATS */}
         <div className={`search-results-area ${viewMode === 'map' ? 'mobile-hide' : ''}`} style={{ flex: viewMode === 'list' ? '1 1 50%' : '1 1 100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0 }}>
               {total > 0 ? `${total} annonce${total > 1 ? 's' : ''} trouvée${total > 1 ? 's' : ''}` : 'Recherche'}
             </h1>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', width: '100%', justifyContent: 'space-between' }}>
               <button 
                 onClick={handleLocateMe}
                 className="btn btn-outline"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minHeight: '44px', padding: '0.5rem 0.875rem', fontSize: '0.85rem' }}
               >
-                <Navigation size={18} /> Me localiser
+                <Navigation size={16} /> Me localiser
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }} className="desktop-only">Trier par :</span>
-                <select name="sort" value={filters.sort} onChange={handleChange} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--color-border)', outline: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }} className="desktop-only">Trier:</span>
+                <select name="sort" value={filters.sort} onChange={handleChange} style={{ height: '44px', minHeight: '44px', padding: '0 0.5rem', borderRadius: '8px', border: '1px solid var(--color-border)', outline: 'none', fontSize: '0.85rem' }}>
                   <option value="newest">Plus récent</option>
                   <option value="price_asc">Prix croissant</option>
                   <option value="price_desc">Prix décroissant</option>

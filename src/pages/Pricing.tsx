@@ -65,30 +65,28 @@ export default function Pricing() {
 
   const renderPremiumHero = () => {
     return (
-      <div style={{ padding: '0 1rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-secondary)' }}>
+      <div style={{ padding: '0 0.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2.4rem)', fontWeight: 800, color: 'var(--color-secondary)', lineHeight: 1.25 }}>
             <i style={{ fontFamily: 'Georgia, serif', color: '#1e293b' }}>{firstName},</i><br/>
             ton futur {userRole === 'AGENCY' ? 'client' : 'locataire/acheteur'} t&apos;attend. <span style={{ color: '#d97706' }}>Ne le rate pas.</span>
           </h1>
-          <p style={{ fontSize: '1.1rem', color: 'var(--color-text-light)', maxWidth: '800px', margin: '1.5rem auto', lineHeight: '1.6' }}>
-            Sans Premium, ton annonce reste noyee. <strong>Avec Premium, tu apparais en premier, tu vois qui s&apos;interesse a toi, et tu reponds sans limite.</strong>
+          <p style={{ fontSize: 'clamp(0.95rem, 3.5vw, 1.1rem)', color: 'var(--color-text-light)', maxWidth: '800px', margin: '1rem auto 1.5rem auto', lineHeight: '1.5' }}>
+            Sans Premium, ton annonce reste noyée. <strong>Avec Premium, tu apparais en premier, tu vois qui s&apos;intéresse à toi, et tu réponds sans limite.</strong>
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', background: '#fef3c7', padding: '1.5rem', borderRadius: '16px', maxWidth: '800px', margin: '0 auto', border: '1px solid #fde68a' }}>
-            <div style={{ textAlign: 'center', flex: 1, minWidth: '150px' }}>
-              <h3 style={{ fontSize: '2.2rem', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>3x</h3>
-              <p style={{ fontSize: '0.95rem', color: '#92400e', margin: 0, fontWeight: 600 }}>plus de contacts</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', background: '#fef3c7', padding: '1.25rem 1rem', borderRadius: '16px', maxWidth: '800px', margin: '0 auto', border: '1px solid #fde68a' }}>
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{ fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>3x</h3>
+              <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0, fontWeight: 600 }}>plus de contacts</p>
             </div>
-            <div style={{ width: '1px', background: '#fde68a' }}></div>
-            <div style={{ textAlign: 'center', flex: 1, minWidth: '150px' }}>
-              <h3 style={{ fontSize: '2.2rem', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>10 000+</h3>
-              <p style={{ fontSize: '0.95rem', color: '#92400e', margin: 0, fontWeight: 600 }}>chercheurs actifs</p>
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{ fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>10 000+</h3>
+              <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0, fontWeight: 600 }}>chercheurs actifs</p>
             </div>
-            <div style={{ width: '1px', background: '#fde68a' }}></div>
-            <div style={{ textAlign: 'center', flex: 1, minWidth: '150px' }}>
-              <h3 style={{ fontSize: '2.2rem', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>100%</h3>
-              <p style={{ fontSize: '0.95rem', color: '#92400e', margin: 0, fontWeight: 600 }}>visibilite garantie</p>
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{ fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', color: '#d97706', fontWeight: 800, margin: 0, fontFamily: 'Georgia, serif' }}>100%</h3>
+              <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0, fontWeight: 600 }}>visibilité garantie</p>
             </div>
           </div>
         </div>
@@ -418,6 +416,169 @@ export default function Pricing() {
           {renderPremiumUI(PREMIUM_UI_DATA, plans.agency)}
         </div>
       )}
+
+      <style>{`
+        .premium-subscription-container {
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 0 1rem;
+        }
+        .premium-cards-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+        .premium-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #ffffff;
+          border: 2px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 1.25rem 1.5rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          gap: 1rem;
+        }
+        .premium-card.selected {
+          border-color: #C9A227;
+          background: #fffdf5;
+          box-shadow: 0 4px 16px rgba(201, 162, 39, 0.15);
+        }
+        .premium-card-left {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex: 1;
+        }
+        .premium-radio {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          border: 2px solid #cbd5e1;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+        .premium-radio.checked {
+          border-color: #C9A227;
+          background: #C9A227;
+          box-shadow: inset 0 0 0 4px #ffffff;
+        }
+        .premium-card-title-row {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+        .premium-card-title {
+          font-weight: 700;
+          font-size: 1.05rem;
+          color: #0B1F3A;
+        }
+        .premium-badge-popular {
+          background: #fef3c7;
+          color: #b45309;
+          font-size: 0.72rem;
+          font-weight: 700;
+          padding: 0.15rem 0.5rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+        }
+        .premium-badge-discount {
+          background: #dcfce7;
+          color: #15803d;
+          font-size: 0.72rem;
+          font-weight: 700;
+          padding: 0.15rem 0.5rem;
+          border-radius: 4px;
+        }
+        .premium-card-monthly {
+          font-size: 0.85rem;
+          color: #64748b;
+          margin-top: 0.25rem;
+        }
+        .premium-card-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.35rem;
+          flex-shrink: 0;
+        }
+        .premium-badge-boost {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          background: #f1f5f9;
+          color: #475569;
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 0.2rem 0.6rem;
+          border-radius: 999px;
+        }
+        .premium-price-old {
+          font-size: 0.82rem;
+          color: #94a3b8;
+          text-decoration: line-through;
+        }
+        .premium-price-current .price-number {
+          font-size: 1.4rem;
+          font-weight: 800;
+          color: #0B1F3A;
+        }
+        .premium-price-current .price-currency {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: #C9A227;
+          margin-left: 0.25rem;
+        }
+        .premium-action-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+          margin-top: 2rem;
+        }
+        .btn-premium-checkout {
+          width: 100%;
+          min-height: 48px;
+          border-radius: 12px;
+          font-size: 1.05rem;
+          font-weight: 700;
+        }
+        .premium-secure-text {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.85rem;
+          color: #64748b;
+        }
+        .premium-disclaimer {
+          font-size: 0.8rem;
+          color: #94a3b8;
+          text-align: center;
+          margin: 0;
+        }
+        @media (max-width: 640px) {
+          .premium-card {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1rem;
+            gap: 0.75rem;
+          }
+          .premium-card-right {
+            width: 100%;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 0.6rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }

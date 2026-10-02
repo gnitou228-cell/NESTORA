@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Edit, Trash2, Globe, Rocket } from 'lucide-react';
+import { Search, Edit, Trash2, Globe, Rocket, MoreVertical, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 import BoostModal from '../components/BoostModal';
@@ -12,6 +12,7 @@ export default function MyListings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
 
   // Boost Modal state
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
@@ -77,13 +78,13 @@ export default function MyListings() {
   if (role === 'SEEKER') {
     return (
       <div className="mylistings-page">
-        <div className="d-flex justify-between mb-4" style={{ alignItems: 'center' }}>
+        <div className="d-flex justify-between flex-wrap gap-3 mb-4" style={{ alignItems: 'center' }}>
           <div>
-            <h1 className="page-title">Mes demandes</h1>
-            <p className="page-subtitle text-light">Gérez vos demandes de logement publiées.</p>
+            <h1 className="page-title" style={{ margin: 0 }}>Mes demandes</h1>
+            <p className="page-subtitle text-light" style={{ margin: '0.25rem 0 0 0' }}>Gérez vos demandes de logement publiées.</p>
           </div>
-          <Link to="/publier" className="btn btn-primary">
-            Publier une demande
+          <Link to="/publier" className="btn btn-primary" style={{ minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.6rem 1.2rem', fontWeight: 600 }}>
+            <Plus size={18} /> Publier une demande
           </Link>
         </div>
 
@@ -136,18 +137,22 @@ export default function MyListings() {
                     <div><strong>Zone:</strong> {req.location}</div>
                     <div><strong>Budget:</strong> {req.budget}</div>
                   </div>
-                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <button 
-                      className="btn btn-primary d-flex align-items-center" 
-                      style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                      className="btn btn-primary d-flex align-items-center justify-content-center" 
+                      style={{ gap: '0.4rem', padding: '0.6rem 1.2rem', minHeight: '44px', fontSize: '0.88rem', fontWeight: 600, flex: '1 1 auto' }}
                       onClick={() => {
                         setSelectedPropertyToBoost(req.id);
                         setIsBoostModalOpen(true);
                       }}
                     >
-                      <Rocket size={14} /> Booster
+                      <Rocket size={16} /> Booster
                     </button>
-                    <button onClick={() => handleDelete(req.id)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', borderColor: '#ef4444' }}>
+                    <button 
+                      onClick={() => handleDelete(req.id)} 
+                      className="btn btn-outline d-flex align-items-center justify-content-center" 
+                      style={{ gap: '0.5rem', minHeight: '44px', padding: '0.6rem 1rem', color: '#ef4444', borderColor: '#ef4444' }}
+                    >
                       <Trash2 size={16} /> Supprimer
                     </button>
                   </div>
@@ -162,13 +167,13 @@ export default function MyListings() {
 
   return (
     <div className="mylistings-page">
-      <div className="d-flex justify-between mb-4" style={{ alignItems: 'center' }}>
+      <div className="d-flex justify-between flex-wrap gap-3 mb-4" style={{ alignItems: 'center' }}>
         <div>
-          <h1 className="page-title">Mes annonces</h1>
-          <p className="page-subtitle text-light">Gérez vos publications et analysez leurs performances.</p>
+          <h1 className="page-title" style={{ margin: 0 }}>Mes annonces</h1>
+          <p className="page-subtitle text-light" style={{ margin: '0.25rem 0 0 0' }}>Gérez vos publications et analysez leurs performances.</p>
         </div>
-        <Link to="/publier" className="btn btn-primary">
-          Publier une annonce
+        <Link to="/publier" className="btn btn-primary" style={{ minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.6rem 1.2rem', fontWeight: 600 }}>
+          <Plus size={18} /> Publier une annonce
         </Link>
       </div>
 
@@ -195,75 +200,274 @@ export default function MyListings() {
             <Link to="/publier" className="btn btn-outline mt-2">Commencer à publier</Link>
           </div>
         ) : (
-          <div className="table-responsive">
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left', backgroundColor: '#f8fafc' }}>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Annonce</th>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Statut</th>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Prix</th>
-                  <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {properties.map(property => (
-                  <tr key={property.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                    <td style={{ padding: '1rem' }}>
-                      <div className="d-flex" style={{ gap: '1rem', alignItems: 'center' }}>
-                        <img 
-                          src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
-                          alt={property.title} 
-                          style={{ width: '80px', height: '60px', borderRadius: '4px', objectFit: 'cover', backgroundColor: '#eee' }} 
-                        />
-                        <div>
-                          <div style={{ fontWeight: 600, maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {property.title}
-                          </div>
-                          <div className="text-light" style={{ fontSize: '0.85rem' }}>
-                            {property.city?.name} • {property.propertyType}
-                          </div>
+          <>
+            {/* Desktop View: Table */}
+            <div className="desktop-only table-responsive">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left', backgroundColor: '#f8fafc' }}>
+                <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Annonce</th>
+                <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Statut</th>
+                <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Prix</th>
+                <th style={{ padding: '1rem', color: 'var(--color-text-light)', fontWeight: 500 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {properties.map(property => (
+                <tr key={property.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                  <td style={{ padding: '1rem' }}>
+                    <div className="d-flex" style={{ gap: '1rem', alignItems: 'center' }}>
+                      <img 
+                        src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
+                        alt={property.title} 
+                        style={{ width: '80px', height: '60px', borderRadius: '4px', objectFit: 'cover', backgroundColor: '#eee' }} 
+                      />
+                      <div>
+                        <div style={{ fontWeight: 600, maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {property.title}
+                        </div>
+                        <div className="text-light" style={{ fontSize: '0.85rem' }}>
+                          {property.city?.name} • {property.propertyType}
                         </div>
                       </div>
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <div className={`mini-badge ${property.status === 'PUBLISHED' ? 'badge-success' : 'badge-warning'}`}>
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div className={`mini-badge ${property.status === 'PUBLISHED' ? 'badge-success' : 'badge-warning'}`}>
+                      {property.status === 'PUBLISHED' ? 'En ligne' : property.status}
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem', fontWeight: 600 }}>
+                    {property.price} {property.currency}
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                      <Link to={`/annonces/${property.id}`} className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title="Voir l'annonce">
+                        <Globe size={16} />
+                      </Link>
+                      <button 
+                        className="btn btn-primary d-flex align-items-center" 
+                        style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                        onClick={() => {
+                          setSelectedPropertyToBoost(property.id);
+                          setIsBoostModalOpen(true);
+                        }}
+                      >
+                        <Rocket size={14} />
+                        Booster
+                      </button>
+                      <button onClick={() => alert("La modification d'annonce sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
+                        <Edit size={16} />
+                      </button>
+                      <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#ef4444', borderColor: '#fee2e2' }} title="Supprimer" onClick={() => handleDelete(property.id)}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile View: High-End Touch Cards */}
+        <div className="mobile-only" style={{ padding: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+            {properties.map(property => (
+              <div 
+                key={property.id} 
+                style={{ 
+                  backgroundColor: '#ffffff', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: '14px', 
+                  padding: '1rem',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  position: 'relative'
+                }}
+              >
+                <div style={{ display: 'flex', gap: '0.875rem', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                  <img 
+                    src={property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'} 
+                    alt={property.title} 
+                    style={{ width: '84px', height: '72px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }} 
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <span className={`mini-badge ${property.status === 'PUBLISHED' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.72rem' }}>
                         {property.status === 'PUBLISHED' ? 'En ligne' : property.status}
-                      </div>
-                    </td>
-                    <td style={{ padding: '1rem', fontWeight: 600 }}>
-                      {property.price} {property.currency}
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <div className="d-flex" style={{ gap: '0.5rem' }}>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#0ea5e9', borderColor: '#e0f2fe' }} title="Voir l'annonce">
-                          <Globe size={16} />
-                        </button>
-                        <button 
-                          className="btn btn-primary d-flex align-items-center" 
-                          style={{ gap: '0.2rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                      </span>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                        {property.propertyType}
+                      </span>
+                    </div>
+                    <h3 style={{ 
+                      fontSize: '0.95rem', 
+                      fontWeight: 600, 
+                      color: 'var(--color-navy, #0B1F3A)', 
+                      margin: '0 0 0.25rem 0',
+                      lineHeight: 1.3,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {property.title}
+                    </h3>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.35rem' }}>
+                      📍 {property.city?.name || 'Localisation'}
+                    </div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-primary, #0B1F3A)' }}>
+                      {Number(property.price).toLocaleString()} <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--color-gold, #C9A227)' }}>{property.currency}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile Action Controls */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  paddingTop: '0.75rem', 
+                  borderTop: '1px solid #f1f5f9',
+                  gap: '0.5rem',
+                  position: 'relative'
+                }}>
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ 
+                      flex: 1, 
+                      height: '44px', 
+                      minHeight: '44px',
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '0.4rem', 
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      borderRadius: '8px'
+                    }}
+                    onClick={() => {
+                      setSelectedPropertyToBoost(property.id);
+                      setIsBoostModalOpen(true);
+                    }}
+                  >
+                    <Rocket size={16} /> Booster l'annonce
+                  </button>
+
+                  {/* 3-dots Context Menu Button (44x44px target) */}
+                  <div style={{ position: 'relative' }}>
+                    <button 
+                      type="button"
+                      className="btn btn-outline action-menu-trigger"
+                      style={{ 
+                        width: '44px', 
+                        height: '44px', 
+                        minHeight: '44px', 
+                        padding: 0, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        borderColor: '#cbd5e1',
+                        borderRadius: '8px',
+                        color: '#475569'
+                      }}
+                      onClick={() => setActiveActionMenu(activeActionMenu === property.id ? null : property.id)}
+                      aria-label="Actions de l'annonce"
+                    >
+                      <MoreVertical size={20} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {activeActionMenu === property.id && (
+                      <div 
+                        className="action-menu-dropdown"
+                        style={{
+                          position: 'absolute',
+                          right: 0,
+                          bottom: '50px',
+                          zIndex: 50,
+                          backgroundColor: '#ffffff',
+                          borderRadius: '10px',
+                          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                          border: '1px solid #e2e8f0',
+                          minWidth: '180px',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <Link 
+                          to={`/annonces/${property.id}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.6rem',
+                            padding: '0.75rem 1rem',
+                            color: '#1e293b',
+                            textDecoration: 'none',
+                            fontSize: '0.88rem',
+                            borderBottom: '1px solid #f1f5f9'
+                          }}
+                          onClick={() => setActiveActionMenu(null)}
+                        >
+                          <Globe size={16} color="#0ea5e9" />
+                          <span>Voir l'annonce</span>
+                        </Link>
+                        <button
+                          type="button"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.6rem',
+                            padding: '0.75rem 1rem',
+                            color: '#1e293b',
+                            background: 'none',
+                            border: 'none',
+                            width: '100%',
+                            textAlign: 'left',
+                            fontSize: '0.88rem',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #f1f5f9'
+                          }}
                           onClick={() => {
-                            setSelectedPropertyToBoost(property.id);
-                            setIsBoostModalOpen(true);
+                            setActiveActionMenu(null);
+                            alert("La modification d'annonce sera disponible dans une prochaine mise à jour.");
                           }}
                         >
-                          <Rocket size={14} />
-                          Booster
+                          <Edit size={16} color="#3b82f6" />
+                          <span>Modifier</span>
                         </button>
-                        <button onClick={() => alert("La modification d'annonce sera disponible dans une prochaine mise à jour.")} className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--color-primary)' }} title="Modifier">
-                          <Edit size={16} />
-                        </button>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem', color: '#ef4444', borderColor: '#fee2e2' }} title="Supprimer" onClick={() => handleDelete(property.id)}>
-                          <Trash2 size={16} />
+                        <button
+                          type="button"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.6rem',
+                            padding: '0.75rem 1rem',
+                            color: '#ef4444',
+                            background: 'none',
+                            border: 'none',
+                            width: '100%',
+                            textAlign: 'left',
+                            fontSize: '0.88rem',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => {
+                            setActiveActionMenu(null);
+                            handleDelete(property.id);
+                          }}
+                        >
+                          <Trash2 size={16} color="#ef4444" />
+                          <span>Supprimer</span>
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      </>
+    )}
+  </div>
 
       <BoostModal 
         isOpen={isBoostModalOpen} 

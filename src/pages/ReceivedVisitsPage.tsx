@@ -75,19 +75,19 @@ const ReceivedVisitsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-nestora-ivory">
-        <Loader className="w-12 h-12 text-nestora-gold animate-spin" />
+      <div className="py-12 flex items-center justify-center">
+        <Loader className="w-10 h-10 text-nestora-gold animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-nestora-ivory">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-nestora-navy mb-8">Demandes reçues</h1>
+    <div className="received-visits-page" style={{ padding: '1rem 0 3rem 0' }}>
+      <div className="max-w-4xl mx-auto px-2 sm:px-4">
+        <h1 className="page-title mb-4">Demandes de visite reçues</h1>
 
         {visits.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+          <div className="bg-white rounded-xl shadow-sm p-8 sm:p-12 text-center" style={{ border: '1px solid #e2e8f0' }}>
             <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8" />
             </div>
@@ -103,33 +103,33 @@ const ReceivedVisitsPage = () => {
               const requester = visit.requester;
               
               return (
-                <div key={visit.id} className="bg-white rounded-xl shadow-sm p-6 flex flex-col md:flex-row gap-6">
-                  <div className="md:w-1/3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 md:pr-6">
-                    <div className="text-sm font-semibold text-nestora-primary uppercase tracking-wider mb-2">Demandeur</div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
-                        {requester.profile?.avatarUrl ? (
+                <div key={visit.id} className="bg-white rounded-xl shadow-sm p-4 sm:p-6 flex flex-col md:flex-row gap-4 sm:gap-6" style={{ border: '1px solid #e2e8f0' }}>
+                  <div className="md:w-1/3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-100 pb-3 md:pb-0 md:pr-6">
+                    <div className="text-xs font-semibold text-nestora-primary uppercase tracking-wider mb-2">Demandeur</div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {requester?.profile?.avatarUrl ? (
                           <img src={requester.profile.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
                           <User size={20} className="text-gray-500" />
                         )}
                       </div>
                       <div>
-                        <div className="font-bold text-nestora-navy">{requester.profile?.firstName} {requester.profile?.lastName}</div>
+                        <div className="font-bold text-nestora-navy text-sm sm:text-base">{requester?.profile?.firstName} {requester?.profile?.lastName}</div>
                       </div>
                     </div>
                   </div>
                   
                   <div className="md:w-2/3 flex flex-col justify-between">
                     <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <Link to={`/annonces/${p.id}`} className="text-lg font-bold text-nestora-navy hover:underline">
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <Link to={`/annonces/${p.id}`} className="text-base sm:text-lg font-bold text-nestora-navy hover:underline" style={{ lineHeight: 1.3 }}>
                           {p.title}
                         </Link>
                         {getStatusBadge(visit.status)}
                       </div>
                       
-                      <div className="bg-gray-50 p-4 rounded-lg mb-4 flex flex-wrap gap-4 text-sm mt-3">
+                      <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-3 flex flex-wrap gap-3 text-sm mt-2">
                         <div className="flex items-center gap-2">
                           <Calendar size={16} className="text-nestora-primary" />
                           <span className="font-semibold text-nestora-navy">
@@ -145,27 +145,27 @@ const ReceivedVisitsPage = () => {
                       </div>
                       
                       {visit.message && (
-                        <div className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border-l-4 border-nestora-primary">
+                        <div className="text-sm text-gray-600 mb-3 bg-gray-50 p-3 rounded-lg border-l-4 border-nestora-primary">
                           "{visit.message}"
                         </div>
                       )}
                     </div>
                     
                     {visit.status === 'PENDING' && (
-                      <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex flex-wrap gap-2 justify-end mt-3 pt-3 border-t border-gray-100">
                         <button 
                           onClick={() => updateStatus(visit.id, 'DECLINED')}
-                          className="btn flex items-center gap-2" 
-                          style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5' }}
+                          className="btn flex-1 sm:flex-initial flex items-center justify-center gap-2" 
+                          style={{ minHeight: '44px', padding: '0.6rem 1.25rem', fontSize: '0.88rem', fontWeight: 600, backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5' }}
                         >
-                          <XCircle size={16} /> Refuser
+                          <XCircle size={18} /> Refuser
                         </button>
                         <button 
                           onClick={() => updateStatus(visit.id, 'CONFIRMED')}
-                          className="btn flex items-center gap-2" 
-                          style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#dcfce7', color: '#10b981', border: '1px solid #86efac' }}
+                          className="btn flex-1 sm:flex-initial flex items-center justify-center gap-2" 
+                          style={{ minHeight: '44px', padding: '0.6rem 1.25rem', fontSize: '0.88rem', fontWeight: 600, backgroundColor: '#dcfce7', color: '#10b981', border: '1px solid #86efac' }}
                         >
-                          <CheckCircle2 size={16} /> Confirmer
+                          <CheckCircle2 size={18} /> Confirmer
                         </button>
                       </div>
                     )}

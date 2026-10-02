@@ -72,19 +72,19 @@ const VisitsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-nestora-ivory">
-        <Loader className="w-12 h-12 text-nestora-gold animate-spin" />
+      <div className="py-12 flex items-center justify-center">
+        <Loader className="w-10 h-10 text-nestora-gold animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-nestora-ivory">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-nestora-navy mb-8">Mes demandes de visite</h1>
+    <div className="visits-page" style={{ padding: '1rem 0 3rem 0' }}>
+      <div className="max-w-4xl mx-auto px-2 sm:px-4">
+        <h1 className="page-title mb-4">Mes demandes de visite</h1>
 
         {visits.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+          <div className="bg-white rounded-xl shadow-sm p-8 sm:p-12 text-center" style={{ border: '1px solid #e2e8f0' }}>
             <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8" />
             </div>
@@ -94,7 +94,8 @@ const VisitsPage = () => {
             </p>
             <Link 
               to="/recherche" 
-              className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-white bg-nestora-navy hover:bg-nestora-navy/90 transition-colors"
+              className="btn btn-primary inline-flex items-center justify-center px-6"
+              style={{ minHeight: '46px' }}
             >
               Explorer les annonces
             </Link>
@@ -106,23 +107,23 @@ const VisitsPage = () => {
               const img = p.images?.length ? p.images[0].url : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
               
               return (
-                <div key={visit.id} className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row">
+                <div key={visit.id} className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row" style={{ border: '1px solid #e2e8f0' }}>
                   <div className="md:w-1/3 h-48 md:h-auto">
                     <img src={img} alt={p.title} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-6 md:w-2/3 flex flex-col justify-between">
+                  <div className="p-4 sm:p-6 md:w-2/3 flex flex-col justify-between">
                     <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <Link to={`/annonces/${p.id}`} className="text-xl font-bold text-nestora-navy hover:underline">
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <Link to={`/annonces/${p.id}`} className="text-base sm:text-xl font-bold text-nestora-navy hover:underline" style={{ lineHeight: 1.3 }}>
                           {p.title}
                         </Link>
                         {getStatusBadge(visit.status)}
                       </div>
-                      <div className="text-gray-500 flex items-center gap-1 mb-4 text-sm">
+                      <div className="text-gray-500 flex items-center gap-1 mb-3 text-sm">
                         <MapPin size={14} /> {p.neighborhood?.name ? `${p.neighborhood.name}, ` : ''}{p.city?.name}
                       </div>
                       
-                      <div className="bg-gray-50 p-4 rounded-lg mb-4 flex flex-wrap gap-4 text-sm">
+                      <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-3 flex flex-wrap gap-3 text-sm">
                         <div className="flex items-center gap-2">
                           <Calendar size={16} className="text-nestora-primary" />
                           <span className="font-semibold text-nestora-navy">
@@ -138,21 +139,25 @@ const VisitsPage = () => {
                       </div>
                       
                       {visit.message && (
-                        <div className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border-l-4 border-nestora-primary">
+                        <div className="text-sm text-gray-600 mb-3 bg-gray-50 p-3 rounded-lg border-l-4 border-nestora-primary">
                           "{visit.message}"
                         </div>
                       )}
                     </div>
                     
-                    <div className="flex gap-2 justify-end mt-4">
-                      <Link to={`/annonces/${p.id}`} className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}>
+                    <div className="flex flex-wrap gap-2 justify-end mt-3 pt-3 border-t border-gray-100">
+                      <Link 
+                        to={`/annonces/${p.id}`} 
+                        className="btn btn-outline flex-1 sm:flex-initial text-center justify-center items-center" 
+                        style={{ minHeight: '44px', padding: '0.6rem 1rem', fontSize: '0.88rem' }}
+                      >
                         Voir l'annonce
                       </Link>
                       {['PENDING', 'CONFIRMED'].includes(visit.status) && (
                         <button 
                           onClick={() => cancelVisit(visit.id)}
-                          className="btn" 
-                          style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5' }}
+                          className="btn flex-1 sm:flex-initial text-center justify-center items-center" 
+                          style={{ minHeight: '44px', padding: '0.6rem 1rem', fontSize: '0.88rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5' }}
                         >
                           Annuler
                         </button>

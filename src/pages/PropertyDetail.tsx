@@ -1060,23 +1060,44 @@ const PropertyDetail = () => {
       {/* MOBILE STICKY ACTION BAR */}
       <div className="mobile-sticky-actions">
         <button 
-          className="btn btn-primary" 
-          onClick={handleContactClick}
-          style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-        >
-          <MessageCircle size={18} />
-          <span>Contact</span>
-        </button>
-        <button 
           className="btn btn-outline" 
           onClick={toggleFavorite}
           style={{ 
-            width: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0', flexShrink: 0,
+            width: '46px', height: '46px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0', flexShrink: 0,
             color: favorite ? '#ef4444' : 'inherit',
-            borderColor: favorite ? '#ef4444' : 'var(--color-border)'
+            borderColor: favorite ? '#ef4444' : 'var(--color-border)',
+            borderRadius: '10px'
           }}
+          aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
         >
           <Heart size={20} fill={favorite ? 'currentColor' : 'none'} />
+        </button>
+
+        <button 
+          className="btn btn-outline" 
+          onClick={() => {
+            if (!user) { navigate('/connexion'); return; }
+            setShowVisitModal(true);
+          }}
+          style={{ 
+            flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', height: '46px', borderRadius: '10px', 
+            fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-primary)', borderColor: 'var(--color-primary)' 
+          }}
+        >
+          <Calendar size={18} />
+          <span>Visite</span>
+        </button>
+
+        <button 
+          className="btn btn-primary" 
+          onClick={handleContactClick}
+          style={{ 
+            flex: 1.2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', height: '46px', borderRadius: '10px', 
+            fontWeight: 600, fontSize: '0.9rem' 
+          }}
+        >
+          <MessageCircle size={18} />
+          <span>Contacter</span>
         </button>
       </div>
     </div>
