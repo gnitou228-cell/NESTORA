@@ -42,6 +42,7 @@ import AgentsPage from './pages/agency/AgentsPage';
 import LeadsPage from './pages/agency/LeadsPage';
 import DemandesChercheursPage from './pages/DemandesChercheursPage';
 import Statistics from './pages/Statistics';
+import SettingsPage from './pages/SettingsPage';
 import { FavoritesProvider } from './context/FavoritesContext';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -99,7 +100,6 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['AGENCY']} />}>
                 <Route path="/dashboard/agency" element={<Dashboard />} />
                 <Route path="agents" element={<AgentsPage />} />
-                <Route path="prospects" element={<LeadsPage />} />
               </Route>
               
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
@@ -107,6 +107,7 @@ function App() {
               </Route>
               
               <Route element={<ProtectedRoute allowedRoles={['OWNER', 'AGENCY']} />}>
+                <Route path="prospects" element={<LeadsPage />} />
                 <Route path="demandes-visites" element={<ReceivedVisitsPage />} />
                 <Route path="statistiques" element={<Statistics />} />
               </Route>
@@ -122,6 +123,7 @@ function App() {
               <Route path="paiement" element={<Checkout />} />
               <Route path="abonnement" element={<Subscription />} />
               <Route path="paiements" element={<Invoices />} />
+              <Route path="parametres" element={<SettingsPage />} />
             </Route>
           </Route>
         </Routes>

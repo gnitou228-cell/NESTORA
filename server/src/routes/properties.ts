@@ -117,10 +117,18 @@ router.post('/', requireAuth, requireOwnerOrAgency, async (req, res) => {
 });
 
 // GET /api/properties/my - Get properties for the current user
-router.get('/my', requireAuth, async (req, res) => {
+router.get('/my', requireAuth, async (req: any, res) => {
   try {
+    const userId = req.user.id;
+    const isAgency = req.role === 'AGENCY';
+    const agencyId = req.agencyId || req.user.agency?.id;
+
+    const whereClause: any = isAgency
+      ? (agencyId ? { OR: [{ agencyId }, { ownerId: userId }] } : { ownerId: userId })
+      : { ownerId: userId };
+
     const properties = await prisma.property.findMany({
-      where: { ownerId: req.user.id },
+      where: whereClause,
       include: {
         images: {
           orderBy: { position: 'asc' },

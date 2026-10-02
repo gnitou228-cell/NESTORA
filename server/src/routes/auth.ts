@@ -184,7 +184,11 @@ router.post('/verify-email', async (req, res) => {
 router.put('/profile', requireAuth, async (req: any, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, phone, bio, avatar, documentUrl, documentBackUrl, selfieUrl, idDocumentType, birthDate, countryId, regionId, cityId, neighborhoodId, address } = req.body;
+    const { 
+      firstName, lastName, phone, bio, avatar, documentUrl, documentBackUrl, selfieUrl, 
+      idDocumentType, birthDate, countryId, regionId, cityId, neighborhoodId, address,
+      agencyName, agencyPhone, agencyAddress, agencyDescription, registrationNumber, website, logo
+    } = req.body;
 
     const updatedUser = await prisma.$transaction(async (tx) => {
       if (phone) {
@@ -202,6 +206,23 @@ router.put('/profile', requireAuth, async (req: any, res) => {
           firstName, lastName, bio, avatar, documentUrl, documentBackUrl, selfieUrl, idDocumentType, birthDate: birthDate ? new Date(birthDate) : null, countryId, regionId, cityId, neighborhoodId, address
         }
       });
+
+      // If user is an agency owner, update agency details
+      const existingAgency = await tx.agency.findUnique({ where: { ownerUserId: userId } });
+      if (existingAgency && (agencyName || agencyPhone || agencyAddress || agencyDescription || registrationNumber || website || logo)) {
+        await tx.agency.update({
+          where: { ownerUserId: userId },
+          data: {
+            name: agencyName || existingAgency.name,
+            phone: agencyPhone || existingAgency.phone,
+            address: agencyAddress !== undefined ? agencyAddress : existingAgency.address,
+            description: agencyDescription !== undefined ? agencyDescription : existingAgency.description,
+            registrationNumber: registrationNumber !== undefined ? registrationNumber : existingAgency.registrationNumber,
+            website: website !== undefined ? website : existingAgency.website,
+            logo: logo !== undefined ? logo : existingAgency.logo
+          }
+        });
+      }
 
       // Automatically create a verification request if documents are uploaded
       if (documentUrl && selfieUrl) {
@@ -224,6 +245,45 @@ router.put('/profile', requireAuth, async (req: any, res) => {
     res.json({ message: "Profil mis à jour", user: updatedUser });
   } catch (error: any) {
     res.status(400).json({ message: error.message || "Erreur lors de la mise à jour du profil" });
+  }
+});
+
+// Update Password
+router.put('/password', requireAuth, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'Le nouveau mot de passe doit comporter au moins 6 caractères.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+
+    // If user already has a password, verify the current password
+    if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Veuillez saisir votre mot de passe actuel.' });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Le mot de passe actuel est incorrect.' });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    res.json({ message: 'Mot de passe modifié avec succès.' });
+  } catch (error: any) {
+    console.error('Password update error:', error);
+    res.status(500).json({ message: error.message || 'Erreur lors de la mise à jour du mot de passe.' });
   }
 });
 

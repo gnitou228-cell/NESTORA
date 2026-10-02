@@ -172,7 +172,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn("SignOut error", e);
+    }
+    localStorage.removeItem('nestora_token');
+    localStorage.removeItem('nestora_is_premium');
+    localStorage.removeItem('nestora_user_prefs');
     setUser(null);
     setRole(null);
     window.location.href = '/connexion';

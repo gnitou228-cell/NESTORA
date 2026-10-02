@@ -10,8 +10,12 @@ router.get('/dashboard', requireAuth, requireOwnerOrAgency, async (req: any, res
   try {
     const userId = req.user.id;
     const isAgency = req.role === 'AGENCY';
+    const agencyId = req.agencyId || req.user.agency?.id;
 
-    const whereClause = isAgency ? { agencyId: req.user.agencyId } : { ownerId: userId };
+    // For agency, check either their agencyId or their ownerId
+    const whereClause: any = isAgency
+      ? (agencyId ? { OR: [{ agencyId }, { ownerId: userId }] } : { ownerId: userId })
+      : { ownerId: userId };
 
     const properties = await prisma.property.findMany({
       where: whereClause,
@@ -31,10 +35,10 @@ router.get('/dashboard', requireAuth, requireOwnerOrAgency, async (req: any, res
 
     const activeProperties = properties.filter(p => p.status === 'PUBLISHED').length;
     const totalProperties = properties.length;
-    const totalViews = properties.reduce((acc, curr) => acc + curr.views, 0);
-    const totalFavorites = properties.reduce((acc, curr) => acc + curr._count.favorites, 0);
-    const totalVisits = properties.reduce((acc, curr) => acc + curr._count.visits, 0);
-    const totalConversations = properties.reduce((acc, curr) => acc + curr._count.conversations, 0);
+    const totalViews = properties.reduce((acc, curr) => acc + (curr.views || 0), 0);
+    const totalFavorites = properties.reduce((acc, curr) => acc + (curr._count?.favorites || 0), 0);
+    const totalVisits = properties.reduce((acc, curr) => acc + (curr._count?.visits || 0), 0);
+    const totalConversations = properties.reduce((acc, curr) => acc + (curr._count?.conversations || 0), 0);
 
     const boosts = await prisma.boost.count({
       where: {
@@ -45,13 +49,13 @@ router.get('/dashboard', requireAuth, requireOwnerOrAgency, async (req: any, res
     });
 
     res.json({
-      activeProperties,
-      totalProperties,
-      totalViews,
-      totalFavorites,
-      totalVisits,
-      totalConversations,
-      activeBoosts: boosts
+      activeProperties: activeProperties || 0,
+      totalProperties: totalProperties || 0,
+      totalViews: totalViews || 0,
+      totalFavorites: totalFavorites || 0,
+      totalVisits: totalVisits || 0,
+      totalConversations: totalConversations || 0,
+      activeBoosts: boosts || 0
     });
   } catch (error: any) {
     console.error('Stats error:', error);

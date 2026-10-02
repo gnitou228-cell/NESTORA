@@ -13,6 +13,7 @@ import adminRoutes from './routes/admin';
 import reportsRoutes from './routes/reports';
 import statsRoutes from './routes/stats';
 import housingRequestsRoutes from './routes/housing-requests';
+import agencyRoutes from './routes/agency';
 import { PrismaClient } from '@prisma/client';
 import { initCronJobs } from './jobs/subscriptionCron';
 
@@ -37,6 +38,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/housing-requests', housingRequestsRoutes);
+app.use('/api/agency', agencyRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

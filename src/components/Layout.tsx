@@ -37,6 +37,7 @@ export default function Layout() {
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },
       { icon: <CreditCard size={20} />, label: 'Abonnement', path: '/abonnement' },
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
+      { icon: <Settings size={20} />, label: 'Paramètres', path: '/parametres' },
       { icon: <UserIcon size={20} />, label: 'Profil', path: '#' },
     ];
   } else if (role === 'OWNER') {
@@ -53,6 +54,7 @@ export default function Layout() {
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },
       { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '/statistiques' },
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
+      { icon: <Settings size={20} />, label: 'Paramètres', path: '/parametres' },
       { icon: <UserIcon size={20} />, label: 'Profil', path: '#' },
     ];
   } else if (role === 'ADMIN') {
@@ -76,7 +78,7 @@ export default function Layout() {
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },
       { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '/statistiques' },
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
-      { icon: <Settings size={20} />, label: 'Paramètres', path: '#' },
+      { icon: <Settings size={20} />, label: 'Paramètres', path: '/parametres' },
     ];
   }
 
@@ -159,7 +161,7 @@ export default function Layout() {
           <div className="sidebar-widget-text">
             Notre équipe est disponible 7j/7
           </div>
-          <button className="btn btn-outline-light btn-block" onClick={() => setMobileSidebarOpen(false)}>Contacter le support</button>
+          <Link to="/nous-contacter" className="btn btn-outline-light btn-block" onClick={() => setMobileSidebarOpen(false)}>Contacter le support</Link>
         </div>
       </aside>
 

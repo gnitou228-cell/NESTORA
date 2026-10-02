@@ -37,7 +37,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // Récupérer l'utilisateur dans la BDD pour avoir son rôle (OWNER, SEEKER, etc.)
     let dbUser = await prisma.user.findUnique({
       where: { id: user.id },
-      include: { agency: true }
+      include: { 
+        agency: true,
+        agencyMember: { include: { agency: true } }
+      }
     });
 
     if (!dbUser) {
@@ -60,13 +63,16 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             }
           }
         },
-        include: { agency: true }
+        include: { 
+          agency: true,
+          agencyMember: { include: { agency: true } }
+        }
       });
     }
 
     req.user = dbUser;
     req.role = dbUser.role;
-    req.agencyId = dbUser.agency?.id;
+    req.agencyId = dbUser.agency?.id || dbUser.agencyMember?.agencyId;
 
     next();
   } catch (error: any) {
