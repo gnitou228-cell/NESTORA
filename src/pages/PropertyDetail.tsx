@@ -365,220 +365,205 @@ const PropertyDetail = () => {
   const hasMultipleImages = images.length > 1;
 
   return (
-    <div className="bg-secondary" style={{ minHeight: '100vh', paddingBottom: '4rem' }}>
+    <div className="property-detail-page bg-secondary">
       
-      {/* HEADER LOCALISATION */}
-      <div style={{ backgroundColor: 'var(--color-primary)', padding: '2rem 1.5rem', color: 'white' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', marginBottom: '1rem' }}>
-            <Link to="/recherche" style={{ color: 'white', textDecoration: 'none' }}>Recherche</Link>
-            <span>&gt;</span>
-            <span>{property.country?.name}</span>
-            <span>&gt;</span>
-            <span>{property.region?.name}</span>
-            <span>&gt;</span>
-            <span>{property.city?.name}</span>
+      {/* HEADER LOCALISATION & RETOUR */}
+      <div className="property-detail-header">
+        <div className="property-detail-header-inner">
+          <div className="property-nav-row">
+            <Link to="/annonces" className="property-back-btn">
+              <ChevronLeft size={18} />
+              <span>Toutes les annonces</span>
+            </Link>
+            <div className="property-breadcrumbs">
+              <Link to="/recherche">Recherche</Link>
+              <span className="breadcrumb-sep">&gt;</span>
+              <span>{property.country?.name}</span>
+              <span className="breadcrumb-sep">&gt;</span>
+              <span>{property.city?.name}</span>
+              {property.neighborhood?.name && (
+                <>
+                  <span className="breadcrumb-sep">&gt;</span>
+                  <span>{property.neighborhood.name}</span>
+                </>
+              )}
+            </div>
           </div>
-          <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 700, lineHeight: 1.2 }}>{property.title}</h1>
+          <h1 className="property-page-title">{property.title}</h1>
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1.5rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+      <div className="property-detail-container">
+        <div className="property-layout-grid">
           
           {/* COLONNE GAUCHE : DÉTAILS */}
-          <div style={{ flex: '1 1 65%', minWidth: '300px' }}>
+          <div className="property-main-col">
             
             {/* GALERIE */}
             <div 
-              style={{ 
-                position: 'relative', 
-                borderRadius: '12px', 
-                overflow: 'hidden', 
-                backgroundColor: '#e2e8f0',
-                aspectRatio: '16/9',
-                cursor: 'pointer',
-                marginBottom: '1rem'
-              }}
+              className="property-main-gallery"
               onClick={() => setShowGallery(true)}
             >
               <img 
                 src={images[0]} 
                 alt={property.title} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                className="property-main-img"
               />
+              <div className="gallery-badge-top-left">
+                <span className="badge badge-accent-gold">
+                  {formatTransactionType(property.transactionType)}
+                </span>
+                <span className="badge badge-type-white">
+                  {formatPropertyType(property.propertyType)}
+                </span>
+              </div>
               {hasMultipleImages && (
-                <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '20px', fontSize: '0.9rem', fontWeight: 600 }}>
+                <div className="gallery-photo-counter">
                   1 / {images.length} photos
                 </div>
               )}
             </div>
 
             {hasMultipleImages && (
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                {images.slice(1, 5).map((img: string, idx: number) => (
-                  <img 
+              <div className="property-thumbnails-track">
+                {images.slice(1, 6).map((img: string, idx: number) => (
+                  <div 
                     key={idx}
-                    src={img}
-                    alt={`Vue ${idx+2}`}
+                    className="thumbnail-item"
                     onClick={() => {
                       setCurrentImageIndex(idx + 1);
                       setShowGallery(true);
                     }}
-                    style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', flexShrink: 0 }}
-                  />
-                ))}
-                {images.length > 5 && (
-                  <div 
-                    onClick={() => { setCurrentImageIndex(5); setShowGallery(true); }}
-                    style={{ width: '120px', height: '80px', borderRadius: '8px', backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, position: 'relative' }}
                   >
-                    <img src={images[5]} style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', zIndex: -1, borderRadius: '8px' }} />
-                    <span style={{ fontWeight: 'bold' }}>+{images.length - 5}</span>
+                    <img 
+                      src={img} 
+                      alt={`Photo ${idx + 2}`}
+                      className="thumbnail-img"
+                    />
+                  </div>
+                ))}
+                {images.length > 6 && (
+                  <div 
+                    className="thumbnail-item thumbnail-more"
+                    onClick={() => { setCurrentImageIndex(6); setShowGallery(true); }}
+                  >
+                    <img src={images[6]} alt="Plus de photos" className="thumbnail-img" />
+                    <span className="thumbnail-more-overlay">+{images.length - 6}</span>
                   </div>
                 )}
               </div>
             )}
 
             {/* INFO PRINCIPALES */}
-            <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: '0.5rem' }}>
-                    {formatPrice(property.price)} {property.currency}
-                    {property.transactionType === 'RENT' && <span style={{ fontSize: '1rem', color: 'var(--color-text-light)' }}> / mois</span>}
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span className="badge" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>
-                      {formatTransactionType(property.transactionType)}
-                    </span>
-                    <span className="badge" style={{ backgroundColor: '#f1f5f9', color: 'var(--color-primary)' }}>
-                      {formatPropertyType(property.propertyType)}
-                    </span>
+            <div className="card property-detail-card">
+              <div className="property-header-price-row">
+                <div className="property-price-block">
+                  <div className="property-price-display">
+                    {formatPrice(property.price)} <span className="property-currency">{property.currency}</span>
+                    {property.transactionType === 'RENT' && <span className="property-period"> / mois</span>}
                   </div>
                 </div>
                 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }} onClick={handleShare}>
-                    <Share2 size={18} /> Partager
+                <div className="property-actions-grid">
+                  <button className="btn btn-outline property-action-btn" onClick={handleShare}>
+                    <Share2 size={16} /> <span>Partager</span>
                   </button>
                   <button 
-                    className="btn btn-outline" 
+                    className={`btn btn-outline property-action-btn ${favorite ? 'btn-fav-active' : ''}`}
                     onClick={toggleFavorite}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem',
-                      color: favorite ? '#ef4444' : 'inherit',
-                      borderColor: favorite ? '#ef4444' : 'inherit'
-                    }}
                   >
-                    <Heart size={18} fill={favorite ? 'currentColor' : 'none'} /> {favorite ? 'Retirer' : 'Favori'}
+                    <Heart size={16} fill={favorite ? 'currentColor' : 'none'} />
+                    <span>{favorite ? 'Favori' : 'Favori'}</span>
                   </button>
                   <button 
-                    className="btn btn-outline" 
+                    className="btn btn-outline property-action-btn btn-report-subtle"
                     onClick={() => {
                       if (!user) navigate('/connexion');
                       else setShowReportModal(true);
                     }}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem',
-                      color: 'var(--color-danger)', borderColor: 'var(--color-danger)'
-                    }}
                   >
-                    <Flag size={18} /> Signaler
+                    <Flag size={16} /> <span>Signaler</span>
                   </button>
                 </div>
               </div>
 
               {shareSuccess && (
-                <div style={{ backgroundColor: '#10b981', color: 'white', padding: '0.5rem 1rem', borderRadius: '4px', marginBottom: '1rem', display: 'inline-block', fontSize: '0.9rem' }}>
-                  Lien de l'annonce copié.
+                <div className="property-alert-success">
+                  Lien de l&apos;annonce copié dans le presse-papiers.
                 </div>
               )}
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--color-text-light)', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <MapPin size={16} />
-                  {property.neighborhood?.name ? `${property.neighborhood.name}, ` : ''}{property.city?.name}
+              <div className="property-meta-row">
+                <div className="property-meta-item">
+                  <MapPin size={16} color="#d97706" />
+                  <span>{property.neighborhood?.name ? `${property.neighborhood.name}, ` : ''}{property.city?.name}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Calendar size={16} />
-                  Publié {formatDistanceToNow(new Date(property.createdAt), { addSuffix: true, locale: fr })}
+                <div className="property-meta-item">
+                  <Calendar size={16} color="#64748b" />
+                  <span>Publié {formatDistanceToNow(new Date(property.createdAt), { addSuffix: true, locale: fr })}</span>
                 </div>
               </div>
 
-              <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '1.5rem 0' }}></div>
+              <div className="property-card-divider"></div>
 
               {/* CARACTÉRISTIQUES */}
-              <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Caractéristiques</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginBottom: '1.5rem' }}>
+              <h3 className="property-section-title">Caractéristiques</h3>
+              <div className="property-features-grid">
                 {property.surface > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ padding: '0.8rem', backgroundColor: '#f1f5f9', borderRadius: '50%' }}>
-                      <Move size={20} color="var(--color-primary)" />
+                  <div className="feature-box">
+                    <div className="feature-icon-wrap">
+                      <Move size={18} color="var(--color-primary)" />
                     </div>
-                    <div>
-                      <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }}>Surface</div>
-                      <div style={{ fontWeight: 600 }}>{property.surface} m²</div>
-                    </div>
+                    <div className="feature-value">{property.surface} m²</div>
+                    <div className="feature-label">Surface</div>
                   </div>
                 )}
                 {property.bedrooms > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ padding: '0.8rem', backgroundColor: '#f1f5f9', borderRadius: '50%' }}>
-                      <Bed size={20} color="var(--color-primary)" />
+                  <div className="feature-box">
+                    <div className="feature-icon-wrap">
+                      <Bed size={18} color="var(--color-primary)" />
                     </div>
-                    <div>
-                      <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }}>Chambres</div>
-                      <div style={{ fontWeight: 600 }}>{property.bedrooms}</div>
-                    </div>
+                    <div className="feature-value">{property.bedrooms}</div>
+                    <div className="feature-label">Chambres</div>
                   </div>
                 )}
                 {property.bathrooms > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ padding: '0.8rem', backgroundColor: '#f1f5f9', borderRadius: '50%' }}>
-                      <Bath size={20} color="var(--color-primary)" />
+                  <div className="feature-box">
+                    <div className="feature-icon-wrap">
+                      <Bath size={18} color="var(--color-primary)" />
                     </div>
-                    <div>
-                      <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)' }}>Salles de bain</div>
-                      <div style={{ fontWeight: 600 }}>{property.bathrooms}</div>
-                    </div>
+                    <div className="feature-value">{property.bathrooms}</div>
+                    <div className="feature-label">Salles de bain</div>
                   </div>
                 )}
               </div>
             </div>
 
             {/* DESCRIPTION */}
-            <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Description</h3>
-              <div style={{ 
-                color: 'var(--color-text-dark)', 
-                lineHeight: 1.6,
-                maxHeight: showFullDesc ? 'none' : '150px',
-                overflow: 'hidden',
-                position: 'relative',
-                whiteSpace: 'pre-wrap'
-              }}>
+            <div className="card property-detail-card">
+              <h3 className="property-section-title">Description du bien</h3>
+              <div className={`property-description-body ${!showFullDesc ? 'collapsed' : ''}`}>
                 {property.description}
                 {!showFullDesc && (
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to bottom, transparent, white)' }}></div>
+                  <div className="property-description-fade"></div>
                 )}
               </div>
               <button 
                 onClick={() => setShowFullDesc(!showFullDesc)}
-                style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontWeight: 600, marginTop: '1rem', cursor: 'pointer', textDecoration: 'underline' }}
+                className="btn-read-more"
               >
-                {showFullDesc ? 'Réduire' : 'Lire plus'}
+                {showFullDesc ? 'Réduire la description' : 'Lire la description complète'}
               </button>
             </div>
 
             {/* EQUIPEMENTS */}
             {property.amenities && property.amenities.length > 0 && (
-              <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Équipements</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div className="card property-detail-card">
+                <h3 className="property-section-title">Équipements & Commodités</h3>
+                <div className="property-amenities-grid">
                   {property.amenities.map((pa: any) => (
-                    <div key={pa.amenityId} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <CheckCircle2 size={18} color="var(--color-accent)" />
+                    <div key={pa.amenityId} className="amenity-pill">
+                      <CheckCircle2 size={16} color="#16a34a" />
                       <span>{pa.amenity.name}</span>
                     </div>
                   ))}
@@ -588,87 +573,86 @@ const PropertyDetail = () => {
 
             {/* LOCALISATION MAP */}
             {property.latitude && property.longitude && (
-              <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Localisation</h3>
+              <div className="card property-detail-card">
+                <h3 className="property-section-title">Localisation</h3>
                 
-                <div style={{ marginBottom: '1rem', color: 'var(--color-text-dark)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="property-location-tag">
                   <MapPin size={18} color="var(--color-accent)" />
                   <span style={{ fontWeight: 600 }}>{property.city?.name}</span>
                   {property.neighborhood?.name && (
-                    <span> - {property.neighborhood.name}</span>
+                    <span> — {property.neighborhood.name}</span>
                   )}
                 </div>
                 
-                <div style={{ height: '350px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+                <div className="property-map-wrapper">
                   <NestoraMap 
                     properties={[property]}
                     center={[property.latitude, property.longitude]}
                     zoom={14}
                   />
                 </div>
-                <div style={{ marginTop: '0.8rem', fontSize: '0.85rem', color: 'var(--color-text-light)', display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
+                <div className="property-map-disclaimer">
                   <AlertCircle size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
-                  <span>La localisation affichée est approximative pour protéger la confidentialité de l'annonceur.</span>
+                  <span>La localisation affichée est approximative pour protéger la confidentialité du bien.</span>
                 </div>
               </div>
             )}
           </div>
 
           {/* COLONNE DROITE : CONTACT / ANNONCEUR */}
-          <div style={{ flex: '1 1 30%', minWidth: '300px' }}>
-            <div className="card" style={{ padding: '2rem', position: 'sticky', top: '2rem' }}>
+          <div className="property-sidebar-col">
+            <div className="card property-detail-card property-advertiser-sticky">
               
-              <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+              <div className="advertiser-profile-header">
                 {property.agency ? (
                   <>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', overflow: 'hidden' }}>
+                    <div className="advertiser-avatar-box">
                       {property.agency.logoUrl ? (
-                         <img src={property.agency.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                         <img src={property.agency.logoUrl} alt="Logo" className="advertiser-avatar-img" />
                       ) : (
                          <Building size={32} color="var(--color-primary)" />
                       )}
                     </div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary)' }}>{property.agency.name}</div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>Agence immobilière</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '0.25rem 0.75rem', borderRadius: '1rem', display: 'inline-block' }}>
+                    <div className="advertiser-name">{property.agency.name}</div>
+                    <div className="advertiser-role-label">Agence immobilière partenaire</div>
+                    <div className="advertiser-duration-pill">
                       {getMemberDuration(property.agency.createdAt)}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', overflow: 'hidden' }}>
+                    <div className="advertiser-avatar-box">
                       {property.owner?.profile?.avatarUrl ? (
-                         <img src={property.owner.profile.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                         <img src={property.owner.profile.avatarUrl} alt="Avatar" className="advertiser-avatar-img" />
                       ) : (
                          <User size={32} color="var(--color-primary)" />
                       )}
                     </div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    <div className="advertiser-name">
                       {property.owner?.profile?.firstName} {property.owner?.profile?.lastName}
                     </div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>Propriétaire</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '0.25rem 0.75rem', borderRadius: '1rem', display: 'inline-block' }}>
+                    <div className="advertiser-role-label">Propriétaire vérifié</div>
+                    <div className="advertiser-duration-pill">
                       {getMemberDuration(property.owner?.createdAt)}
                     </div>
                   </>
                 )}
               </div>
               
-              <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '1.5rem 0' }}></div>
+              <div className="property-card-divider"></div>
 
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Vous êtes intéressé par ce bien ?</h4>
+              <h4 className="advertiser-cta-title">Vous êtes intéressé par ce bien ?</h4>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="advertiser-actions-stack">
                 <button 
-                  className="btn btn-primary btn-block" 
+                  className="btn btn-primary btn-block btn-advertiser-primary" 
                   onClick={handleContactClick}
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}
                 >
                   <MessageCircle size={20} />
-                  {property.agency ? "Contacter l'agent immobilier" : "Contacter le propriétaire"}
+                  <span>{property.agency ? "Contacter l'agence" : "Contacter le propriétaire"}</span>
                 </button>
                 <button 
-                  className="btn btn-outline btn-block" 
+                  className="btn btn-outline btn-block btn-advertiser-secondary" 
                   onClick={() => {
                     if (!user) {
                       navigate('/connexion');
@@ -680,14 +664,11 @@ const PropertyDetail = () => {
                     }
                     setShowVisitModal(true);
                   }}
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}
                 >
                   <Calendar size={20} />
-                  Demander une visite
+                  <span>Demander une visite</span>
                 </button>
               </div>
-
-
 
             </div>
           </div>
@@ -696,9 +677,9 @@ const PropertyDetail = () => {
 
         {/* ANNONCES SIMILAIRES */}
         {similarProperties.length > 0 && (
-          <div style={{ marginTop: '4rem' }}>
-            <h2 style={{ fontSize: '1.8rem', color: 'var(--color-primary)', marginBottom: '1.5rem' }}>Vous pourriez également aimer</h2>
-            <div className="properties-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          <div className="similar-properties-section">
+            <h2 className="similar-section-title">Vous pourriez également aimer</h2>
+            <div className="properties-grid">
               {similarProperties.map(sim => {
                 const simImages = sim.images?.length > 0 ? sim.images : [{ url: defaultImage }];
                 return (
@@ -1059,47 +1040,660 @@ const PropertyDetail = () => {
 
       {/* MOBILE STICKY ACTION BAR */}
       <div className="mobile-sticky-actions">
-        <button 
-          className="btn btn-outline" 
-          onClick={toggleFavorite}
-          style={{ 
-            width: '46px', height: '46px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0', flexShrink: 0,
-            color: favorite ? '#ef4444' : 'inherit',
-            borderColor: favorite ? '#ef4444' : 'var(--color-border)',
-            borderRadius: '10px'
-          }}
-          aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-        >
-          <Heart size={20} fill={favorite ? 'currentColor' : 'none'} />
-        </button>
+        <div className="mobile-bar-price-wrap">
+          <div className="mobile-bar-price">
+            {formatPrice(property.price)} <span className="mobile-bar-curr">{property.currency}</span>
+          </div>
+          {property.transactionType === 'RENT' && (
+            <div className="mobile-bar-period">/ mois</div>
+          )}
+        </div>
 
-        <button 
-          className="btn btn-outline" 
-          onClick={() => {
-            if (!user) { navigate('/connexion'); return; }
-            setShowVisitModal(true);
-          }}
-          style={{ 
-            flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', height: '46px', borderRadius: '10px', 
-            fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-primary)', borderColor: 'var(--color-primary)' 
-          }}
-        >
-          <Calendar size={18} />
-          <span>Visite</span>
-        </button>
+        <div className="mobile-bar-btns">
+          <button 
+            className={`btn btn-outline mobile-bar-fav-btn ${favorite ? 'fav-active' : ''}`}
+            onClick={toggleFavorite}
+            aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+          >
+            <Heart size={20} fill={favorite ? 'currentColor' : 'none'} />
+          </button>
 
-        <button 
-          className="btn btn-primary" 
-          onClick={handleContactClick}
-          style={{ 
-            flex: 1.2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', height: '46px', borderRadius: '10px', 
-            fontWeight: 600, fontSize: '0.9rem' 
-          }}
-        >
-          <MessageCircle size={18} />
-          <span>Contacter</span>
-        </button>
+          <button 
+            className="btn btn-outline mobile-bar-action-btn" 
+            onClick={() => {
+              if (!user) { navigate('/connexion'); return; }
+              setShowVisitModal(true);
+            }}
+          >
+            <Calendar size={16} />
+            <span>Visite</span>
+          </button>
+
+          <button 
+            className="btn btn-primary mobile-bar-action-btn btn-contact-gold" 
+            onClick={handleContactClick}
+          >
+            <MessageCircle size={16} />
+            <span>Contacter</span>
+          </button>
+        </div>
       </div>
+
+      <style>{`
+        /* Container & Layout */
+        .property-detail-page {
+          min-height: 100vh;
+          padding-bottom: calc(110px + env(safe-area-inset-bottom)) !important;
+        }
+        .property-detail-header {
+          background-color: var(--color-primary, #0B1F3A);
+          padding: 1.75rem 1.5rem;
+          color: white;
+        }
+        .property-detail-header-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        .property-nav-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          margin-bottom: 0.85rem;
+          flex-wrap: wrap;
+        }
+        .property-back-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          color: #C9A227;
+          text-decoration: none;
+          font-size: 0.88rem;
+          font-weight: 600;
+          padding: 0.3rem 0.65rem;
+          background: rgba(201, 162, 39, 0.12);
+          border-radius: 8px;
+          border: 1px solid rgba(201, 162, 39, 0.25);
+          transition: all 0.2s;
+        }
+        .property-breadcrumbs {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.7);
+          flex-wrap: wrap;
+        }
+        .property-breadcrumbs a {
+          color: rgba(255, 255, 255, 0.85);
+          text-decoration: none;
+        }
+        .breadcrumb-sep {
+          color: rgba(255, 255, 255, 0.4);
+        }
+        .property-page-title {
+          margin: 0;
+          font-size: clamp(1.3rem, 4.5vw, 1.95rem);
+          font-weight: 800;
+          line-height: 1.25;
+          color: #ffffff;
+        }
+
+        .property-detail-container {
+          max-width: 1200px;
+          margin: 1.5rem auto 3rem;
+          padding: 0 1.25rem;
+        }
+        .property-layout-grid {
+          display: flex;
+          gap: 1.75rem;
+          align-items: flex-start;
+        }
+        .property-main-col {
+          flex: 1 1 65%;
+          min-width: 0;
+        }
+        .property-sidebar-col {
+          flex: 0 0 35%;
+          min-width: 320px;
+        }
+
+        /* Gallery */
+        .property-main-gallery {
+          position: relative;
+          border-radius: 16px;
+          overflow: hidden;
+          background-color: #0f172a;
+          aspect-ratio: 16/9;
+          cursor: pointer;
+          margin-bottom: 0.85rem;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+        .property-main-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
+        }
+        .property-main-gallery:hover .property-main-img {
+          transform: scale(1.02);
+        }
+        .gallery-badge-top-left {
+          position: absolute;
+          top: 1rem;
+          left: 1rem;
+          display: flex;
+          gap: 0.5rem;
+          z-index: 2;
+        }
+        .badge-accent-gold {
+          background-color: #C9A227 !important;
+          color: #ffffff !important;
+          font-weight: 700;
+          padding: 0.35rem 0.75rem;
+          border-radius: 8px;
+          font-size: 0.82rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .badge-type-white {
+          background-color: rgba(255, 255, 255, 0.95) !important;
+          color: #0B1F3A !important;
+          font-weight: 700;
+          padding: 0.35rem 0.75rem;
+          border-radius: 8px;
+          font-size: 0.82rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .gallery-photo-counter {
+          position: absolute;
+          bottom: 1rem;
+          right: 1rem;
+          background-color: rgba(11, 31, 58, 0.85);
+          backdrop-filter: blur(8px);
+          color: #ffffff;
+          padding: 0.35rem 0.85rem;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          z-index: 2;
+        }
+
+        .property-thumbnails-track {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+          overflow-x: auto;
+          padding-bottom: 0.35rem;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: thin;
+        }
+        .thumbnail-item {
+          width: 100px;
+          height: 68px;
+          border-radius: 10px;
+          overflow: hidden;
+          cursor: pointer;
+          flex-shrink: 0;
+          border: 2px solid transparent;
+          transition: all 0.2s;
+          background: #e2e8f0;
+        }
+        .thumbnail-item:hover {
+          border-color: #C9A227;
+        }
+        .thumbnail-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .thumbnail-more {
+          position: relative;
+          background-color: rgba(0,0,0,0.7);
+        }
+        .thumbnail-more-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 800;
+          font-size: 1rem;
+          background: rgba(11, 31, 58, 0.7);
+        }
+
+        /* Property Detail Card */
+        .property-detail-card {
+          padding: 1.75rem 1.5rem;
+          margin-bottom: 1.5rem;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+          background: #ffffff;
+        }
+        .property-header-price-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+          margin-bottom: 1.25rem;
+          flex-wrap: wrap;
+        }
+        .property-price-display {
+          font-size: clamp(1.5rem, 5vw, 2.1rem);
+          font-weight: 800;
+          color: #0B1F3A;
+          line-height: 1.2;
+        }
+        .property-currency {
+          font-size: 1.1rem;
+          color: #C9A227;
+          font-weight: 700;
+        }
+        .property-period {
+          font-size: 0.95rem;
+          color: #64748b;
+          font-weight: 500;
+        }
+        .property-actions-grid {
+          display: flex;
+          gap: 0.5rem;
+        }
+        .property-action-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.55rem 0.85rem;
+          font-size: 0.85rem;
+          border-radius: 9px;
+          font-weight: 600;
+        }
+        .btn-fav-active {
+          color: #ef4444 !important;
+          border-color: #fca5a5 !important;
+          background-color: #fef2f2 !important;
+        }
+        .btn-report-subtle {
+          color: #94a3b8;
+          border-color: #e2e8f0;
+        }
+        .btn-report-subtle:hover {
+          color: #ef4444;
+          border-color: #ef4444;
+        }
+
+        .property-alert-success {
+          background-color: #10b981;
+          color: white;
+          padding: 0.6rem 1rem;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          font-size: 0.88rem;
+          font-weight: 600;
+        }
+        .property-meta-row {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+          color: #64748b;
+          margin-bottom: 1.25rem;
+          flex-wrap: wrap;
+          font-size: 0.9rem;
+        }
+        .property-meta-item {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .property-card-divider {
+          height: 1px;
+          background-color: #e2e8f0;
+          margin: 1.25rem 0;
+        }
+
+        .property-section-title {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #0B1F3A;
+          margin-bottom: 1rem;
+        }
+
+        /* Features Grid */
+        .property-features-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+        }
+        .feature-box {
+          background: #f8fafc;
+          border: 1px solid #f1f5f9;
+          border-radius: 12px;
+          padding: 0.85rem 0.5rem;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .feature-icon-wrap {
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 0.35rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .feature-value {
+          font-size: 1rem;
+          font-weight: 800;
+          color: #0B1F3A;
+          line-height: 1.2;
+        }
+        .feature-label {
+          font-size: 0.75rem;
+          color: #64748b;
+          margin-top: 2px;
+        }
+
+        /* Description */
+        .property-description-body {
+          color: #334155;
+          line-height: 1.65;
+          white-space: pre-wrap;
+          position: relative;
+          font-size: 0.95rem;
+        }
+        .property-description-body.collapsed {
+          max-height: 140px;
+          overflow: hidden;
+        }
+        .property-description-fade {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 60px;
+          background: linear-gradient(to bottom, transparent, white);
+        }
+        .btn-read-more {
+          background: none;
+          border: none;
+          color: #0B1F3A;
+          font-weight: 700;
+          margin-top: 0.75rem;
+          cursor: pointer;
+          text-decoration: underline;
+          padding: 0;
+          font-size: 0.9rem;
+        }
+
+        /* Amenities */
+        .property-amenities-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 0.75rem;
+        }
+        .amenity-pill {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: #f8fafc;
+          padding: 0.6rem 0.85rem;
+          border-radius: 10px;
+          border: 1px solid #f1f5f9;
+          font-size: 0.88rem;
+          color: #1e293b;
+          font-weight: 500;
+        }
+
+        /* Map */
+        .property-location-tag {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #1e293b;
+          margin-bottom: 0.85rem;
+          font-size: 0.95rem;
+        }
+        .property-map-wrapper {
+          height: 320px;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid #e2e8f0;
+        }
+        .property-map-disclaimer {
+          margin-top: 0.75rem;
+          font-size: 0.82rem;
+          color: #64748b;
+          display: flex;
+          align-items: flex-start;
+          gap: 0.4rem;
+        }
+
+        /* Advertiser Card */
+        .property-advertiser-sticky {
+          position: sticky;
+          top: 2rem;
+        }
+        .advertiser-profile-header {
+          text-align: center;
+        }
+        .advertiser-avatar-box {
+          width: 74px;
+          height: 74px;
+          border-radius: 50%;
+          background: #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 0.85rem;
+          overflow: hidden;
+          border: 2px solid #e2e8f0;
+        }
+        .advertiser-avatar-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .advertiser-name {
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: #0B1F3A;
+          margin-bottom: 0.2rem;
+        }
+        .advertiser-role-label {
+          font-size: 0.85rem;
+          color: #64748b;
+          margin-bottom: 0.5rem;
+        }
+        .advertiser-duration-pill {
+          font-size: 0.78rem;
+          color: #475569;
+          background-color: #f1f5f9;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          display: inline-block;
+        }
+        .advertiser-cta-title {
+          font-size: 1.05rem;
+          font-weight: 700;
+          color: #0B1F3A;
+          margin-bottom: 1rem;
+        }
+        .advertiser-actions-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .btn-advertiser-primary {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.85rem;
+          border-radius: 12px;
+          font-weight: 700;
+          background: #C9A227;
+          color: #ffffff;
+          border: none;
+        }
+        .btn-advertiser-primary:hover {
+          background: #b38f22;
+        }
+        .btn-advertiser-secondary {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.85rem;
+          border-radius: 12px;
+          font-weight: 600;
+          border: 1px solid #0B1F3A;
+          color: #0B1F3A;
+        }
+
+        /* Similar Properties */
+        .similar-properties-section {
+          margin-top: 3.5rem;
+        }
+        .similar-section-title {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: #0B1F3A;
+          margin-bottom: 1.25rem;
+        }
+
+        /* Mobile Sticky Action Bar */
+        .mobile-sticky-actions {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 1050;
+          background: rgba(255, 255, 255, 0.96);
+          backdrop-filter: blur(12px);
+          border-top: 1px solid #e2e8f0;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+          padding: 0.65rem 1rem calc(0.65rem + env(safe-area-inset-bottom));
+          justify-content: space-between;
+          align-items: center;
+          gap: 0.65rem;
+        }
+        .mobile-bar-price-wrap {
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+        }
+        .mobile-bar-price {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: #0B1F3A;
+          line-height: 1.1;
+        }
+        .mobile-bar-curr {
+          font-size: 0.78rem;
+          color: #C9A227;
+          font-weight: 700;
+        }
+        .mobile-bar-period {
+          font-size: 0.7rem;
+          color: #64748b;
+        }
+        .mobile-bar-btns {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+          flex: 1;
+          justify-content: flex-end;
+        }
+        .mobile-bar-fav-btn {
+          width: 42px;
+          height: 42px;
+          padding: 0 !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          flex-shrink: 0;
+        }
+        .mobile-bar-fav-btn.fav-active {
+          color: #ef4444;
+          border-color: #fca5a5;
+          background: #fef2f2;
+        }
+        .mobile-bar-action-btn {
+          height: 42px;
+          border-radius: 10px;
+          padding: 0 0.85rem !important;
+          font-size: 0.85rem !important;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          white-space: nowrap;
+        }
+        .btn-contact-gold {
+          background-color: #C9A227 !important;
+          color: #ffffff !important;
+          border: none !important;
+        }
+
+        /* Mobile Media Queries */
+        @media (max-width: 992px) {
+          .property-layout-grid {
+            flex-direction: column;
+          }
+          .property-sidebar-col {
+            width: 100%;
+            min-width: 0;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .property-detail-header {
+            padding: 1.25rem 1rem;
+          }
+          .property-detail-container {
+            padding: 0 0.75rem;
+            margin: 1rem auto 2rem;
+          }
+          .property-detail-card {
+            padding: 1.25rem 1rem;
+            border-radius: 14px;
+            margin-bottom: 1rem;
+          }
+          .property-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            width: 100%;
+            gap: 0.4rem;
+          }
+          .property-action-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.5rem 0.25rem;
+            font-size: 0.78rem;
+          }
+          .property-features-grid {
+            gap: 0.5rem;
+          }
+          .feature-box {
+            padding: 0.65rem 0.35rem;
+          }
+          .property-map-wrapper {
+            height: 240px;
+          }
+          .property-amenities-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .mobile-sticky-actions {
+            display: flex;
+          }
+        }
+      `}</style>
     </div>
   );
 };
