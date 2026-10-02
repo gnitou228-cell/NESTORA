@@ -318,7 +318,7 @@ export default function Layout() {
         <main className="page-content" style={{ minHeight: 'calc(100vh - 80px)', paddingBottom: '3rem' }}>
           <Outlet />
         </main>
-        <div className="layout-footer" style={{ marginTop: 'auto', borderTop: '1px solid var(--color-border)', backgroundColor: '#fff' }}>
+        <div className="layout-footer" style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#061222' }}>
           <Footer />
         </div>
       </div>

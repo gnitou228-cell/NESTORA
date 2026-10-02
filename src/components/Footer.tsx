@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Send } from 'lucide-react';
+import { Send, ChevronDown, Sparkles } from 'lucide-react';
 
 const FacebookIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -25,6 +26,18 @@ import '../index.css';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
+    navigation: true,
+    support: true,
+    entreprise: true
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   return (
     <footer className="global-footer">
@@ -69,44 +82,94 @@ export default function Footer() {
           </div>
 
           {/* Colonne 2 : NAVIGATION */}
-          <div className="footer-col">
-            <h4 className="footer-title">Navigation</h4>
-            <ul className="footer-links">
-              <li><Link to="/">Accueil</Link></li>
-              <li><Link to="/recherche">Rechercher</Link></li>
-              <li><Link to="/annonces">Annonces</Link></li>
-              <li><Link to="/agences">Agences</Link></li>
-              <li><Link to="/tarifs">Tarifs</Link></li>
-              <li><Link to="/comment-ca-marche">Comment ça marche</Link></li>
-              <li><Link to="/publier">Publier une annonce</Link></li>
-            </ul>
+          <div className={`footer-col ${openSections.navigation ? 'is-open' : 'is-collapsed'}`}>
+            <h4 
+              className="footer-title" 
+              onClick={() => toggleSection('navigation')}
+            >
+              <span>Navigation</span>
+              <ChevronDown 
+                size={18} 
+                className="footer-chevron mobile-only" 
+                style={{ 
+                  transform: openSections.navigation ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.25s ease'
+                }} 
+              />
+            </h4>
+            {openSections.navigation && (
+              <ul className="footer-links">
+                <li><Link to="/">Accueil</Link></li>
+                <li><Link to="/tarifs">Tarifs</Link></li>
+                <li><Link to="/recherche">Rechercher</Link></li>
+                <li><Link to="/comment-ca-marche">Comment ça marche</Link></li>
+                <li><Link to="/annonces">Annonces</Link></li>
+                <li>
+                  <Link to="/publier" className="footer-link-highlight">
+                    <span>Publier une annonce</span>
+                    <Sparkles size={14} color="#C9A227" style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }} />
+                  </Link>
+                </li>
+                <li><Link to="/agences">Agences</Link></li>
+              </ul>
+            )}
           </div>
 
           {/* Colonne 3 : SUPPORT */}
-          <div className="footer-col">
-            <h4 className="footer-title">Support</h4>
-            <ul className="footer-links">
-              <li><Link to="/centre-d-aide">Centre d'aide</Link></li>
-              <li><Link to="/faq">FAQ</Link></li>
-              <li><Link to="/nous-contacter">Nous contacter</Link></li>
-              <li><Link to="/signaler-une-annonce">Signaler une annonce</Link></li>
-              <li><Link to="/securite-et-confiance">Sécurité et confiance</Link></li>
-              <li><Link to="/telecharger">Télécharger l'application</Link></li>
-            </ul>
+          <div className={`footer-col ${openSections.support ? 'is-open' : 'is-collapsed'}`}>
+            <h4 
+              className="footer-title" 
+              onClick={() => toggleSection('support')}
+            >
+              <span>Support & Aide</span>
+              <ChevronDown 
+                size={18} 
+                className="footer-chevron mobile-only" 
+                style={{ 
+                  transform: openSections.support ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.25s ease'
+                }} 
+              />
+            </h4>
+            {openSections.support && (
+              <ul className="footer-links">
+                <li><Link to="/centre-d-aide">Centre d'aide</Link></li>
+                <li><Link to="/signaler-une-annonce">Signaler annonce</Link></li>
+                <li><Link to="/faq">FAQ</Link></li>
+                <li><Link to="/securite-et-confiance">Sécurité & confiance</Link></li>
+                <li><Link to="/nous-contacter">Nous contacter</Link></li>
+                <li><Link to="/telecharger">Télécharger l'app</Link></li>
+              </ul>
+            )}
           </div>
 
           {/* Colonne 4 : ENTREPRISE */}
-          <div className="footer-col">
-            <h4 className="footer-title">Entreprise</h4>
-            <ul className="footer-links">
-              <li><Link to="/a-propos">À propos</Link></li>
-              <li><Link to="/valeurs">Nos valeurs</Link></li>
-              <li><Link to="/partenaire">Devenir partenaire</Link></li>
-              <li><Link to="/conditions-generales">Conditions générales</Link></li>
-              <li><Link to="/confidentialite">Politique de confidentialité</Link></li>
-              <li><Link to="/cookies">Politique relative aux cookies</Link></li>
-              <li><Link to="/mentions-legales">Mentions légales</Link></li>
-            </ul>
+          <div className={`footer-col ${openSections.entreprise ? 'is-open' : 'is-collapsed'}`}>
+            <h4 
+              className="footer-title" 
+              onClick={() => toggleSection('entreprise')}
+            >
+              <span>Entreprise</span>
+              <ChevronDown 
+                size={18} 
+                className="footer-chevron mobile-only" 
+                style={{ 
+                  transform: openSections.entreprise ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.25s ease'
+                }} 
+              />
+            </h4>
+            {openSections.entreprise && (
+              <ul className="footer-links">
+                <li><Link to="/a-propos">À propos</Link></li>
+                <li><Link to="/confidentialite">Confidentialité</Link></li>
+                <li><Link to="/valeurs">Nos valeurs</Link></li>
+                <li><Link to="/conditions-generales">Conditions</Link></li>
+                <li><Link to="/partenaire">Partenaires</Link></li>
+                <li><Link to="/mentions-legales">Mentions légales</Link></li>
+                <li><Link to="/cookies">Cookies</Link></li>
+              </ul>
+            )}
           </div>
         </div>
       </div>
