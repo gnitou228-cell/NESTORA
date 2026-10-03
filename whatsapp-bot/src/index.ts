@@ -115,13 +115,30 @@ Instructions :
 1. Salue le client et demande-lui ce qui l'intéresse.
 2. S'il pose des questions sur un produit, explique-lui brièvement les avantages.
 3. Rappelle toujours que prendre le pack complet à 5000 F CFA est la meilleure affaire.
-4. S'il est prêt à acheter, donne-lui les instructions de paiement (tu peux lui dire de payer par Mobile Money et de t'envoyer la capture d'écran).`
+4. S'il est prêt à acheter, donne-lui les instructions de paiement (tu peux lui dire de payer par Mobile Money et de t'envoyer la capture d'écran).
+5. Si le client te dit qu'il a effectué le paiement, qu'il a envoyé la capture d'écran, ou qu'il demande la livraison de son produit, tu dois ABSOLUMENT ajouter le code secret [ALERTE_PAIEMENT] tout à la fin de ta réponse.`
       },
       { role: 'user', content: text }
     ]
   });
 
-  const reply = completion.choices[0].message.content || 'Désolé, je ne peux pas répondre pour le moment.';
+  let reply = completion.choices[0].message.content || 'Désolé, je ne peux pas répondre pour le moment.';
+  
+  // Interception de l'alerte
+  if (reply.includes('[ALERTE_PAIEMENT]')) {
+    reply = reply.replace('[ALERTE_PAIEMENT]', '').trim();
+    
+    // Envoi de l'alerte sur le vrai numéro personnel de Jeff
+    if (process.env.ADMIN_PHONE_NUMBER) {
+      await sendWhatsAppMessage(
+        process.env.ADMIN_PHONE_NUMBER, 
+        `🚨 *ALERTE PAIEMENT CLIENT* 🚨\n\nLe client au numéro *${phone}* indique avoir payé ou demande sa livraison.\n\nSon message : "${text}"\n\nAllez vite discuter avec lui sur WhatsApp !`
+      );
+    } else {
+      console.log("ALERTE: Un client a payé mais ADMIN_PHONE_NUMBER n'est pas configuré sur Vercel !");
+    }
+  }
+
   await sendWhatsAppMessage(phone, reply);
 }
 
