@@ -25,14 +25,17 @@ if (OPENAI_API_KEY) {
   });
 }
 
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
-);
+let supabase: any = null;
+if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+  supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY
+  );
+}
 
 async function saveContact(phone: string, contactName: string) {
   try {
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+    if (supabase) {
       await supabase
         .from('whatsapp_leads')
         .upsert({ 
@@ -40,6 +43,8 @@ async function saveContact(phone: string, contactName: string) {
           name: contactName,
           last_message_at: new Date().toISOString()
         }, { onConflict: 'phone' });
+    } else {
+      console.log('Supabase non configuré, impossible de sauvegarder le contact');
     }
   } catch (err) {
     console.error('Erreur lors de la sauvegarde du contact:', err);
