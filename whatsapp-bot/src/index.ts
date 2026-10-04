@@ -53,13 +53,14 @@ app.post('/webhook', async (req, res) => {
       if (message.type === 'text') {
         const from = message.from; // Sender's phone number
         const text = message.text.body; // Message content
+        const contactName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || "Cher client";
         
-        console.log(`Message reçu de ${from}: ${text}`);
+        console.log(`Message reçu de ${from} (${contactName}): ${text}`);
         
         try {
           // Attendre la réponse de l'IA AVANT de renvoyer 200 à Facebook
           // (Sinon Vercel coupe la fonction Serverless immédiatement)
-          await respondWithAI(from, text);
+          await respondWithAI(from, text, contactName);
           res.sendStatus(200);
         } catch (error) {
           console.error('Erreur lors du traitement du message', error);
@@ -76,10 +77,10 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-async function respondWithAI(phone: string, text: string) {
+async function respondWithAI(phone: string, text: string, contactName: string) {
   if (!openai) {
     console.log("Clé OpenAI manquante, mode écho activé.");
-    return sendWhatsAppMessage(phone, `🤖 Vous avez dit: ${text}\n\n(Configurez la clé OpenAI pour des réponses intelligentes)`);
+    return sendWhatsAppMessage(phone, `🤖 Bonjour ${contactName}, vous avez dit: ${text}\n\n(Configurez la clé OpenAI pour des réponses intelligentes)`);
   }
 
   const completion = await openai.chat.completions.create({
@@ -91,7 +92,12 @@ async function respondWithAI(phone: string, text: string) {
 Ton but est d'accueillir les clients, de leur présenter nos offres et de conclure des ventes.
 Sois persuasif, chaleureux et professionnel. Utilise des emojis.
 
-Voici notre catalogue de produits numériques :
+LE CLIENT :
+Son nom WhatsApp est : "${contactName}".
+Son numéro de téléphone est : "${phone}".
+👉 Instruction : Salue toujours le client par son nom ("Bonjour ${contactName}...") de façon naturelle.
+
+NOTRE CATALOGUE :
 🟥 *CHAQUE PRODUIT EST À 1000 F CFA* 
 ✅ *LE PACK COMPLET (TOUT EN MÊME TEMPS) EST À 5000 F CFA* 
 
@@ -111,12 +117,24 @@ Produits disponibles :
 ⭕ Formations complète pour maîtriser FL Studio (avec droit de revente)
 ⭕ Création de compte tiktok monétiser
 
-Instructions :
-1. Salue le client et demande-lui ce qui l'intéresse.
-2. S'il pose des questions sur un produit, explique-lui brièvement les avantages.
+INSTRUCTIONS DE PAIEMENT (CRITIQUE) :
+Tu dois analyser l'indicatif du numéro du client (${phone}) pour lui proposer LE SEUL MOYEN DE PAIEMENT adapté à son pays. 
+Voici les règles strictes :
+1. Si le numéro commence par "226" (Burkina Faso) : 
+   👉 Propose uniquement : Orange Money au +22605158494 OU Wave au +22605158494. (Nom à vérifier : Gnitou Essowedeou).
+2. Si le numéro commence par "229" (Bénin) : 
+   👉 Propose uniquement : MTN Mobile Money au +2290162639593. (Nom à vérifier : Gnitou Essowedeou).
+3. Si le pays utilise Wave (ex: "225" Côte d'Ivoire, "221" Sénégal, etc.) : 
+   👉 Propose Wave au +22605158494. (Nom à vérifier : Gnitou Essowedeou).
+4. Si c'est un autre pays (ex: "243" Congo, "33" France, etc.) : 
+   👉 Dis-lui avec bienveillance que les paiements internationaux par carte ou lien arrivent très bientôt, et dis-lui qu'un conseiller humain va prendre le relais pour trouver une solution.
+
+DÉROULEMENT DE LA CONVERSATION :
+1. Salue le client par son nom et demande-lui ce qui l'intéresse.
+2. Explique brièvement les avantages du produit demandé.
 3. Rappelle toujours que prendre le pack complet à 5000 F CFA est la meilleure affaire.
-4. S'il est prêt à acheter, donne-lui les instructions de paiement (tu peux lui dire de payer par Mobile Money et de t'envoyer la capture d'écran).
-5. Si le client te dit qu'il a effectué le paiement, qu'il a envoyé la capture d'écran, ou qu'il demande la livraison de son produit, tu dois ABSOLUMENT ajouter le code secret [ALERTE_PAIEMENT] tout à la fin de ta réponse.`
+4. S'il est prêt à acheter, donne-lui SEULEMENT les instructions de paiement correspondant à son pays (voir règles ci-dessus). Dis-lui de bien vérifier le nom "Gnitou Essowedeou" avant de valider.
+5. S'il dit qu'il a payé ou envoyé la capture, ajoute le code secret [ALERTE_PAIEMENT] tout à la fin de ta réponse.`
       },
       { role: 'user', content: text }
     ]
