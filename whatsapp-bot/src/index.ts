@@ -158,7 +158,7 @@ CATALOGUE :
 
 CONDUITE DE LA CONVERSATION :
 1. Sois très concis (pas de longs paragraphes).
-2. Si le client veut acheter, arrête les explications et donne les numéros de paiement.`
+2. Si le client veut acheter, arrête les explications et donne les numéros de paiement.
 
 INSTRUCTIONS DE PAIEMENT (CRITIQUE) :
 Tu dois analyser l'indicatif du numéro du client (${phone}) pour lui proposer LE SEUL MOYEN DE PAIEMENT adapté à son pays. 
