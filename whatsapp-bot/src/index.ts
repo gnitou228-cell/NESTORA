@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import OpenAI from 'openai';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
@@ -22,6 +23,27 @@ if (OPENAI_API_KEY) {
   openai = new OpenAI({
     apiKey: OPENAI_API_KEY
   });
+}
+
+const supabase = createClient(
+  process.env.SUPABASE_URL || '',
+  process.env.SUPABASE_KEY || ''
+);
+
+async function saveContact(phone: string, contactName: string) {
+  try {
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+      await supabase
+        .from('whatsapp_leads')
+        .upsert({ 
+          phone: phone, 
+          name: contactName,
+          last_message_at: new Date().toISOString()
+        }, { onConflict: 'phone' });
+    }
+  } catch (err) {
+    console.error('Erreur lors de la sauvegarde du contact:', err);
+  }
 }
 
 // Verification route for Meta
@@ -57,6 +79,9 @@ app.post('/webhook', async (req, res) => {
         
         console.log(`Message reçu de ${from} (${contactName}): ${text}`);
         
+        // Sauvegarder le contact en base de données
+        saveContact(from, contactName);
+        
         try {
           // Attendre la réponse de l'IA AVANT de renvoyer 200 à Facebook
           // (Sinon Vercel coupe la fonction Serverless immédiatement)
@@ -77,10 +102,28 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
+// Store conversation history in memory (Phone number -> Array of messages)
+const conversationHistory = new Map<string, any[]>();
+
 async function respondWithAI(phone: string, text: string, contactName: string) {
   if (!openai) {
     console.log("Clé OpenAI manquante, mode écho activé.");
-    return sendWhatsAppMessage(phone, `🤖 Bonjour ${contactName}, vous avez dit: ${text}\n\n(Configurez la clé OpenAI pour des réponses intelligentes)`);
+    return sendWhatsAppMessage(phone, `🤖 Bonjour ${contactName}, vous avez dit: ${text}`);
+  }
+
+  // Initialiser l'historique pour ce numéro s'il n'existe pas
+  if (!conversationHistory.has(phone)) {
+    conversationHistory.set(phone, []);
+  }
+
+  const history = conversationHistory.get(phone)!;
+
+  // Ajouter le message du client à l'historique
+  history.push({ role: 'user', content: text });
+
+  // Garder seulement les 10 derniers échanges pour ne pas saturer la mémoire
+  if (history.length > 10) {
+    history.splice(0, history.length - 10);
   }
 
   const completion = await openai.chat.completions.create({
@@ -95,7 +138,7 @@ Tu dois agir comme un commercial professionnel, chaleureux, rapide, naturel et o
 LE CLIENT :
 Son nom WhatsApp est : "${contactName}".
 Son numéro de téléphone est : "${phone}".
-👉 Instruction : Salue toujours le client par son nom ("Bonjour ${contactName}...") de façon naturelle lors du premier message, MAIS ne répète plus "Bonjour" à chaque message ensuite.
+👉 Instruction CRITIQUE : Ne salue ("Bonjour", "Bienvenue") QUE si c'est le tout premier message de la conversation. Si le client pose une question en plein milieu de la conversation, NE REDIS PAS BONJOUR et ne te représente pas. Réponds directement et naturellement.
 
 RÈGLE DES PRIX (CRITIQUE) :
 ⚠️ NE JAMAIS utiliser les anciens prix de 1 000 FCFA ou 5 000 FCFA.
@@ -109,8 +152,8 @@ BIBLIOTHÈQUES : Bibliothèque de 160 livres numériques, Bibliothèque de 200 l
 SERVICES : Création de compte TikTok monétisable, Création chaîne YouTube/Page Facebook, Accompagnement monétisation, Création de boutique en ligne/site web, Gestion de publicité.
 
 INSTRUCTIONS DE CONVERSATION :
-1. Accueil : "Bonjour 👋 Bienvenue chez Jeff Digital ! Je suis l'assistant virtuel. Que recherchez-vous ?"
-2. Naturel : Ne redemande pas ce que tu sais déjà.
+1. Accueil (UNIQUEMENT AU DÉBUT) : "Bonjour 👋 Bienvenue chez Jeff Digital ! Je suis l'assistant virtuel. Que recherchez-vous ?"
+2. Naturel : Ne redemande pas ce que tu sais déjà. Souviens-toi du contexte.
 3. Présentation produit : Donne le nom, à quoi il sert, avantage, Prix (1 300 FCFA), et propose le paiement.
 4. Passage à l'achat : Si le client dit "Je veux", "Comment payer", arrête les explications et donne les instructions de paiement.
 
@@ -125,11 +168,14 @@ PREUVE DE PAIEMENT :
 Après avoir donné le paiement, demande TOUJOURS une capture d'écran.
 Si le client dit qu'il a payé ou envoyé la capture, ajoute le code secret [ALERTE_PAIEMENT] tout à la fin de ta réponse.`
       },
-      { role: 'user', content: text }
+      ...history
     ]
   });
 
   let reply = completion.choices[0].message.content || 'Désolé, je ne peux pas répondre pour le moment.';
+  
+  // Ajouter la réponse de l'IA à l'historique
+  history.push({ role: 'assistant', content: reply });
   
   // Interception de l'alerte
   if (reply.includes('[ALERTE_PAIEMENT]')) {
