@@ -67,6 +67,10 @@ app.get('/webhook', (req, res) => {
   }
 });
 
+// Garder en mémoire les ID des messages déjà traités (Anti-Spam)
+const processedMessages = new Set<string>();
+
+
 // Message reception route
 app.post('/webhook', async (req, res) => {
   const body = req.body;
@@ -78,8 +82,17 @@ app.post('/webhook', async (req, res) => {
       const message = body.entry[0].changes[0].value.messages[0];
       
       if (message.type === 'text' || message.type === 'order') {
-        const from = message.from; // Sender's phone number
+        const from = message.from; 
+        const messageId = message.id; // L'identifiant unique du message
         const contactName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || "Cher client";
+        
+        // 🔴 ANTI-SPAM : Vérifier si on a déjà traité ce message
+        // Facebook renvoie le même message si l'IA met trop de temps à répondre (Timeout).
+        if (processedMessages.has(messageId)) {
+          console.log(`[ANTI-SPAM] Message ${messageId} déjà traité. On ignore la relance de Facebook.`);
+          return res.sendStatus(200);
+        }
+        processedMessages.add(messageId);
         
         let textToAI = "";
 
@@ -87,26 +100,19 @@ app.post('/webhook', async (req, res) => {
           textToAI = message.text.body;
           console.log(`Message reçu de ${from} (${contactName}): ${textToAI}`);
         } else if (message.type === 'order') {
-          // Le client a envoyé un panier !
           const items = message.order?.product_items || [];
           let totalQuantity = 0;
-          
           for (const item of items) {
             totalQuantity += parseInt(item.quantity) || 0;
           }
-          
           const totalAmount = totalQuantity * 1300;
-          
-          // On traduit l'action du client en texte pour que l'IA comprenne et prenne le relais
           textToAI = `[PANIER REÇU] Je viens de t'envoyer mon panier. J'ai sélectionné ${totalQuantity} produit(s). Le montant total est de ${totalAmount} FCFA. Peux-tu me confirmer ma commande de ${totalAmount} FCFA et me donner les numéros pour faire le paiement ?`;
           console.log(`🛒 PANIER reçu de ${from} (${contactName}) : ${totalQuantity} produits = ${totalAmount} FCFA`);
         }
         
-        // Sauvegarder le contact en base de données
         saveContact(from, contactName);
         
         try {
-          // Attendre la réponse de l'IA AVANT de renvoyer 200 à Facebook
           await respondWithAI(from, textToAI, contactName);
           res.sendStatus(200);
         } catch (error) {
