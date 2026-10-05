@@ -135,6 +135,9 @@ router.get('/me', requireAuth, async (req: any, res) => {
           where: {
             status: 'ACTIVE',
             endDate: { gt: new Date() }
+          },
+          include: {
+            plan: true
           }
         }
       }

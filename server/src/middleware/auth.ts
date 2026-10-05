@@ -45,10 +45,25 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     if (!dbUser) {
       // Sync user from Supabase to Prisma if it doesn't exist
-      const role = user.user_metadata?.role || 'SEEKER';
+      const requestedRole = req.headers['x-oauth-role'] as string;
+      const role = requestedRole || user.user_metadata?.role || 'SEEKER';
       const email = user.email || '';
-      const firstName = user.user_metadata?.first_name || '';
-      const lastName = user.user_metadata?.last_name || '';
+      
+      let firstName = user.user_metadata?.first_name || '';
+      let lastName = user.user_metadata?.last_name || '';
+      
+      if (!firstName && user.user_metadata?.full_name) {
+        const parts = user.user_metadata.full_name.split(' ');
+        firstName = parts[0];
+        lastName = parts.slice(1).join(' ');
+      }
+      if (!firstName && user.user_metadata?.name) {
+        const parts = user.user_metadata.name.split(' ');
+        firstName = parts[0];
+        lastName = parts.slice(1).join(' ');
+      }
+      
+      if (!firstName) firstName = 'Utilisateur';
 
       dbUser = await prisma.user.create({
         data: {
@@ -61,7 +76,16 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
               firstName,
               lastName
             }
-          }
+          },
+          ...(role === 'AGENCY' ? {
+            agency: {
+              create: {
+                name: `Agence de ${firstName}`,
+                email,
+                phone: 'Non renseigné'
+              }
+            }
+          } : {})
         },
         include: { 
           agency: true,

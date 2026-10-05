@@ -1,27 +1,18 @@
-import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Crown, CreditCard, Check, AlertCircle, XCircle, Lock } from 'lucide-react';
+import { Crown, Check, XCircle, Lock, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { invoices } from '../data/mockData';
 
 export default function Subscription() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const navigate = useNavigate();
-  const [isPremium, setIsPremium] = useState(false);
-
-  useEffect(() => {
-    // Check if user has premium in local storage (mock for now)
-    const premium = localStorage.getItem('nestora_is_premium') === 'true';
-    setIsPremium(premium);
-  }, []);
+  const isPremium = user?.hasActiveSubscription || false;
+  const activeSub = user?.activeSubscription;
+  const activePlan = activeSub?.plan;
 
   const handleCancelSubscription = () => {
     if (window.confirm("Êtes-vous sûr de vouloir annuler votre abonnement Premium ? Vos avantages resteront actifs jusqu'à la fin de la période de facturation en cours.")) {
-      localStorage.setItem('nestora_is_premium', 'false');
-      setIsPremium(false);
-      alert("Votre abonnement a été annulé avec succès.");
-      // Optionnellement, rafraîchir ou rediriger
-      navigate('/dashboard');
+      alert("Demande d'annulation envoyée au support.");
     }
   };
 
@@ -102,26 +93,28 @@ export default function Subscription() {
               <div>
                 <div className="d-flex" style={{ alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <Crown size={24} color="#C9A227" />
-                  <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Pack {role} - Standard</h2>
-                  <span className="badge-success" style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>Actif</span>
+                  <h2 style={{ fontSize: '1.5rem', margin: 0 }}>{activePlan?.name || "NESTORA Pro"}</h2>
+                  <span className="badge-success" style={{ padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600 }}>ACTIF</span>
                 </div>
-                <p className="text-light mb-3">Renouvellement automatique le 25 oct. 2025</p>
+                <p className="text-light mb-3">
+                  Renouvellement automatique le {activeSub?.endDate ? new Date(activeSub.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                </p>
                 
                 <div className="d-flex" style={{ gap: '2rem', marginBottom: '1.5rem' }}>
                   <div>
                     <div className="text-light" style={{ fontSize: '0.85rem' }}>Date de début</div>
-                    <div style={{ fontWeight: 600 }}>25 oct. 2024</div>
+                    <div style={{ fontWeight: 600 }}>{activeSub?.startDate ? new Date(activeSub.startDate).toLocaleDateString('fr-FR') : 'N/A'}</div>
                   </div>
                   <div>
                     <div className="text-light" style={{ fontSize: '0.85rem' }}>Prochain paiement</div>
-                    <div style={{ fontWeight: 600 }}>40 000 FCFA</div>
+                    <div style={{ fontWeight: 600 }}>{activePlan?.price?.toLocaleString('fr-FR')} {activePlan?.currency || 'FCFA'}</div>
                   </div>
                 </div>
 
                 <div className="progress-bar-container mb-2" style={{ maxWidth: '400px' }}>
                   <div className="d-flex justify-between mb-1" style={{ fontSize: '0.85rem' }}>
                     <span>Annonces utilisées : <strong>3</strong></span>
-                    <span>Restantes : <strong>7</strong> / 10</span>
+                    <span>Restantes : <strong>Illimité</strong></span>
                   </div>
                   <div className="progress-bar-bg" style={{ height: '8px' }}>
                     <div className="progress-bar-fill" style={{ width: '30%' }}></div>
@@ -140,14 +133,14 @@ export default function Subscription() {
             <h3 className="mb-3">Fonctionnalités incluses</h3>
             <div className="pricing-grid mini-grid">
               <ul className="pricing-features" style={{ margin: 0 }}>
-                <li><Check size={16} className="text-success" /> Jusqu'à 10 annonces actives</li>
-                <li><Check size={16} className="text-success" /> Statistiques de base</li>
-                <li><Check size={16} className="text-success" /> Messagerie intégrée</li>
-              </ul>
-              <ul className="pricing-features" style={{ margin: 0 }}>
-                <li><Check size={16} className="text-success" /> Gestion des visites</li>
-                <li><Check size={16} className="text-success" /> Support email</li>
-                <li className="text-light"><AlertCircle size={16} /> Pas de boost mensuel inclus</li>
+                {activePlan?.features ? JSON.parse(activePlan.features).map((feature: string, index: number) => (
+                  <li key={index}><Check size={16} className="text-success" /> {feature}</li>
+                )) : (
+                  <>
+                    <li><Check size={16} className="text-success" /> Annonces illimitées</li>
+                    <li><Check size={16} className="text-success" /> Visibilité maximale</li>
+                  </>
+                )}
               </ul>
             </div>
           </div>
@@ -178,7 +171,7 @@ export default function Subscription() {
               <Link to="/paiements" className="card-link">Voir tout</Link>
             </div>
             <div className="mini-list">
-              {invoices.map(inv => (
+              {invoices.map((inv: any) => (
                 <div className="mini-item" key={inv.id}>
                   <div className="mini-item-content">
                     <div className="mini-item-title">{inv.desc}</div>

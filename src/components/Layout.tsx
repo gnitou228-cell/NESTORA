@@ -41,6 +41,7 @@ export default function Layout() {
       { icon: <UserIcon size={20} />, label: 'Profil', path: '#' },
     ];
   } else if (role === 'OWNER') {
+    const premiumPath = user?.hasActiveSubscription ? '/abonnement' : '/tarifs';
     menuItems = [
       { icon: <LayoutDashboard size={20} />, label: 'Tableau de bord', path: '/dashboard/owner' },
       { icon: <Home size={20} />, label: 'Mes annonces', badge: '7', path: '/mes-annonces' },
@@ -50,7 +51,7 @@ export default function Layout() {
       { icon: <SearchIcon size={20} />, label: 'Recherches Clients', path: '/recherches-clients' },
       { icon: <FileQuestion size={20} />, label: 'Demandes reçues', path: '/demandes-visites' },
       { icon: <Rocket size={20} />, label: 'Boost & Visibilité', path: '/boost' },
-      { icon: <CreditCard size={20} />, label: 'Premium', path: '/tarifs' },
+      { icon: <CreditCard size={20} />, label: 'Premium', path: premiumPath },
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },
       { icon: <BarChart2 size={20} />, label: 'Statistiques', path: '/statistiques' },
       { icon: <FileText size={20} />, label: 'Paiements & Factures', path: '/paiements' },
@@ -63,6 +64,7 @@ export default function Layout() {
       { icon: <UserIcon size={20} />, label: 'Mon Profil', path: '#' },
     ];
   } else {
+    const premiumPath = user?.hasActiveSubscription ? '/abonnement' : '/tarifs';
     menuItems = [
       { icon: <LayoutDashboard size={20} />, label: 'Vue d\'ensemble', path: '/dashboard/agency' },
       { icon: <Home size={20} />, label: 'Portefeuille immobilier', path: '/mes-annonces' },
@@ -72,7 +74,7 @@ export default function Layout() {
       { icon: <SearchIcon size={20} />, label: 'Recherches Clients', path: '/recherches-clients' },
       { icon: <FileQuestion size={20} />, label: 'Demandes reçues', path: '/demandes-visites' },
       { icon: <Rocket size={20} />, label: 'Boost & Visibilité', path: '/boost' },
-      { icon: <CreditCard size={20} />, label: 'Premium', path: '/tarifs' },
+      { icon: <CreditCard size={20} />, label: 'Premium', path: premiumPath },
       { icon: <Users size={20} />, label: 'Agents', path: '/agents' },
       { icon: <Activity size={20} />, label: 'Prospects / Leads', path: '/prospects' },
       { icon: <MessageSquare size={20} />, label: 'Messages', path: '/messages' },

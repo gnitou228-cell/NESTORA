@@ -26,6 +26,7 @@ export interface User {
     name: string;
   };
   hasActiveSubscription?: boolean;
+  activeSubscription?: any;
 }
 
 interface AuthContextType {
@@ -59,13 +60,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       let dbUser = null;
       try {
+        const oauthRole = localStorage.getItem('nestora_oauth_role');
+        const headers: Record<string, string> = { 'Authorization': `Bearer ${session.access_token}` };
+        if (oauthRole) {
+          headers['x-oauth-role'] = oauthRole;
+        }
+
         const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
-          headers: { 'Authorization': `Bearer ${session.access_token}` }
+          headers
         });
         
         if (res.ok) {
           const json = await res.json();
           dbUser = json.user;
+          if (oauthRole) localStorage.removeItem('nestora_oauth_role');
         }
       } catch (e) {
         console.warn("Backend inaccessible, fallback to Supabase session", e);
@@ -94,7 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           agency: dbUser.agency ? {
             name: dbUser.agency.name
           } : undefined,
-          hasActiveSubscription: dbUser.subscriptions && dbUser.subscriptions.length > 0
+          hasActiveSubscription: dbUser.subscriptions && dbUser.subscriptions.length > 0,
+          activeSubscription: dbUser.subscriptions && dbUser.subscriptions.length > 0 ? dbUser.subscriptions[0] : null
         };
 
         setUser(userData);
