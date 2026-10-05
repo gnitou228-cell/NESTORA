@@ -139,8 +139,37 @@ async function respondWithAI(phone: string, text: string, contactName: string) {
     return sendWhatsAppMessage(phone, `🤖 Bonjour ${contactName}, vous avez dit: ${text}`);
   }
 
+  const cleanText = text.trim();
+  const isMenuChoice = /^[1-5]$/.test(cleanText) || 
+    /^(canva|capcut|filmora|tiktok|catalogue|pro|panier)/i.test(cleanText);
+
+  // Déterminer s'il s'agit d'un tout premier contact
+  let isFirstMessage = false;
+  if (isMenuChoice) {
+    isFirstMessage = false;
+  } else {
+    try {
+      if (supabase) {
+        const { data: lead } = await supabase
+          .from('whatsapp_leads')
+          .select('status')
+          .eq('phone', phone)
+          .single();
+
+        if (!lead || lead.status === 'Nouveau prospect' || !lead.status) {
+          isFirstMessage = true;
+        } else {
+          isFirstMessage = false;
+        }
+      } else {
+        isFirstMessage = !conversationHistory.has(phone) || conversationHistory.get(phone)!.length === 0;
+      }
+    } catch {
+      isFirstMessage = !conversationHistory.has(phone) || conversationHistory.get(phone)!.length === 0;
+    }
+  }
+
   // Initialiser l'historique pour ce numéro s'il n'existe pas
-  const isFirstMessage = !conversationHistory.has(phone) || conversationHistory.get(phone)!.length === 0;
   if (!conversationHistory.has(phone)) {
     conversationHistory.set(phone, []);
   }
@@ -185,15 +214,21 @@ Ensuite, propose immédiatement ce MENU PRÉPARÉ :
 👉 Répondez simplement avec le chiffre de votre choix (ex: 1, 2, 3, 4) pour recevoir les détails !"
 
 - IMPORTANT : Termine ton message et ATTENDS que le client réponde. Ne lui envoie rien d'autre tant qu'il n'a pas écrit.` : `👉 RÈGLE POUR LES MESSAGES SUIVANTS (CONVERSATION DÉJÀ ENGAGÉE) :
-- Si le client répond par un chiffre ou un nom du menu :
-  * Option 1 (ou Canva) : Présente l'offre Canva Pro (1 300 FCFA), ses avantages et propose le paiement pour activation immédiate.
-  * Option 2 (ou CapCut) : Présente l'offre CapCut Pro (1 300 FCFA) et propose l'activation.
-  * Option 3 (ou Filmora) : Présente le logiciel Filmora (1 300 FCFA).
-  * Option 4 (ou TikTok) : Explique notre service de création de compte TikTok monétisé (1 300 FCFA).
-  * Option 5 (ou autre) : Réponds précisément selon la demande du client (autres formations, outils, etc.).
-- NE DIS PLUS JAMAIS "Bonjour" ou "Bonjour ${contactName}".
-- NE TE PRÉSENTE PLUS.
-- Réponds DIRECTEMENT, précisément et exclusivement à ce que le client vient d'écrire. Pas de bavardage inutile.`}
+- INTERDICTION ABSOLUE de redire "Bonjour" ou "Bonjour ${contactName}".
+- INTERDICTION de répéter "Merci pour votre intérêt pour nos services chez Jeff Digital".
+- Entre DIRECTEMENT dans la réponse au client de manière fluide et naturelle.
+
+TUNNEL DE VENTE EN 2 ÉTAPES (TRÈS IMPORTANT) :
+1. Si le client a choisi un chiffre (ex: 1, 2, 3, 4) ou a nommé un produit :
+   - Fais une description valorisante du produit en 2 lignes (ses meilleurs atouts).
+   - Indique son tarif promo : 1 300 FCFA.
+   - NE DONNE PAS encore les numéros de paiement à cette étape !
+   - Termine en lui demandant simplement :
+     "Souhaitez-vous recevoir les coordonnées de paiement pour l'activer dès maintenant ? 😊"
+
+2. Si le client confirme son achat (il dit "oui", "d'accord", "je veux payer", "envoie le numéro", "comment on fait", etc.) :
+   - Donne DIRECTEMENT et clairement le numéro de paiement adapté à son pays.
+   - Demande-lui d'envoyer la capture d'écran une fois le transfert fait pour activation.`}
 
 RÈGLE DES PRIX :
 Chaque produit/formation est à 1 300 FCFA. Ne parle JAMAIS de 1000 FCFA ou 5000 FCFA.
@@ -228,6 +263,18 @@ Si le client dit qu'il a payé ou envoyé la capture, ajoute le code secret [ALE
   
   // Ajouter la réponse de l'IA à l'historique
   history.push({ role: 'assistant', content: reply });
+
+  // Mémoriser que le prospect a démarré la conversation pour ne plus répéter l'accueil
+  if (supabase) {
+    try {
+      await supabase
+        .from('whatsapp_leads')
+        .update({ status: 'en_discussion', last_message_at: new Date().toISOString() })
+        .eq('phone', phone);
+    } catch (e) {
+      console.error('Erreur mise à jour status:', e);
+    }
+  }
   
   // Interception de l'alerte
   if (reply.includes('[ALERTE_PAIEMENT]')) {
