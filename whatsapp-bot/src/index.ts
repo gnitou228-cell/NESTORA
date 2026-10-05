@@ -77,27 +77,44 @@ app.post('/webhook', async (req, res) => {
     if (body.entry && body.entry[0].changes && body.entry[0].changes[0] && body.entry[0].changes[0].value.messages && body.entry[0].changes[0].value.messages[0]) {
       const message = body.entry[0].changes[0].value.messages[0];
       
-      if (message.type === 'text') {
+      if (message.type === 'text' || message.type === 'order') {
         const from = message.from; // Sender's phone number
-        const text = message.text.body; // Message content
         const contactName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || "Cher client";
         
-        console.log(`Message reçu de ${from} (${contactName}): ${text}`);
+        let textToAI = "";
+
+        if (message.type === 'text') {
+          textToAI = message.text.body;
+          console.log(`Message reçu de ${from} (${contactName}): ${textToAI}`);
+        } else if (message.type === 'order') {
+          // Le client a envoyé un panier !
+          const items = message.order?.product_items || [];
+          let totalQuantity = 0;
+          
+          for (const item of items) {
+            totalQuantity += parseInt(item.quantity) || 0;
+          }
+          
+          const totalAmount = totalQuantity * 1300;
+          
+          // On traduit l'action du client en texte pour que l'IA comprenne et prenne le relais
+          textToAI = `[PANIER REÇU] Je viens de t'envoyer mon panier. J'ai sélectionné ${totalQuantity} produit(s). Le montant total est de ${totalAmount} FCFA. Peux-tu me confirmer ma commande de ${totalAmount} FCFA et me donner les numéros pour faire le paiement ?`;
+          console.log(`🛒 PANIER reçu de ${from} (${contactName}) : ${totalQuantity} produits = ${totalAmount} FCFA`);
+        }
         
         // Sauvegarder le contact en base de données
         saveContact(from, contactName);
         
         try {
           // Attendre la réponse de l'IA AVANT de renvoyer 200 à Facebook
-          // (Sinon Vercel coupe la fonction Serverless immédiatement)
-          await respondWithAI(from, text, contactName);
+          await respondWithAI(from, textToAI, contactName);
           res.sendStatus(200);
         } catch (error) {
           console.error('Erreur lors du traitement du message', error);
           res.sendStatus(500);
         }
       } else {
-        res.sendStatus(200); // Ignore non-text messages
+        res.sendStatus(200); // Ignore non-text and non-order messages
       }
     } else {
       res.sendStatus(200);
